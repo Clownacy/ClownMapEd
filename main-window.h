@@ -3,17 +3,14 @@
 
 #include <vector>
 
-#include <QLabel>
 #include <QMainWindow>
-#include <QPixmap>
-#include <QGraphicsScene>
-#include <QGraphicsView>
 
 #include "palette.h"
 #include "palette-editor.h"
 #include "sprite-mappings.h"
 #include "sprite-viewer.h"
 #include "tile-pixmaps.h"
+#include "tile-viewer.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -36,6 +33,7 @@ private:
 	TilePixmaps tile_pixmaps;
 	SpriteViewer sprite_viewer;
 	PaletteEditor palette_editor;
+	TileViewer tile_viewer;
 };
 
 #endif // MAIN_WINDOW_H

@@ -44,6 +44,9 @@ public:
 public slots:
 	void regenerate();
 
+signals:
+	void regenerated();
+
 private:
 	const std::vector<unsigned char> *tiles_bytes = nullptr;
 	const Palette *palette = nullptr;

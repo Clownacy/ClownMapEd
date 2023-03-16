@@ -15,6 +15,8 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 set(PROJECT_SOURCES
 	colour-button.cpp
 	colour-button.h
+	flowlayout.cpp
+	flowlayout.h
 	main.cpp
 	main-window.cpp
 	main-window.h
@@ -23,12 +25,16 @@ set(PROJECT_SOURCES
 	palette.h
 	palette-editor.cpp
 	palette-editor.h
+	pixmap-button.cpp
+	pixmap-button.h
 	sprite-viewer.cpp
 	sprite-viewer.h
 	sprite-mappings.cpp
 	sprite-mappings.h
 	tile-pixmaps.cpp
 	tile-pixmaps.h
+	tile-viewer.cpp
+	tile-viewer.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

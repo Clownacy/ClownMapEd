@@ -56,4 +56,6 @@ void TilePixmaps::regenerate()
 
 		pixmaps[current_pixmap] = QPixmap::fromImage(QImage(reinterpret_cast<uchar*>(pixmap_data), 8, 8, QImage::Format::Format_ARGB4444_Premultiplied));
 	}
+
+	emit regenerated();
 }

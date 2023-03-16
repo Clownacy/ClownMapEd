@@ -1,25 +1,35 @@
 #include "main-window.h"
 #include "./ui_main-window.h"
 
-#include <QColorDialog>
 #include <QFileDialog>
-#include <QGraphicsPixmapItem>
-#include <QGridLayout>
 #include <QHBoxLayout>
+#include <QVBoxLayout>
 #include <QKeyEvent>
-#include <QPushButton>
 
 MainWindow::MainWindow(QWidget* const parent)
 	: QMainWindow(parent)
 	, ui(new Ui::MainWindow)
-    , palette()
-    , tiles_bytes()
-    , sprite_mappings()
     , tile_pixmaps(&tiles_bytes, &palette)
 	, sprite_viewer(tile_pixmaps, sprite_mappings)
     , palette_editor(palette)
+    , tile_viewer(tile_pixmaps)
 {
 	ui->setupUi(this);
+
+	auto horizontal_box = new QHBoxLayout();
+
+	horizontal_box->addWidget(&palette_editor);
+	horizontal_box->addWidget(&sprite_viewer);
+
+	auto vertical_box = new QVBoxLayout();
+
+	vertical_box->addLayout(horizontal_box);
+//	vbox->addsp
+	vertical_box->addWidget(&tile_viewer);
+
+	centralWidget()->setLayout(vertical_box);
+
+	sprite_viewer.setBackgroundColour(palette.getColourQColor(0, 0));
 
 	connect(ui->actionOpen_Tiles, &QAction::triggered, this,
 		[this]()
@@ -82,18 +92,7 @@ MainWindow::MainWindow(QWidget* const parent)
 		}
 	);
 
-	QHBoxLayout *hbox = new QHBoxLayout;
-	hbox->addWidget(&palette_editor);
-	hbox->addWidget(&sprite_viewer);
-
-	QVBoxLayout *vbox = new QVBoxLayout;
-	vbox->addLayout(hbox);
-//	vbox->addsp
-	vbox->addWidget(new QLabel("HOW"));
-
-	centralWidget()->setLayout(vbox);
-
-	sprite_viewer.setBackgroundColour(palette.getColourQColor(0, 0));
+	connect(&tile_pixmaps, &TilePixmaps::regenerated, &tile_viewer, &TileViewer::refresh);
 }
 
 MainWindow::~MainWindow()
