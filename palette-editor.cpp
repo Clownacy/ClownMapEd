@@ -40,4 +40,20 @@ PaletteEditor::PaletteEditor(Palette &palette)
 			grid_layout.addWidget(&button, index, line);
 		}
 	}
+
+	connect(&palette, &Palette::singleColourChanged, this, &PaletteEditor::setButtonColour);
+
+	connect(&palette, &Palette::allColoursChanged, this,
+		[this]()
+		{
+			for (unsigned int line = 0; line < 4; ++line)
+				for (unsigned int index = 0; index < 16; ++index)
+					buttons[line][index].setColour(this->palette.getColourQColor(line, index));
+		}
+	);
+}
+
+void PaletteEditor::setButtonColour(unsigned int palette_line, unsigned int palette_index, const QColor &colour)
+{
+	buttons[palette_line][palette_index].setColour(colour);
 }

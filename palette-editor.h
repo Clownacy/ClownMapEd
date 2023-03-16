@@ -1,6 +1,7 @@
 #ifndef PALETTE_EDITOR_H
 #define PALETTE_EDITOR_H
 
+#include <QColor>
 #include <QGridLayout>
 #include <QWidget>
 
@@ -18,6 +19,9 @@ private:
 	QGridLayout grid_layout;
 	ColourButton buttons[4][16];
 	Palette &palette;
+
+private slots:
+	void setButtonColour(unsigned int palette_line, unsigned int palette_index, const QColor &colour);
 };
 
 #endif // PALETTE_EDITOR_H

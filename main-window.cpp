@@ -9,8 +9,6 @@
 #include <QKeyEvent>
 #include <QPushButton>
 
-#include "colour-button.h"
-
 MainWindow::MainWindow(QWidget* const parent)
 	: QMainWindow(parent)
 	, ui(new Ui::MainWindow)
@@ -54,9 +52,6 @@ MainWindow::MainWindow(QWidget* const parent)
 			{
 				palette.loadFromFile(file_path);
 				tile_pixmaps.setPalette(palette);
-
-				const Palette::Colour colour = palette.getColour(0, 0);
-				sprite_viewer.setBackgroundColour(QColor(colour.red, colour.green, colour.blue));
 			}
 		}
 	);
@@ -71,7 +66,21 @@ MainWindow::MainWindow(QWidget* const parent)
 		}
 	);
 
-	connect(&palette, &Palette::colourChanged, &tile_pixmaps, &TilePixmaps::regenerate);
+	connect(&palette, &Palette::singleColourChanged, &tile_pixmaps, &TilePixmaps::regenerate);
+
+	connect(&palette, &Palette::singleColourChanged, this,
+		[this](const unsigned int palette_line, const unsigned int palette_index, const QColor &colour)
+		{
+			if (palette_line == 0 && palette_index == 0)
+				sprite_viewer.setBackgroundColour(colour);
+		}
+	);
+	connect(&palette, &Palette::allColoursChanged, this,
+		[this]()
+		{
+			sprite_viewer.setBackgroundColour(palette.getColourQColor(0, 0));
+		}
+	);
 
 	QHBoxLayout *hbox = new QHBoxLayout;
 	hbox->addWidget(&palette_editor);
@@ -84,8 +93,7 @@ MainWindow::MainWindow(QWidget* const parent)
 
 	centralWidget()->setLayout(vbox);
 
-	const Palette::Colour colour = palette.getColour(0, 0);
-	sprite_viewer.setBackgroundColour(QColor(colour.red, colour.green, colour.blue));
+	sprite_viewer.setBackgroundColour(palette.getColourQColor(0, 0));
 }
 
 MainWindow::~MainWindow()

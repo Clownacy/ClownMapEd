@@ -28,7 +28,8 @@ public:
 	void setColour(unsigned int palette_line, unsigned int palette_index, const QColor &colour);
 
 signals:
-	void colourChanged();
+	void singleColourChanged(unsigned int palette_line, unsigned int palette_index, const QColor &colour);
+	void allColoursChanged();
 
 private:
 	static QColor MDToQColor(unsigned int md_colour);
