@@ -18,27 +18,27 @@ public:
 
 	void setTiles(const std::vector<unsigned char> &tile_bytes)
 	{
-		this->tiles_bytes = &tile_bytes;
-		this->regenerate();
+		tiles_bytes = &tile_bytes;
+		regenerate();
 	}
 
 	void setPalette(const Palette &palette)
 	{
 		this->palette = &palette;
-		this->regenerate();
+		regenerate();
 	}
 
 	const QPixmap& operator[](const std::size_t tile_index) const
 	{
-		if (tile_index < this->total_pixmaps())
-			return this->pixmaps[tile_index];
+		if (tile_index < total_pixmaps())
+			return pixmaps[tile_index];
 		else
-			return this->invalid_pixmap;
+			return invalid_pixmap;
 	}
 
 	std::size_t total_pixmaps() const // TODO: Rename to just 'total'.
 	{
-		return this->pixmaps.size();
+		return pixmaps.size();
 	}
 
 public slots:

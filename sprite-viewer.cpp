@@ -9,12 +9,12 @@ SpriteViewer::SpriteViewer(const TilePixmaps &tile_pixmaps, const SpriteMappings
     , sprite_mappings(sprite_mappings)
     , tile_pixmaps(tile_pixmaps)
 {
-	this->setAutoFillBackground(true);
+	setAutoFillBackground(true);
 }
 
 void SpriteViewer::paintFrame(QPainter &painter, unsigned int frame_index, int x_offset, int y_offset)
 {
-	const SpriteMappings::Frame &frame = this->sprite_mappings.frames[frame_index];
+	const SpriteMappings::Frame &frame = sprite_mappings.frames[frame_index];
 
 	for (unsigned int current_piece = 0; current_piece < frame.total_pieces; ++current_piece)
 	{
@@ -39,7 +39,7 @@ void SpriteViewer::paintFrame(QPainter &painter, unsigned int frame_index, int x
 					8
 				);
 
-				painter.drawPixmap(rect, this->tile_pixmaps[tile_index++].transformed(flip_transform), QRectF(0, 0, 8, 8));
+				painter.drawPixmap(rect, tile_pixmaps[tile_index++].transformed(flip_transform), QRectF(0, 0, 8, 8));
 			}
 		}
 	}
@@ -51,23 +51,23 @@ void SpriteViewer::paintEvent(QPaintEvent* const event)
 
 	QPainter painter(this);
 
-	const qreal dpi_scale_x = qRound((qreal)this->logicalDpiX() / 96);
-	const qreal dpi_scale_y = qRound((qreal)this->logicalDpiY() / 96);
+	const qreal dpi_scale_x = qRound((qreal)logicalDpiX() / 96);
+	const qreal dpi_scale_y = qRound((qreal)logicalDpiY() / 96);
 
 	QTransform transform;
-	transform.translate(this->width() / 2, this->height() / 2); // Centre origin.
+	transform.translate(width() / 2, height() / 2); // Centre origin.
 	transform.scale(dpi_scale_x, dpi_scale_y); // Apply DPI scale.
 	transform.scale(1.5, 1.5); // Apply general scale.
 	painter.setTransform(transform);
 
-	const SpriteMappings::Frame *frames = this->sprite_mappings.frames.data();
+	const SpriteMappings::Frame *frames = sprite_mappings.frames.data();
 
-	if (this->sprite_mappings.frames.size() == 0)
+	if (sprite_mappings.frames.size() == 0)
 		return;
 
 	// Draw outline around selected sprite.
-	const SpriteMappings::Frame &selected_sprite = frames[this->selected_sprite_index];
-	const QColor background_colour = this->palette().color(QPalette::Window);
+	const SpriteMappings::Frame &selected_sprite = frames[selected_sprite_index];
+	const QColor background_colour = palette().color(QPalette::Window);
 	const QRect outline_rect(selected_sprite.x1, selected_sprite.y1, selected_sprite.x2 - selected_sprite.x1, selected_sprite.y2 - selected_sprite.y1);
 
 	// Draw a solid colour outline.
@@ -85,28 +85,28 @@ void SpriteViewer::paintEvent(QPaintEvent* const event)
 	painter.drawRect(outline_rect);
 
 	// Draw selected sprite.
-	this->paintFrame(painter, this->selected_sprite_index);
+	paintFrame(painter, selected_sprite_index);
 
 	int x_offset;
 
 	// Draw sprites to the left of the selected sprite.
 	x_offset = 0;
 
-	for (unsigned int i = this->selected_sprite_index; i-- > 0; )
+	for (unsigned int i = selected_sprite_index; i-- > 0; )
 	{
 		x_offset += qMin(-16, frames[i + 1].x1);
 		x_offset -= frames[i].x2;
-		this->paintFrame(painter, i, x_offset, 0);
+		paintFrame(painter, i, x_offset, 0);
 	}
 
 	// Draw sprites to the right of the selected sprite.
 	x_offset = 0;
 
-	for (unsigned int i = this->selected_sprite_index + 1; i < this->sprite_mappings.frames.size(); ++i)
+	for (unsigned int i = selected_sprite_index + 1; i < sprite_mappings.frames.size(); ++i)
 	{
 		x_offset += qMax(16, frames[i - 1].x2);
 		x_offset -= frames[i].x1;
-		this->paintFrame(painter, i, x_offset, 0);
+		paintFrame(painter, i, x_offset, 0);
 	}
 
 	// TODO: Remove.
@@ -117,25 +117,25 @@ void SpriteViewer::paintEvent(QPaintEvent* const event)
 
 void SpriteViewer::selectNextSprite()
 {
-	if (this->selected_sprite_index != this->sprite_mappings.frames.size() - 1)
+	if (selected_sprite_index != sprite_mappings.frames.size() - 1)
 	{
-		++this->selected_sprite_index;
-		this->repaint();
+		++selected_sprite_index;
+		repaint();
 	}
 }
 
 void SpriteViewer::selectPreviousSprite()
 {
-	if (this->selected_sprite_index != 0)
+	if (selected_sprite_index != 0)
 	{
-		--this->selected_sprite_index;
-		this->repaint();
+		--selected_sprite_index;
+		repaint();
 	}
 }
 
 void SpriteViewer::setBackgroundColour(const QColor &colour)
 {
-	QPalette palette = this->palette();
+	QPalette palette;
 	palette.setColor(QPalette::Window, colour);
-	this->setPalette(palette);
+	setPalette(palette);
 }

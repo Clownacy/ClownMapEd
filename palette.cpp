@@ -40,7 +40,7 @@ Palette::Palette()
 					break;
 			}
 
-			this->colours[line][index] = colour;
+			colours[line][index] = colour;
 		}
 	}
 }
@@ -58,14 +58,14 @@ void Palette::loadFromFile(const QString &file_path)
 
 	for (std::size_t i = 0; i < std::min(static_cast<std::size_t>(4), total_colours / 16); ++i)
 		for (std::size_t j = 0; j < std::min(static_cast<std::size_t>(16), total_colours - i * 16); ++j)
-			in_stream >> this->colours[i][j];
+			in_stream >> colours[i][j];
 }
 
 Palette::Colour Palette::getColour(const unsigned int palette_line, const unsigned int palette_index) const
 {
 	Palette::Colour colour;
 
-	const QColor qt_colour = this->MDToQColor(this->colours[palette_line][palette_index]);
+	const QColor qt_colour = MDToQColor(colours[palette_line][palette_index]);
 
 	colour.red = qt_colour.red();
 	colour.green = qt_colour.green();
@@ -79,9 +79,9 @@ void Palette::setColour(const unsigned int palette_line, const unsigned int pale
 	if (palette_line >= 4 || palette_index >= 16)
 		return;
 
-	this->colours[palette_line][palette_index] = this->QColorToMD(colour);
+	colours[palette_line][palette_index] = QColorToMD(colour);
 
-	emit this->colourChanged();
+	emit colourChanged();
 }
 
 QColor Palette::MDToQColor(unsigned int md_colour)

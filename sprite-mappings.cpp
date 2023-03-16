@@ -43,7 +43,7 @@ void SpriteMappings::loadFromFile(const QString &file_path)
 			earliest_frame = frame_offset;
 	}
 
-	this->frames.resize(total_frames);
+	frames.resize(total_frames);
 
 	unsigned int total_pieces = 0;
 
@@ -54,7 +54,7 @@ void SpriteMappings::loadFromFile(const QString &file_path)
 		total_pieces += Read<quint16>(in_stream);
 	}
 
-	this->pieces.resize(total_pieces);
+	pieces.resize(total_pieces);
 
 	unsigned int piece_index = 0;
 
@@ -63,10 +63,10 @@ void SpriteMappings::loadFromFile(const QString &file_path)
 		file.seek(current_frame * 2);
 		file.seek(Read<quint16>(in_stream));
 
-		Frame &frame = this->frames[current_frame];
+		Frame &frame = frames[current_frame];
 
 		frame.total_pieces = Read<quint16>(in_stream);
-		frame.pieces = &this->pieces[piece_index];
+		frame.pieces = &pieces[piece_index];
 
 		frame.x1 = INT_MAX;
 		frame.x2 = INT_MIN;
@@ -75,7 +75,7 @@ void SpriteMappings::loadFromFile(const QString &file_path)
 
 		for (unsigned int current_piece = 0; current_piece < frame.total_pieces; ++current_piece)
 		{
-			Piece &piece = this->pieces[piece_index];
+			Piece &piece = pieces[piece_index];
 
 			piece.y = Read<qint8>(in_stream);
 			const unsigned int size = Read<quint8>(in_stream);

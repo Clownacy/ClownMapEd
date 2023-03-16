@@ -23,7 +23,7 @@ public:
 	Colour getColour(unsigned int palette_line, unsigned int palette_index) const;
 	QColor getColourQColor(unsigned int palette_line, unsigned int palette_index) const
 	{
-		return this->MDToQColor(colours[palette_line][palette_index]);
+		return MDToQColor(colours[palette_line][palette_index]);
 	}
 	void setColour(unsigned int palette_line, unsigned int palette_index, const QColor &colour);
 

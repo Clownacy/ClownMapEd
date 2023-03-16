@@ -22,24 +22,21 @@ TilePixmaps::TilePixmaps(const std::vector<unsigned char>* const tile_bytes, con
 		invalid_pixmap_raw_data[i][i ^ 7] = colour;
 	}
 
-	this->invalid_pixmap = QPixmap::fromImage(QImage(reinterpret_cast<uchar*>(invalid_pixmap_raw_data), 8, 8, QImage::Format::Format_ARGB4444_Premultiplied));
+	invalid_pixmap = QPixmap::fromImage(QImage(reinterpret_cast<uchar*>(invalid_pixmap_raw_data), 8, 8, QImage::Format::Format_ARGB4444_Premultiplied));
 
-	this->regenerate();
+	regenerate();
 }
 
 void TilePixmaps::regenerate()
 {
-	if (this->tiles_bytes == nullptr || this->palette == nullptr)
+	if (tiles_bytes == nullptr || palette == nullptr)
 		return;
 
-	auto &tiles_bytes = *this->tiles_bytes;
-	auto &palette = *this->palette;
+	pixmaps.resize(tiles_bytes->size() / (8 * 8 / 2));
 
-	this->pixmaps.resize(tiles_bytes.size() / (8 * 8 / 2));
-
-	for (std::size_t current_pixmap = 0; current_pixmap < this->pixmaps.size(); ++current_pixmap)
+	for (std::size_t current_pixmap = 0; current_pixmap < pixmaps.size(); ++current_pixmap)
 	{
-		const unsigned char *tile_bytes = &tiles_bytes[current_pixmap * (8 * 8 / 2)];
+		const unsigned char *tile_bytes = &(*tiles_bytes)[current_pixmap * (8 * 8 / 2)];
 		qint16 pixmap_data[8 * 8];
 
 		for (unsigned int i = 0; i < 8 * 8; ++i)
@@ -51,12 +48,12 @@ void TilePixmaps::regenerate()
 			}
 			else
 			{
-				const Palette::Colour colour = palette.getColour(0, palette_index);
+				const Palette::Colour colour = palette->getColour(0, palette_index);
 
 				pixmap_data[i] = (0xF << 12) | ((colour.red >> 4) << 8) | ((colour.green >> 4) << 4) | ((colour.blue >> 4) << 0);
 			}
 		}
 
-		this->pixmaps[current_pixmap] = QPixmap::fromImage(QImage(reinterpret_cast<uchar*>(pixmap_data), 8, 8, QImage::Format::Format_ARGB4444_Premultiplied));
+		pixmaps[current_pixmap] = QPixmap::fromImage(QImage(reinterpret_cast<uchar*>(pixmap_data), 8, 8, QImage::Format::Format_ARGB4444_Premultiplied));
 	}
 }

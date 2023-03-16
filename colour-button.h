@@ -12,8 +12,8 @@ class ColourButton : public QAbstractButton
 public:
 	ColourButton();
 
-	const QColor& colour() const {return this->m_colour;}
-	void setColour(const QColor &colour) {this->m_colour = colour;}
+	const QColor& colour() const { return m_colour; }
+	void setColour(const QColor &colour) { m_colour = colour; }
 
 protected:
 	void paintEvent(QPaintEvent *event) override;

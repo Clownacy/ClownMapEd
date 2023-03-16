@@ -16,9 +16,9 @@ void ColourButton::paintEvent(QPaintEvent* const event)
 
 	QPainter painter(this);
 	QBrush brush;
-	brush.setColor(this->m_colour);
+	brush.setColor(m_colour);
 	brush.setStyle(Qt::BrushStyle::SolidPattern);
 	painter.setBrush(brush);
 	painter.setPen(Qt::NoPen);
-	painter.drawRect(QRect(QPoint(0, 0), this->size()));
+	painter.drawRect(QRect(QPoint(0, 0), size()));
 }
