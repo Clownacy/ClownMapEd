@@ -61,19 +61,47 @@ void Palette::loadFromFile(const QString &file_path)
 			in_stream >> this->colours[i][j];
 }
 
-Palette::Colour Palette::getColour(unsigned int palette_line, unsigned int palette_index) const
+Palette::Colour Palette::getColour(const unsigned int palette_line, const unsigned int palette_index) const
 {
 	Palette::Colour colour;
 
-	const unsigned int raw_colour = this->colours[palette_line][palette_index];
+	const QColor qt_colour = this->MDToQColor(this->colours[palette_line][palette_index]);
 
-	colour.red = (raw_colour >> 1) & 0x7;
-	colour.green = (raw_colour >> 5) & 0x7;
-	colour.blue = (raw_colour >> 9) & 0x7;
-
-	colour.red = (colour.red << 5) | (colour.red << 2) | (colour.red >> 1);
-	colour.green = (colour.green << 5) | (colour.green << 2) | (colour.green >> 1);
-	colour.blue = (colour.blue << 5) | (colour.blue << 2) | (colour.blue >> 1);
+	colour.red = qt_colour.red();
+	colour.green = qt_colour.green();
+	colour.blue = qt_colour.blue();
 
 	return colour;
+}
+
+void Palette::setColour(const unsigned int palette_line, const unsigned int palette_index, const QColor &colour)
+{
+	if (palette_line >= 4 || palette_index >= 16)
+		return;
+
+	this->colours[palette_line][palette_index] = this->QColorToMD(colour);
+
+	emit this->colourChanged();
+}
+
+QColor Palette::MDToQColor(unsigned int md_colour)
+{
+	unsigned int red = (md_colour >> 1) & 7;
+	unsigned int green = (md_colour >> 5) & 7;
+	unsigned int blue = (md_colour >> 9) & 7;
+
+	red = (red << 5) | (red << 2) | (red >> 1);
+	green = (green << 5) | (green << 2) | (green >> 1);
+	blue = (blue << 5) | (blue << 2) | (blue >> 1);
+
+	return QColor(red, green, blue);
+}
+
+unsigned int Palette::QColorToMD(const QColor &colour)
+{
+	unsigned int red = (colour.red() >> 5) & 7;
+	unsigned int green = (colour.green() >> 5) & 7;
+	unsigned int blue = (colour.blue() >> 5) & 7;
+
+	return (blue << 9) | (green << 5) | (red << 1);
 }

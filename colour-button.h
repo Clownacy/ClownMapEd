@@ -3,6 +3,7 @@
 
 #include <QAbstractButton>
 #include <QColor>
+#include <QObject>
 
 class ColourButton : public QAbstractButton
 {

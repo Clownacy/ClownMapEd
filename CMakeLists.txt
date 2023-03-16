@@ -21,6 +21,8 @@ set(PROJECT_SOURCES
 	main-window.ui
 	palette.cpp
 	palette.h
+	palette-editor.cpp
+	palette-editor.h
 	sprite-viewer.cpp
 	sprite-viewer.h
 	sprite-mappings.cpp

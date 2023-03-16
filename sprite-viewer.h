@@ -23,12 +23,12 @@ protected:
 	void paintEvent(QPaintEvent *event) override;
 
 private:
-	unsigned int selected_sprite_index;
+	void paintFrame(QPainter &painter, unsigned int frame_index, int x_offset = 0, int y_offset = 0);
+
+	unsigned int selected_sprite_index = 0;
 	QPixmap pixmap;
 	const SpriteMappings &sprite_mappings;
 	const TilePixmaps &tile_pixmaps;
-
-	void paintFrame(QPainter &painter, unsigned int frame_index, int x_offset = 0, int y_offset = 0);
 };
 
 #endif // SPRITE_VIEWER_H

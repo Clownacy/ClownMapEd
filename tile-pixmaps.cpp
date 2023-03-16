@@ -1,11 +1,43 @@
 #include "tile-pixmaps.h"
 
-TilePixmaps::TilePixmaps(const std::vector<unsigned char> &tiles_bytes, const Palette &palette)
+TilePixmaps::TilePixmaps(const std::vector<unsigned char>* const tile_bytes, const Palette* const palette)
+	: tiles_bytes(tile_bytes)
+    , palette(palette)
 {
-	this->m_total_pixmaps = tiles_bytes.size() / (8 * 8 / 2);
-	this->pixmaps.resize(this->m_total_pixmaps);
+	qint16 invalid_pixmap_raw_data[8][8];
 
-	for (std::size_t current_pixmap = 0; current_pixmap < this->m_total_pixmaps; ++current_pixmap)
+	for (unsigned int y = 0; y < 8; ++y)
+		for (unsigned int x = 0; x < 8; ++x)
+			invalid_pixmap_raw_data[y][x] = 0;
+
+	for (unsigned int i = 0; i < 8; ++i)
+	{
+		const unsigned int colour = 0xFF00;
+
+		invalid_pixmap_raw_data[0][i] = colour;
+		invalid_pixmap_raw_data[7][i] = colour;
+		invalid_pixmap_raw_data[i][0] = colour;
+		invalid_pixmap_raw_data[i][7] = colour;
+		invalid_pixmap_raw_data[i][i] = colour;
+		invalid_pixmap_raw_data[i][i ^ 7] = colour;
+	}
+
+	this->invalid_pixmap = QPixmap::fromImage(QImage(reinterpret_cast<uchar*>(invalid_pixmap_raw_data), 8, 8, QImage::Format::Format_ARGB4444_Premultiplied));
+
+	this->regenerate();
+}
+
+void TilePixmaps::regenerate()
+{
+	if (this->tiles_bytes == nullptr || this->palette == nullptr)
+		return;
+
+	auto &tiles_bytes = *this->tiles_bytes;
+	auto &palette = *this->palette;
+
+	this->pixmaps.resize(tiles_bytes.size() / (8 * 8 / 2));
+
+	for (std::size_t current_pixmap = 0; current_pixmap < this->pixmaps.size(); ++current_pixmap)
 	{
 		const unsigned char *tile_bytes = &tiles_bytes[current_pixmap * (8 * 8 / 2)];
 		qint16 pixmap_data[8 * 8];
@@ -27,24 +59,4 @@ TilePixmaps::TilePixmaps(const std::vector<unsigned char> &tiles_bytes, const Pa
 
 		this->pixmaps[current_pixmap] = QPixmap::fromImage(QImage(reinterpret_cast<uchar*>(pixmap_data), 8, 8, QImage::Format::Format_ARGB4444_Premultiplied));
 	}
-
-	qint16 invalid_pixmap_raw_data[8][8];
-
-	for (unsigned int y = 0; y < 8; ++y)
-		for (unsigned int x = 0; x < 8; ++x)
-			invalid_pixmap_raw_data[y][x] = 0;
-
-	for (unsigned int i = 0; i < 8; ++i)
-	{
-		const unsigned int colour = 0xFF00;
-
-		invalid_pixmap_raw_data[0][i] = colour;
-		invalid_pixmap_raw_data[7][i] = colour;
-		invalid_pixmap_raw_data[i][0] = colour;
-		invalid_pixmap_raw_data[i][7] = colour;
-		invalid_pixmap_raw_data[i][i] = colour;
-		invalid_pixmap_raw_data[i][i ^ 7] = colour;
-	}
-
-	this->invalid_pixmap = QPixmap::fromImage(QImage(reinterpret_cast<uchar*>(invalid_pixmap_raw_data), 8, 8, QImage::Format::Format_ARGB4444_Premultiplied));
 }

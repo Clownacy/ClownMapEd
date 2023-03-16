@@ -10,6 +10,7 @@
 #include <QGraphicsView>
 
 #include "palette.h"
+#include "palette-editor.h"
 #include "sprite-mappings.h"
 #include "sprite-viewer.h"
 #include "tile-pixmaps.h"
@@ -34,6 +35,7 @@ private:
 	SpriteMappings sprite_mappings;
 	TilePixmaps tile_pixmaps;
 	SpriteViewer sprite_viewer;
+	PaletteEditor palette_editor;
 };
 
 #endif // MAIN_WINDOW_H

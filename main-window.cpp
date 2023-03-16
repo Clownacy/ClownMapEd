@@ -17,12 +17,13 @@ MainWindow::MainWindow(QWidget* const parent)
     , palette()
     , tiles_bytes()
     , sprite_mappings()
-    , tile_pixmaps(this->tiles_bytes, this->palette)
+    , tile_pixmaps(&tiles_bytes, &palette)
 	, sprite_viewer(this->tile_pixmaps, this->sprite_mappings)
+    , palette_editor(palette)
 {
-	ui->setupUi(this);
+	this->ui->setupUi(this);
 
-	connect(ui->actionOpen_Tiles, &QAction::triggered, this,
+	this->connect(this->ui->actionOpen_Tiles, &QAction::triggered, this,
 		[this]()
 		{
 			const QString file_path = QFileDialog::getOpenFileName(this, "Open Tile File");
@@ -39,12 +40,12 @@ MainWindow::MainWindow(QWidget* const parent)
 
 				in_stream.readRawData(reinterpret_cast<char*>(this->tiles_bytes.data()), this->tiles_bytes.size());
 
-				this->tile_pixmaps = TilePixmaps(this->tiles_bytes, this->palette);
+				this->tile_pixmaps.setTiles(this->tiles_bytes);
 			}
 		}
 	);
 
-	connect(ui->actionOpen, &QAction::triggered, this,
+	this->connect(this->ui->actionOpen, &QAction::triggered, this,
 		[this]()
 		{
 			const QString file_path = QFileDialog::getOpenFileName(this, "Open Palette File");
@@ -52,7 +53,7 @@ MainWindow::MainWindow(QWidget* const parent)
 			if (!file_path.isNull())
 			{
 				this->palette.loadFromFile(file_path);
-				this->tile_pixmaps = TilePixmaps(this->tiles_bytes, this->palette);
+				this->tile_pixmaps.setPalette(this->palette);
 
 				const Palette::Colour colour = this->palette.getColour(0, 0);
 				sprite_viewer.setBackgroundColour(QColor(colour.red, colour.green, colour.blue));
@@ -60,7 +61,7 @@ MainWindow::MainWindow(QWidget* const parent)
 		}
 	);
 
-	connect(ui->actionOpen_Mappings, &QAction::triggered, this,
+	this->connect(this->ui->actionOpen_Mappings, &QAction::triggered, this,
 		[this]()
 		{
 			const QString file_path = QFileDialog::getOpenFileName(this, "Open Mappings File");
@@ -70,34 +71,11 @@ MainWindow::MainWindow(QWidget* const parent)
 		}
 	);
 
-	QGridLayout *grid_layout = new QGridLayout;
-	grid_layout->setSpacing(0);
-
-	for (unsigned int line = 0; line < 4; ++line)
-	{
-		for (unsigned int index = 0; index < 16; ++index)
-		{
-			ColourButton *button = new ColourButton();
-
-			connect(button, &ColourButton::clicked, this,
-				[this]()
-				{
-					QColorDialog::getColor(Qt::white, this);
-				}
-			);
-
-			button->setColour(palette.getColourQColor(line, index));
-
-			button->setFixedSize(20, 20);
-	//		button->setIcon(QIcon(QPixmap()))
-
-			grid_layout->addWidget(button, index, line);
-		}
-	}
+	this->connect(&this->palette, &Palette::colourChanged, &this->tile_pixmaps, &TilePixmaps::regenerate);
 
 	QHBoxLayout *hbox = new QHBoxLayout;
-	hbox->addLayout(grid_layout);
-	hbox->addWidget(&sprite_viewer);
+	hbox->addWidget(&this->palette_editor);
+	hbox->addWidget(&this->sprite_viewer);
 
 	QVBoxLayout *vbox = new QVBoxLayout;
 	vbox->addLayout(hbox);
@@ -112,7 +90,7 @@ MainWindow::MainWindow(QWidget* const parent)
 
 MainWindow::~MainWindow()
 {
-	delete ui;
+	delete this->ui;
 }
 
 void MainWindow::keyPressEvent(QKeyEvent* const event)

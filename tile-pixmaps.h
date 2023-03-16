@@ -4,14 +4,29 @@
 #include <cstddef>
 #include <vector>
 
+#include <QObject>
 #include <QPixmap>
 
 #include "palette.h"
 
-class TilePixmaps
+class TilePixmaps : public QObject
 {
+	Q_OBJECT;
+
 public:
-	TilePixmaps(const std::vector<unsigned char> &tile_bytes, const Palette &palette);
+	TilePixmaps(const std::vector<unsigned char> *tile_bytes = nullptr, const Palette *palette = nullptr);
+
+	void setTiles(const std::vector<unsigned char> &tile_bytes)
+	{
+		this->tiles_bytes = &tile_bytes;
+		this->regenerate();
+	}
+
+	void setPalette(const Palette &palette)
+	{
+		this->palette = &palette;
+		this->regenerate();
+	}
 
 	const QPixmap& operator[](const std::size_t tile_index) const
 	{
@@ -21,10 +36,18 @@ public:
 			return this->invalid_pixmap;
 	}
 
-	std::size_t total_pixmaps() const {return this->m_total_pixmaps;}
+	std::size_t total_pixmaps() const // TODO: Rename to just 'total'.
+	{
+		return this->pixmaps.size();
+	}
+
+public slots:
+	void regenerate();
 
 private:
-	std::size_t m_total_pixmaps;
+	const std::vector<unsigned char> *tiles_bytes = nullptr;
+	const Palette *palette = nullptr;
+
 	std::vector<QPixmap> pixmaps;
 	QPixmap invalid_pixmap;
 };

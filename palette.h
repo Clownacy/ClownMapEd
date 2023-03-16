@@ -2,10 +2,13 @@
 #define PALETTE_H
 
 #include <QColor>
+#include <QObject>
 #include <QString>
 
-class Palette
+class Palette : public QObject
 {
+	Q_OBJECT;
+
 public:
 	struct Colour
 	{
@@ -20,11 +23,17 @@ public:
 	Colour getColour(unsigned int palette_line, unsigned int palette_index) const;
 	QColor getColourQColor(unsigned int palette_line, unsigned int palette_index) const
 	{
-		const Colour colour = getColour(palette_line, palette_index);
-		return QColor(colour.red, colour.green, colour.blue);
+		return this->MDToQColor(colours[palette_line][palette_index]);
 	}
+	void setColour(unsigned int palette_line, unsigned int palette_index, const QColor &colour);
+
+signals:
+	void colourChanged();
 
 private:
+	static QColor MDToQColor(unsigned int md_colour);
+	static unsigned int QColorToMD(const QColor &colour);
+
 	quint16 colours[4][16];
 };
 
