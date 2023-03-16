@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget"/>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>&amp;File</string>
+    </property>
+    <addaction name="actionOpen_Tiles"/>
+    <addaction name="actionOpen"/>
+    <addaction name="actionOpen_Mappings"/>
+   </widget>
+   <addaction name="menuFile"/>
+  </widget>
+  <action name="actionOpen">
+   <property name="text">
+    <string>Open &amp;Palette...</string>
+   </property>
+  </action>
+  <action name="actionOpen_Tiles">
+   <property name="text">
+    <string>Open &amp;Tiles...</string>
+   </property>
+  </action>
+  <action name="actionOpen_Mappings">
+   <property name="text">
+    <string>Open Mappings...</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
