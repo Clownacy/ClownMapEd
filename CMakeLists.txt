@@ -23,10 +23,13 @@ set(PROJECT_SOURCES
 	palette.h
 	palette-editor.cpp
 	palette-editor.h
-	sprite-viewer.cpp
-	sprite-viewer.h
+	read-stream.h
 	sprite-mappings.cpp
 	sprite-mappings.h
+	sprite-piece.cpp
+	sprite-piece.h
+	sprite-viewer.cpp
+	sprite-viewer.h
 	tile.cpp
 	tile.h
 	tile-pixmaps.cpp

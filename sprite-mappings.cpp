@@ -5,13 +5,7 @@
 #include <QDataStream>
 #include <QFile>
 
-template<typename T>
-static inline T Read(QDataStream &in_stream)
-{
-	T value;
-	in_stream >> value;
-	return value;
-}
+#include "read-stream.h"
 
 SpriteMappings::SpriteMappings()
 {
@@ -75,20 +69,8 @@ void SpriteMappings::loadFromFile(const QString &file_path)
 
 		for (unsigned int current_piece = 0; current_piece < frame.total_pieces; ++current_piece)
 		{
-			Piece &piece = pieces[piece_index];
-
-			piece.y = Read<qint8>(in_stream);
-			const unsigned int size = Read<quint8>(in_stream);
-			piece.width = ((size >> 2) & 3) + 1;
-			piece.height = ((size >> 0) & 3) + 1;
-			const unsigned int art_tile = Read<quint16>(in_stream);
-			piece.priority = (art_tile & (1 << 15)) != 0;
-			piece.palette_line = (art_tile >> 13) & 3;
-			piece.y_flip = (art_tile & (1 << 12)) != 0;
-			piece.x_flip = (art_tile & (1 << 11)) != 0;
-			piece.tile_index = art_tile & 0x7FF;
-			Read<quint16>(in_stream); // TODO - 2-player data?
-			piece.x = Read<qint16>(in_stream);
+			SpritePiece &piece = pieces[piece_index];
+			piece.fromDataStream(in_stream);
 
 			if (frame.x1 > piece.x)
 				frame.x1 = piece.x;
@@ -113,7 +95,7 @@ void SpriteMappings::loadFromFile(const QString &file_path)
 	}
 }
 
-void SpriteMappings::paintPiece(QPainter &painter, const TilePixmaps &tile_pixmaps, const Piece &piece, int x_offset, int y_offset) const
+void SpriteMappings::paintPiece(QPainter &painter, const TilePixmaps &tile_pixmaps, const SpritePiece &piece, int x_offset, int y_offset) const
 {
 	const QTransform flip_transform = QTransform::fromScale(piece.x_flip ? -1 : 1, piece.y_flip ? -1 : 1);
 
