@@ -29,7 +29,6 @@ public:
 private:
 	Ui::MainWindow *ui;
 	Palette palette;
-	QVector<unsigned char> tiles_bytes;
 	SpriteMappings sprite_mappings;
 	TileManager tile_manager;
 	SpriteEditor sprite_viewer;

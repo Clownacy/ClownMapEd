@@ -11,7 +11,7 @@
 MainWindow::MainWindow(QWidget* const parent)
 	: QMainWindow(parent)
 	, ui(new Ui::MainWindow)
-    , tile_manager(&tiles_bytes, &palette)
+    , tile_manager(nullptr, 0, palette)
 	, sprite_viewer(tile_manager, sprite_mappings)
     , palette_editor(palette)
 	, piece_picker(tile_manager)
@@ -48,23 +48,11 @@ MainWindow::MainWindow(QWidget* const parent)
 					return;
 
 				std::stringstream string_stream(std::stringstream::in | std::stringstream::out | std::stringstream::binary);
+
 				if (!nemesis::decode(file_stream, string_stream))
 					return;
 
-				//QFile file(file_path);
-				//if (!file.open(QFile::ReadOnly))
-				//	return;
-
-				//QDataStream stream(&file);
-
-//				tiles_bytes.resize(file.size());
-				tiles_bytes.resize(string_stream.str().length());
-				tiles_bytes.squeeze();
-
-//				stream.readRawData(reinterpret_cast<char*>(tiles_bytes.data()), tiles_bytes.size());
-				string_stream.read(reinterpret_cast<char*>(tiles_bytes.data()), tiles_bytes.size());
-
-				tile_manager.setTiles(tiles_bytes);
+				tile_manager.setTiles(reinterpret_cast<const uchar*>(string_stream.str().c_str()), string_stream.str().length());
 			}
 		}
 	);

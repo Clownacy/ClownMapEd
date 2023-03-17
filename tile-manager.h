@@ -15,11 +15,11 @@ class TileManager : public QObject
 	Q_OBJECT
 
 public:
-	TileManager(const QVector<unsigned char> *tile_bytes = nullptr, const Palette *palette = nullptr);
+	TileManager(const uchar* const tile_bytes, const std::size_t total_bytes, const Palette &palette);
 
-	void setTiles(const QVector<unsigned char> &tile_bytes)
+	void setTiles(const uchar* const tile_bytes, const std::size_t total_bytes)
 	{
-		tiles_bytes = &tile_bytes;
+		setTilesInternal(tile_bytes, total_bytes);
 		regenerate();
 	}
 
@@ -49,8 +49,10 @@ signals:
 	void regenerated();
 
 private:
-	const QVector<unsigned char> *tiles_bytes = nullptr;
-	const Palette *palette = nullptr;
+	void setTilesInternal(const uchar* const tile_bytes, const std::size_t total_bytes);
+
+	QVector<uchar> tile_bytes;
+	const Palette *palette;
 
 	QPixmap invalid_pixmap;
 	QVector<Tile> tiles;
