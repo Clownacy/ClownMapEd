@@ -23,8 +23,6 @@ protected:
 	void paintEvent(QPaintEvent *event) override;
 
 private:
-	void paintFrame(QPainter &painter, unsigned int frame_index, int x_offset = 0, int y_offset = 0);
-
 	unsigned int selected_sprite_index = 0;
 	QPixmap pixmap;
 	const SpriteMappings &sprite_mappings;

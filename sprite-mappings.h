@@ -1,8 +1,11 @@
 #ifndef SPRITE_MAPPINGS_H
 #define SPRITE_MAPPINGS_H
 
+#include <QPainter>
 #include <QString>
 #include <QVector>
+
+#include "tile-pixmaps.h"
 
 class SpriteMappings
 {
@@ -30,10 +33,13 @@ public:
 	SpriteMappings();
 
 	void loadFromFile(const QString &file_path);
+	void paintPiece(QPainter &painter, const TilePixmaps &tile_pixmaps, const Piece &piece, int x_offset = 0, int y_offset = 0) const;
+	void paintFrame(QPainter &painter, const TilePixmaps &tile_pixmaps, const Frame &frame, int x_offset = 0, int y_offset = 0) const;
 
 	QVector<Frame> frames;
 
 private:
+
 	QVector<Piece> pieces;
 };
 

@@ -12,39 +12,6 @@ SpriteViewer::SpriteViewer(const TilePixmaps &tile_pixmaps, const SpriteMappings
 	setAutoFillBackground(true);
 }
 
-void SpriteViewer::paintFrame(QPainter &painter, unsigned int frame_index, int x_offset, int y_offset)
-{
-	const SpriteMappings::Frame &frame = sprite_mappings.frames[frame_index];
-
-	for (unsigned int current_piece = 0; current_piece < frame.total_pieces; ++current_piece)
-	{
-		const SpriteMappings::Piece &piece = frame.pieces[current_piece];
-
-		const QTransform flip_transform = QTransform::fromScale(piece.x_flip ? -1 : 1, piece.y_flip ? -1 : 1);
-
-		unsigned int tile_index = piece.tile_index;
-
-		for (int tile_x = 0; tile_x < piece.width; ++tile_x)
-		{
-			const int tile_x_corrected = piece.x_flip ? piece.width - tile_x - 1 : tile_x;
-
-			for (int tile_y = 0; tile_y < piece.height; ++tile_y)
-			{
-				const int tile_y_corrected = piece.y_flip ? piece.height - tile_y - 1 : tile_y;
-
-				const QRect rect(
-					x_offset + piece.x + tile_x_corrected * 8,
-					y_offset + piece.y + tile_y_corrected * 8,
-					8,
-					8
-				);
-
-				painter.drawPixmap(rect, tile_pixmaps[tile_index++].transformed(flip_transform), QRectF(0, 0, 8, 8));
-			}
-		}
-	}
-}
-
 void SpriteViewer::paintEvent(QPaintEvent* const event)
 {
 	QWidget::paintEvent(event);
@@ -85,7 +52,7 @@ void SpriteViewer::paintEvent(QPaintEvent* const event)
 	painter.drawRect(outline_rect);
 
 	// Draw selected sprite.
-	paintFrame(painter, selected_sprite_index);
+	sprite_mappings.paintFrame(painter, tile_pixmaps, sprite_mappings.frames[selected_sprite_index]);
 
 	int x_offset;
 
@@ -96,7 +63,7 @@ void SpriteViewer::paintEvent(QPaintEvent* const event)
 	{
 		x_offset += qMin(-16, frames[i + 1].x1);
 		x_offset -= frames[i].x2;
-		paintFrame(painter, i, x_offset, 0);
+		sprite_mappings.paintFrame(painter, tile_pixmaps, sprite_mappings.frames[i], x_offset, 0);
 	}
 
 	// Draw sprites to the right of the selected sprite.
@@ -106,7 +73,7 @@ void SpriteViewer::paintEvent(QPaintEvent* const event)
 	{
 		x_offset += qMax(16, frames[i - 1].x2);
 		x_offset -= frames[i].x1;
-		paintFrame(painter, i, x_offset, 0);
+		sprite_mappings.paintFrame(painter, tile_pixmaps, sprite_mappings.frames[i], x_offset, 0);
 	}
 
 	// TODO: Remove.
