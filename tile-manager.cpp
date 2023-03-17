@@ -2,7 +2,7 @@
 
 #include <cstring>
 
-TileManager::TileManager(const uchar* const tile_bytes, const std::size_t total_bytes, const Palette &palette)
+TileManager::TileManager(const uchar* const tile_bytes, const int total_bytes, const Palette &palette)
     : palette(&palette)
 {
 	if (tile_bytes != nullptr)
@@ -33,26 +33,31 @@ TileManager::TileManager(const uchar* const tile_bytes, const std::size_t total_
 
 void TileManager::regenerate()
 {
-	const int total_tiles = tile_bytes.size() / (8 * 8 / 2);
-
 	tiles.clear();
-	tiles.reserve(total_tiles);
+	tiles.reserve(tile_bytes.size() / SIZE_OF_TILE);
 
-	for (int current_pixmap = 0; current_pixmap < total_tiles; ++current_pixmap)
-	{
-		std::array<uchar, 8 * 8 / 2> single_tile_bytes;
-		const uchar* const first_byte = &tile_bytes[current_pixmap * (8 * 8 / 2)];
-		std::copy(first_byte, first_byte + (8 * 8 / 2), single_tile_bytes.begin());
-
+	for (auto &single_tile_bytes : tile_bytes)
 		tiles.push_back(Tile(single_tile_bytes, *palette));
-	}
 
 	emit regenerated();
 }
 
-void TileManager::setTilesInternal(const uchar* const tile_bytes, const std::size_t total_bytes)
+bool TileManager::setTilesInternal(const uchar* const tile_bytes, const int total_bytes)
 {
-	this->tile_bytes.resize(total_bytes);
+	// Bail if the file contains a partial tile (it probably isn't tile data).
+	if (total_bytes % SIZE_OF_TILE != 0)
+		return false;
+
+	const int total_tiles = total_bytes / SIZE_OF_TILE;
+
+	this->tile_bytes.resize(total_tiles);
 	this->tile_bytes.squeeze();
-	std::memcpy(this->tile_bytes.data(), tile_bytes, total_bytes);
+
+	for (int i = 0; i < total_tiles; ++i)
+	{
+		const uchar* const single_tile_bytes = tile_bytes + i * SIZE_OF_TILE;
+		std::copy(single_tile_bytes, single_tile_bytes + SIZE_OF_TILE, this->tile_bytes[i].begin());
+	}
+
+	return true;
 }

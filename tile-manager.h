@@ -1,7 +1,7 @@
 #ifndef TILE_MANAGER_H
 #define TILE_MANAGER_H
 
-#include <cstddef>
+#include <array>
 
 #include <QObject>
 #include <QPixmap>
@@ -15,12 +15,16 @@ class TileManager : public QObject
 	Q_OBJECT
 
 public:
-	TileManager(const uchar* const tile_bytes, const std::size_t total_bytes, const Palette &palette);
+	TileManager(const uchar* const tile_bytes, const int total_bytes, const Palette &palette);
 
-	void setTiles(const uchar* const tile_bytes, const std::size_t total_bytes)
+	bool setTiles(const uchar* const tile_bytes, const int total_bytes)
 	{
-		setTilesInternal(tile_bytes, total_bytes);
+		if (!setTilesInternal(tile_bytes, total_bytes))
+			return false;
+
 		regenerate();
+
+		return true;
 	}
 
 	void setPalette(const Palette &palette)
@@ -42,6 +46,8 @@ public:
 		return tiles.size();
 	}
 
+	static constexpr int SIZE_OF_TILE = 8 * 8 / 2;
+
 public slots:
 	void regenerate();
 
@@ -49,9 +55,9 @@ signals:
 	void regenerated();
 
 private:
-	void setTilesInternal(const uchar* const tile_bytes, const std::size_t total_bytes);
+	bool setTilesInternal(const uchar* const tile_bytes, const int total_bytes);
 
-	QVector<uchar> tile_bytes;
+	QVector<std::array<uchar, SIZE_OF_TILE>> tile_bytes;
 	const Palette *palette;
 
 	QPixmap invalid_pixmap;

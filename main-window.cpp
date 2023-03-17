@@ -52,7 +52,10 @@ MainWindow::MainWindow(QWidget* const parent)
 				if (!nemesis::decode(file_stream, string_stream))
 					return;
 
-				tile_manager.setTiles(reinterpret_cast<const uchar*>(string_stream.str().c_str()), string_stream.str().length());
+				if (!tile_manager.setTiles(reinterpret_cast<const uchar*>(string_stream.str().c_str()), static_cast<int>(string_stream.str().length())))
+				{
+					// TODO: Should probably show an error message or something.
+				}
 			}
 		}
 	);
