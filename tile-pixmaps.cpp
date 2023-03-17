@@ -32,29 +32,18 @@ void TilePixmaps::regenerate()
 	if (tiles_bytes == nullptr || palette == nullptr)
 		return;
 
-	pixmaps.resize(tiles_bytes->size() / (8 * 8 / 2));
+	const int total_tiles = tiles_bytes->size() / (8 * 8 / 2);
 
-	for (std::size_t current_pixmap = 0; current_pixmap < pixmaps.size(); ++current_pixmap)
+	tiles.clear();
+	tiles.reserve(total_tiles);
+
+	for (int current_pixmap = 0; current_pixmap < total_tiles; ++current_pixmap)
 	{
-		const unsigned char *tile_bytes = &(*tiles_bytes)[current_pixmap * (8 * 8 / 2)];
-		qint16 pixmap_data[8 * 8];
+		std::array<uchar, 8 * 8 / 2> tile_bytes;
+		const uchar* const first_byte = &(*tiles_bytes)[current_pixmap * (8 * 8 / 2)];
+		std::copy(first_byte, first_byte + (8 * 8 / 2), tile_bytes.begin());
 
-		for (unsigned int i = 0; i < 8 * 8; ++i)
-		{
-			const unsigned int palette_index = (tile_bytes[i >> 1] >> (~(i << 2) & 4)) & 0xF;
-			if (palette_index == 0)
-			{
-				pixmap_data[i] = 0;
-			}
-			else
-			{
-				const Palette::Colour colour = palette->getColour(0, palette_index);
-
-				pixmap_data[i] = (0xF << 12) | ((colour.red >> 4) << 8) | ((colour.green >> 4) << 4) | ((colour.blue >> 4) << 0);
-			}
-		}
-
-		pixmaps[current_pixmap] = QPixmap::fromImage(QImage(reinterpret_cast<uchar*>(pixmap_data), 8, 8, QImage::Format::Format_ARGB4444_Premultiplied));
+		tiles.push_back(Tile(tile_bytes, *palette));
 	}
 
 	emit regenerated();

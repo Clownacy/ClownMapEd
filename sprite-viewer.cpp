@@ -102,7 +102,7 @@ void SpriteViewer::paintEvent(QPaintEvent* const event)
 	// Draw sprites to the right of the selected sprite.
 	x_offset = 0;
 
-	for (unsigned int i = selected_sprite_index + 1; i < sprite_mappings.frames.size(); ++i)
+	for (int i = selected_sprite_index + 1; i < sprite_mappings.frames.size(); ++i)
 	{
 		x_offset += qMax(16, frames[i - 1].x2);
 		x_offset -= frames[i].x1;

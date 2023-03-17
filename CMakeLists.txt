@@ -27,6 +27,8 @@ set(PROJECT_SOURCES
 	sprite-viewer.h
 	sprite-mappings.cpp
 	sprite-mappings.h
+	tile.cpp
+	tile.h
 	tile-pixmaps.cpp
 	tile-pixmaps.h
 	tile-viewer.cpp

@@ -7,7 +7,7 @@
 
 class Palette : public QObject
 {
-	Q_OBJECT;
+	Q_OBJECT
 
 public:
 	struct Colour

@@ -8,10 +8,11 @@
 #include <QVector>
 
 #include "palette.h"
+#include "tile.h"
 
 class TilePixmaps : public QObject
 {
-	Q_OBJECT;
+	Q_OBJECT
 
 public:
 	TilePixmaps(const QVector<unsigned char> *tile_bytes = nullptr, const Palette *palette = nullptr);
@@ -31,14 +32,14 @@ public:
 	const QPixmap& operator[](const std::size_t tile_index) const
 	{
 		if (tile_index < total_pixmaps())
-			return pixmaps[tile_index];
+			return tiles[tile_index].pixmap();
 		else
 			return invalid_pixmap;
 	}
 
 	std::size_t total_pixmaps() const // TODO: Rename to just 'total'.
 	{
-		return pixmaps.size();
+		return tiles.size();
 	}
 
 public slots:
@@ -51,8 +52,8 @@ private:
 	const QVector<unsigned char> *tiles_bytes = nullptr;
 	const Palette *palette = nullptr;
 
-	QVector<QPixmap> pixmaps;
 	QPixmap invalid_pixmap;
+	QVector<Tile> tiles;
 };
 
 #endif // TILE_PIXMAPS_H

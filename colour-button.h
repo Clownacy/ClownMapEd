@@ -7,7 +7,7 @@
 
 class ColourButton : public QAbstractButton
 {
-	Q_OBJECT;
+	Q_OBJECT
 
 public:
 	ColourButton();
