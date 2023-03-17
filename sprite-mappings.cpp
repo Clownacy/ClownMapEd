@@ -44,7 +44,7 @@ bool SpriteMappings::loadFromFile(const QString &file_path)
 		file.seek(current_frame * 2);
 		file.seek(stream.read<quint16>());
 
-		m_frames[current_frame].fromDataStream(stream);
+		m_frames[current_frame] = SpriteFrame::fromDataStream(stream);
 	}
 
 	return true;

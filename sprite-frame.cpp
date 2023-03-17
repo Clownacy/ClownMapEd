@@ -2,46 +2,44 @@
 
 #include <climits>
 
-SpriteFrame::SpriteFrame()
+SpriteFrame SpriteFrame::fromDataStream(DataStream &stream)
 {
+	SpriteFrame frame;
 
-}
-
-void SpriteFrame::fromDataStream(DataStream &stream)
-{
 	const unsigned int total_pieces = stream.read<quint16>();
-	pieces.resize(total_pieces);
-	pieces.squeeze();
+	frame.pieces.resize(total_pieces);
 
-	x1 = INT_MAX;
-	x2 = INT_MIN;
-	y1 = INT_MAX;
-	y2 = INT_MIN;
+	frame.x1 = INT_MAX;
+	frame.x2 = INT_MIN;
+	frame.y1 = INT_MAX;
+	frame.y2 = INT_MIN;
 
 	for (unsigned int current_piece = 0; current_piece < total_pieces; ++current_piece)
 	{
-		SpritePiece &piece = pieces[current_piece];
+		SpritePiece &piece = frame.pieces[current_piece];
 
 		piece = SpritePiece::fromDataStream(stream);
 
-		if (x1 > piece.x)
-			x1 = piece.x;
-		if (x2 < piece.x + piece.width * 8)
-			x2 = piece.x + piece.width * 8;
-		if (y1 > piece.y)
-			y1 = piece.y;
-		if (y2 < piece.y + piece.height * 8)
-			y2 = piece.y + piece.height * 8;
+		if (frame.x1 > piece.x)
+			frame.x1 = piece.x;
+		if (frame.x2 < piece.x + piece.width * 8)
+			frame.x2 = piece.x + piece.width * 8;
+		if (frame.y1 > piece.y)
+			frame.y1 = piece.y;
+		if (frame.y2 < piece.y + piece.height * 8)
+			frame.y2 = piece.y + piece.height * 8;
 	}
 
-	if (x1 == INT_MAX)
-		x1 = 0;
-	if (x2 == INT_MIN)
-		x2 = 0;
-	if (y1 == INT_MAX)
-		y1 = 0;
-	if (y2 == INT_MIN)
-		y2 = 0;
+	if (frame.x1 == INT_MAX)
+		frame.x1 = 0;
+	if (frame.x2 == INT_MIN)
+		frame.x2 = 0;
+	if (frame.y1 == INT_MAX)
+		frame.y1 = 0;
+	if (frame.y2 == INT_MIN)
+		frame.y2 = 0;
+
+	return frame;
 }
 
 void SpriteFrame::draw(QPainter &painter, const TileManager &tile_manager, const int x_offset, const int y_offset) const

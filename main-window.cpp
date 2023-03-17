@@ -42,11 +42,12 @@ MainWindow::MainWindow(QWidget* const parent)
 				if (!file.open(QFile::ReadOnly))
 					return;
 
-				QDataStream in_stream(&file);
+				QDataStream stream(&file);
 
 				tiles_bytes.resize(file.size());
+				tiles_bytes.squeeze();
 
-				in_stream.readRawData(reinterpret_cast<char*>(tiles_bytes.data()), tiles_bytes.size());
+				stream.readRawData(reinterpret_cast<char*>(tiles_bytes.data()), tiles_bytes.size());
 
 				tile_manager.setTiles(tiles_bytes);
 			}
@@ -98,6 +99,15 @@ MainWindow::MainWindow(QWidget* const parent)
 	);
 
 	connect(&tile_viewer, &TileViewer::tileSelected, &piece_picker, &SpritePiecePicker::setSelectedTile);
+
+	connect(&tile_manager, &TileManager::regenerated, &tile_viewer,
+		[this]()
+		{
+			piece_picker.update();
+			sprite_viewer.update();
+			tile_viewer.update();
+		}
+	);
 }
 
 MainWindow::~MainWindow()
