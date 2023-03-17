@@ -63,6 +63,7 @@ MainWindow::MainWindow(QWidget* const parent)
 			{
 				palette.loadFromFile(file_path);
 				tile_manager.setPalette(palette);
+				palette_editor.update();
 			}
 		}
 	);
