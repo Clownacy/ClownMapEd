@@ -5,14 +5,14 @@
 #include <QColor>
 #include <QObject>
 
-#include "tile-pixmaps.h"
+#include "tile-manager.h"
 
 class TileViewer : public QAbstractButton
 {
 	Q_OBJECT
 
 public:
-	TileViewer(const TilePixmaps &tile_pixmaps);
+	TileViewer(const TileManager &tile_manager);
 
 	void setBackgroundColour(const QColor &colour);
 
@@ -23,8 +23,8 @@ private:
 	void deleteButtons();
 	void paintEvent(QPaintEvent *event) override;
 
-	const TilePixmaps &tile_pixmaps;
+	const TileManager &tile_manager;
 	QColor background_colour;
 };
 
-#endif // TILEVIEWER_H
+#endif // TILE_VIEWER_H

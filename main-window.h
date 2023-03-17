@@ -9,7 +9,7 @@
 #include "palette-editor.h"
 #include "sprite-mappings.h"
 #include "sprite-viewer.h"
-#include "tile-pixmaps.h"
+#include "tile-manager.h"
 #include "tile-viewer.h"
 
 QT_BEGIN_NAMESPACE
@@ -30,7 +30,7 @@ private:
 	Palette palette;
 	QVector<unsigned char> tiles_bytes;
 	SpriteMappings sprite_mappings;
-	TilePixmaps tile_pixmaps;
+	TileManager tile_manager;
 	SpriteViewer sprite_viewer;
 	PaletteEditor palette_editor;
 	TileViewer tile_viewer;

@@ -4,14 +4,14 @@
 #include <QWidget>
 
 #include "sprite-mappings.h"
-#include "tile-pixmaps.h"
+#include "tile-manager.h"
 
 class SpriteViewer : public QWidget
 {
 	Q_OBJECT
 
 public:
-	SpriteViewer(const TilePixmaps &tile_pixmaps, const SpriteMappings &sprite_mappings);
+	SpriteViewer(const TileManager &tile_manager, const SpriteMappings &sprite_mappings);
 
 	void selectNextSprite();
 	void selectPreviousSprite();
@@ -24,7 +24,7 @@ protected:
 private:
 	unsigned int selected_sprite_index = 0;
 	const SpriteMappings &sprite_mappings;
-	const TilePixmaps &tile_pixmaps;
+	const TileManager &tile_manager;
 };
 
 #endif // SPRITE_VIEWER_H

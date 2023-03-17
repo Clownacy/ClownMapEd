@@ -7,10 +7,10 @@
 MainWindow::MainWindow(QWidget* const parent)
 	: QMainWindow(parent)
 	, ui(new Ui::MainWindow)
-    , tile_pixmaps(&tiles_bytes, &palette)
-	, sprite_viewer(tile_pixmaps, sprite_mappings)
+    , tile_manager(&tiles_bytes, &palette)
+	, sprite_viewer(tile_manager, sprite_mappings)
     , palette_editor(palette)
-    , tile_viewer(tile_pixmaps)
+    , tile_viewer(tile_manager)
 {
 	ui->setupUi(this);
 
@@ -43,7 +43,7 @@ MainWindow::MainWindow(QWidget* const parent)
 
 				in_stream.readRawData(reinterpret_cast<char*>(tiles_bytes.data()), tiles_bytes.size());
 
-				tile_pixmaps.setTiles(tiles_bytes);
+				tile_manager.setTiles(tiles_bytes);
 			}
 		}
 	);
@@ -56,7 +56,7 @@ MainWindow::MainWindow(QWidget* const parent)
 			if (!file_path.isNull())
 			{
 				palette.loadFromFile(file_path);
-				tile_pixmaps.setPalette(palette);
+				tile_manager.setPalette(palette);
 			}
 		}
 	);
@@ -71,7 +71,7 @@ MainWindow::MainWindow(QWidget* const parent)
 		}
 	);
 
-	connect(&palette, &Palette::singleColourChanged, &tile_pixmaps, &TilePixmaps::regenerate);
+	connect(&palette, &Palette::singleColourChanged, &tile_manager, &TileManager::regenerate);
 
 	connect(&palette, &Palette::singleColourChanged, this,
 		[this](const unsigned int palette_line, const unsigned int palette_index, const QColor &colour)
@@ -91,7 +91,7 @@ MainWindow::MainWindow(QWidget* const parent)
 		}
 	);
 
-	connect(&tile_pixmaps, &TilePixmaps::regenerated, &tile_viewer, &TileViewer::refresh);
+	connect(&tile_manager, &TileManager::regenerated, &tile_viewer, &TileViewer::refresh);
 }
 
 MainWindow::~MainWindow()

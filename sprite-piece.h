@@ -1,10 +1,10 @@
-#ifndef SPRITEPIECE_H
-#define SPRITEPIECE_H
+#ifndef SPRITE_PIECE_H
+#define SPRITE_PIECE_H
 
 #include <QDataStream>
 #include <QPainter>
 
-#include "tile-pixmaps.h"
+#include "tile-manager.h"
 
 class SpritePiece
 {
@@ -12,7 +12,7 @@ public:
 	SpritePiece();
 
 	void fromDataStream(QDataStream &stream);
-	void draw(QPainter &painter, const TilePixmaps &tile_pixmaps, int x_offset = 0, int y_offset = 0) const;
+	void draw(QPainter &painter, const TileManager &tile_manager, int x_offset = 0, int y_offset = 0) const;
 
 	int x = 0;
 	int y = 0;
@@ -25,4 +25,4 @@ public:
 	unsigned int tile_index = 0;
 };
 
-#endif // SPRITEPIECE_H
+#endif // SPRITE_PIECE_H

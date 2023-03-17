@@ -1,5 +1,5 @@
-#ifndef TILE_PIXMAPS_H
-#define TILE_PIXMAPS_H
+#ifndef TILE_MANAGER_H
+#define TILE_MANAGER_H
 
 #include <cstddef>
 
@@ -10,12 +10,12 @@
 #include "palette.h"
 #include "tile.h"
 
-class TilePixmaps : public QObject
+class TileManager : public QObject
 {
 	Q_OBJECT
 
 public:
-	TilePixmaps(const QVector<unsigned char> *tile_bytes = nullptr, const Palette *palette = nullptr);
+	TileManager(const QVector<unsigned char> *tile_bytes = nullptr, const Palette *palette = nullptr);
 
 	void setTiles(const QVector<unsigned char> &tile_bytes)
 	{
@@ -29,17 +29,19 @@ public:
 		regenerate();
 	}
 
-	const QPixmap& operator[](const std::size_t tile_index) const
+	const QPixmap& pixmaps(const std::size_t tile_index) const
 	{
-		if (tile_index < total_pixmaps())
+		// TODO: Stop using QVector because its developers are complete and
+		// utter morons who use a plain `int` to represent the size of a vector.
+		if (tile_index < static_cast<std::size_t>(tiles.size()))
 			return tiles[tile_index].pixmap();
 		else
 			return invalid_pixmap;
 	}
 
-	std::size_t total_pixmaps() const // TODO: Rename to just 'total'.
+	const std::size_t total_tiles() const
 	{
-		return tiles.size();
+		return static_cast<std::size_t>(tiles.size());
 	}
 
 public slots:
@@ -56,4 +58,4 @@ private:
 	QVector<Tile> tiles;
 };
 
-#endif // TILE_PIXMAPS_H
+#endif // TILE_MANAGER_H

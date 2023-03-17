@@ -1,6 +1,6 @@
-#include "tile-pixmaps.h"
+#include "tile-manager.h"
 
-TilePixmaps::TilePixmaps(const QVector<unsigned char>* const tile_bytes, const Palette* const palette)
+TileManager::TileManager(const QVector<unsigned char>* const tile_bytes, const Palette* const palette)
 	: tiles_bytes(tile_bytes)
     , palette(palette)
 {
@@ -27,7 +27,7 @@ TilePixmaps::TilePixmaps(const QVector<unsigned char>* const tile_bytes, const P
 	regenerate();
 }
 
-void TilePixmaps::regenerate()
+void TileManager::regenerate()
 {
 	if (tiles_bytes == nullptr || palette == nullptr)
 		return;

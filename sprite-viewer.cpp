@@ -2,11 +2,11 @@
 
 #include <QPainter>
 
-SpriteViewer::SpriteViewer(const TilePixmaps &tile_pixmaps, const SpriteMappings &sprite_mappings)
+SpriteViewer::SpriteViewer(const TileManager &tile_manager, const SpriteMappings &sprite_mappings)
 	: QWidget()
 	, selected_sprite_index(0)
     , sprite_mappings(sprite_mappings)
-    , tile_pixmaps(tile_pixmaps)
+    , tile_manager(tile_manager)
 {
 	setAutoFillBackground(true);
 }
@@ -51,7 +51,7 @@ void SpriteViewer::paintEvent(QPaintEvent* const event)
 	painter.drawRect(outline_rect);
 
 	// Draw selected sprite.
-	selected_sprite.draw(painter, tile_pixmaps);
+	selected_sprite.draw(painter, tile_manager);
 
 	int x_offset;
 
@@ -62,7 +62,7 @@ void SpriteViewer::paintEvent(QPaintEvent* const event)
 	{
 		x_offset += qMin(-16, frames[i + 1].x1);
 		x_offset -= frames[i].x2;
-		frames[i].draw(painter, tile_pixmaps, x_offset, 0);
+		frames[i].draw(painter, tile_manager, x_offset, 0);
 	}
 
 	// Draw sprites to the right of the selected sprite.
@@ -72,7 +72,7 @@ void SpriteViewer::paintEvent(QPaintEvent* const event)
 	{
 		x_offset += qMax(16, frames[i - 1].x2);
 		x_offset -= frames[i].x1;
-		frames[i].draw(painter, tile_pixmaps, x_offset, 0);
+		frames[i].draw(painter, tile_manager, x_offset, 0);
 	}
 
 	// TODO: Remove.

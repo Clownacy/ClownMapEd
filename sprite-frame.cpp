@@ -48,8 +48,8 @@ void SpriteFrame::fromDataStream(QDataStream &stream)
 		y2 = 0;
 }
 
-void SpriteFrame::draw(QPainter &painter, const TilePixmaps &tile_pixmaps, int x_offset, int y_offset) const
+void SpriteFrame::draw(QPainter &painter, const TileManager &tile_manager, const int x_offset, const int y_offset) const
 {
 	for (auto &piece : pieces)
-		piece.draw(painter, tile_pixmaps, x_offset, y_offset);
+		piece.draw(painter, tile_manager, x_offset, y_offset);
 }

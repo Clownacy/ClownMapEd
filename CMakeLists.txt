@@ -34,8 +34,8 @@ set(PROJECT_SOURCES
 	sprite-viewer.h
 	tile.cpp
 	tile.h
-	tile-pixmaps.cpp
-	tile-pixmaps.h
+	tile-manager.cpp
+	tile-manager.h
 	tile-viewer.cpp
 	tile-viewer.h
 )
