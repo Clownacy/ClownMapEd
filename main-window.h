@@ -7,9 +7,9 @@
 
 #include "palette.h"
 #include "palette-editor.h"
+#include "sprite-editor.h"
 #include "sprite-mappings.h"
 #include "sprite-piece-picker.h"
-#include "sprite-viewer.h"
 #include "tile-manager.h"
 #include "tile-viewer.h"
 
@@ -32,7 +32,7 @@ private:
 	QVector<unsigned char> tiles_bytes;
 	SpriteMappings sprite_mappings;
 	TileManager tile_manager;
-	SpriteViewer sprite_viewer;
+	SpriteEditor sprite_viewer;
 	PaletteEditor palette_editor;
 	SpritePiecePicker piece_picker;
 	TileViewer tile_viewer;

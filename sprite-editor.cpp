@@ -1,17 +1,17 @@
-#include "sprite-viewer.h"
+#include "sprite-editor.h"
 
 #include <QPainter>
 
 #include "utilities.h"
 
-SpriteViewer::SpriteViewer(const TileManager &tile_manager, const SpriteMappings &sprite_mappings)
+SpriteEditor::SpriteEditor(const TileManager &tile_manager, const SpriteMappings &sprite_mappings)
 	: sprite_mappings(sprite_mappings)
     , tile_manager(tile_manager)
 {
 	setAutoFillBackground(true);
 }
 
-void SpriteViewer::paintEvent(QPaintEvent* const event)
+void SpriteEditor::paintEvent(QPaintEvent* const event)
 {
 	QWidget::paintEvent(event);
 
@@ -80,7 +80,7 @@ void SpriteViewer::paintEvent(QPaintEvent* const event)
 	//painter.drawText(rect(), Qt::AlignCenter, QString(std::to_string(0).c_str()));
 }
 
-void SpriteViewer::selectNextSprite()
+void SpriteEditor::selectNextSprite()
 {
 	if (selected_sprite_index != sprite_mappings.frames.size() - 1)
 	{
@@ -89,7 +89,7 @@ void SpriteViewer::selectNextSprite()
 	}
 }
 
-void SpriteViewer::selectPreviousSprite()
+void SpriteEditor::selectPreviousSprite()
 {
 	if (selected_sprite_index != 0)
 	{
@@ -98,7 +98,7 @@ void SpriteViewer::selectPreviousSprite()
 	}
 }
 
-void SpriteViewer::setBackgroundColour(const QColor &colour)
+void SpriteEditor::setBackgroundColour(const QColor &colour)
 {
 	QPalette palette;
 	palette.setColor(QPalette::Window, colour);

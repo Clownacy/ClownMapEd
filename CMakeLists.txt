@@ -24,6 +24,8 @@ set(PROJECT_SOURCES
 	palette.h
 	palette-editor.cpp
 	palette-editor.h
+	sprite-editor.cpp
+	sprite-editor.h
 	sprite-frame.cpp
 	sprite-frame.h
 	sprite-mappings.cpp
@@ -34,8 +36,6 @@ set(PROJECT_SOURCES
 	sprite-piece-button.h
 	sprite-piece-picker.cpp
 	sprite-piece-picker.h
-	sprite-viewer.cpp
-	sprite-viewer.h
 	tile.cpp
 	tile.h
 	tile-manager.cpp
