@@ -27,13 +27,13 @@ void SpriteViewer::paintEvent(QPaintEvent* const event)
 	transform.scale(1.5, 1.5); // Apply general scale.
 	painter.setTransform(transform);
 
-	const SpriteMappings::Frame *frames = sprite_mappings.frames.data();
+	const QVector<SpriteFrame> &frames = sprite_mappings.frames();
 
-	if (sprite_mappings.frames.size() == 0)
+	if (frames.size() == 0)
 		return;
 
 	// Draw outline around selected sprite.
-	const SpriteMappings::Frame &selected_sprite = frames[selected_sprite_index];
+	const SpriteFrame &selected_sprite = frames[selected_sprite_index];
 	const QColor background_colour = palette().color(QPalette::Window);
 	const QRect outline_rect(selected_sprite.x1, selected_sprite.y1, selected_sprite.x2 - selected_sprite.x1, selected_sprite.y2 - selected_sprite.y1);
 
@@ -52,7 +52,7 @@ void SpriteViewer::paintEvent(QPaintEvent* const event)
 	painter.drawRect(outline_rect);
 
 	// Draw selected sprite.
-	sprite_mappings.paintFrame(painter, tile_pixmaps, sprite_mappings.frames[selected_sprite_index]);
+	selected_sprite.draw(painter, tile_pixmaps);
 
 	int x_offset;
 
@@ -63,17 +63,17 @@ void SpriteViewer::paintEvent(QPaintEvent* const event)
 	{
 		x_offset += qMin(-16, frames[i + 1].x1);
 		x_offset -= frames[i].x2;
-		sprite_mappings.paintFrame(painter, tile_pixmaps, sprite_mappings.frames[i], x_offset, 0);
+		frames[i].draw(painter, tile_pixmaps, x_offset, 0);
 	}
 
 	// Draw sprites to the right of the selected sprite.
 	x_offset = 0;
 
-	for (int i = selected_sprite_index + 1; i < sprite_mappings.frames.size(); ++i)
+	for (int i = selected_sprite_index + 1; i < frames.size(); ++i)
 	{
 		x_offset += qMax(16, frames[i - 1].x2);
 		x_offset -= frames[i].x1;
-		sprite_mappings.paintFrame(painter, tile_pixmaps, sprite_mappings.frames[i], x_offset, 0);
+		frames[i].draw(painter, tile_pixmaps, x_offset, 0);
 	}
 
 	// TODO: Remove.
@@ -84,7 +84,7 @@ void SpriteViewer::paintEvent(QPaintEvent* const event)
 
 void SpriteViewer::selectNextSprite()
 {
-	if (selected_sprite_index != sprite_mappings.frames.size() - 1)
+	if (selected_sprite_index != sprite_mappings.frames().size() - 1)
 	{
 		++selected_sprite_index;
 		repaint();

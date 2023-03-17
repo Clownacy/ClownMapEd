@@ -37,92 +37,14 @@ void SpriteMappings::loadFromFile(const QString &file_path)
 			earliest_frame = frame_offset;
 	}
 
-	frames.resize(total_frames);
-
-	unsigned int total_pieces = 0;
-
-	for (unsigned int current_frame = 0; current_frame < total_frames; ++current_frame)
-	{
-		file.seek(current_frame * 2);
-		file.seek(Read<quint16>(in_stream));
-		total_pieces += Read<quint16>(in_stream);
-	}
-
-	pieces.resize(total_pieces);
-
-	unsigned int piece_index = 0;
+	m_frames.resize(total_frames);
+	m_frames.squeeze();
 
 	for (unsigned int current_frame = 0; current_frame < total_frames; ++current_frame)
 	{
 		file.seek(current_frame * 2);
 		file.seek(Read<quint16>(in_stream));
 
-		Frame &frame = frames[current_frame];
-
-		frame.total_pieces = Read<quint16>(in_stream);
-		frame.pieces = &pieces[piece_index];
-
-		frame.x1 = INT_MAX;
-		frame.x2 = INT_MIN;
-		frame.y1 = INT_MAX;
-		frame.y2 = INT_MIN;
-
-		for (unsigned int current_piece = 0; current_piece < frame.total_pieces; ++current_piece)
-		{
-			SpritePiece &piece = pieces[piece_index];
-			piece.fromDataStream(in_stream);
-
-			if (frame.x1 > piece.x)
-				frame.x1 = piece.x;
-			if (frame.x2 < piece.x + piece.width * 8)
-				frame.x2 = piece.x + piece.width * 8;
-			if (frame.y1 > piece.y)
-				frame.y1 = piece.y;
-			if (frame.y2 < piece.y + piece.height * 8)
-				frame.y2 = piece.y + piece.height * 8;
-
-			++piece_index;
-		}
-
-		if (frame.x1 == INT_MAX)
-			frame.x1 = 0;
-		if (frame.x2 == INT_MIN)
-			frame.x2 = 0;
-		if (frame.y1 == INT_MAX)
-			frame.y1 = 0;
-		if (frame.y2 == INT_MIN)
-			frame.y2 = 0;
+		m_frames[current_frame].fromDataStream(in_stream);
 	}
-}
-
-void SpriteMappings::paintPiece(QPainter &painter, const TilePixmaps &tile_pixmaps, const SpritePiece &piece, int x_offset, int y_offset) const
-{
-	const QTransform flip_transform = QTransform::fromScale(piece.x_flip ? -1 : 1, piece.y_flip ? -1 : 1);
-
-	unsigned int tile_index = piece.tile_index;
-
-	for (int tile_x = 0; tile_x < piece.width; ++tile_x)
-	{
-		const int tile_x_corrected = piece.x_flip ? piece.width - tile_x - 1 : tile_x;
-
-		for (int tile_y = 0; tile_y < piece.height; ++tile_y)
-		{
-			const int tile_y_corrected = piece.y_flip ? piece.height - tile_y - 1 : tile_y;
-
-			const QRect rect(
-				x_offset + piece.x + tile_x_corrected * 8,
-				y_offset + piece.y + tile_y_corrected * 8,
-				8,
-				8
-			);
-
-			painter.drawPixmap(rect, tile_pixmaps[tile_index++].transformed(flip_transform), QRectF(0, 0, 8, 8));
-		}
-	}
-}
-
-void SpriteMappings::paintFrame(QPainter &painter, const TilePixmaps &tile_pixmaps, const Frame &frame, int x_offset, int y_offset) const
-{
-	for (unsigned int current_piece = 0; current_piece < frame.total_pieces; ++current_piece)
-		paintPiece(painter, tile_pixmaps, frame.pieces[current_piece], x_offset, y_offset);
 }

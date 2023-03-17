@@ -2,6 +2,9 @@
 #define SPRITEPIECE_H
 
 #include <QDataStream>
+#include <QPainter>
+
+#include "tile-pixmaps.h"
 
 class SpritePiece
 {
@@ -9,6 +12,7 @@ public:
 	SpritePiece();
 
 	void fromDataStream(QDataStream &stream);
+	void draw(QPainter &painter, const TilePixmaps &tile_pixmaps, int x_offset = 0, int y_offset = 0) const;
 
 	int x = 0;
 	int y = 0;

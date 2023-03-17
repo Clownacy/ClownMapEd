@@ -24,6 +24,8 @@ set(PROJECT_SOURCES
 	palette-editor.cpp
 	palette-editor.h
 	read-stream.h
+	sprite-frame.cpp
+	sprite-frame.h
 	sprite-mappings.cpp
 	sprite-mappings.h
 	sprite-piece.cpp
