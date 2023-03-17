@@ -29,6 +29,7 @@
     </property>
     <addaction name="actionOpen_Tiles"/>
     <addaction name="actionOpen_Nemesis_Compressed_Graphics"/>
+    <addaction name="actionLoad_Kosinski_Compressed_Tile_Graphics"/>
     <addaction name="actionOpen"/>
     <addaction name="actionOpen_Mappings"/>
    </widget>
@@ -52,6 +53,11 @@
   <action name="actionOpen_Nemesis_Compressed_Graphics">
    <property name="text">
     <string>Load &amp;Nemesis-Compressed Tile Graphics...</string>
+   </property>
+  </action>
+  <action name="actionLoad_Kosinski_Compressed_Tile_Graphics">
+   <property name="text">
+    <string>Load &amp;Kosinski-Compressed Tile Graphics...</string>
    </property>
   </action>
  </widget>

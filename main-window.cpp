@@ -8,6 +8,7 @@
 #include <QFileDialog>
 #include <QKeyEvent>
 
+#include "kosinski.h"
 #include "nemesis.h"
 
 MainWindow::MainWindow(QWidget* const parent)
@@ -78,6 +79,31 @@ MainWindow::MainWindow(QWidget* const parent)
 				std::stringstream string_stream(std::stringstream::in | std::stringstream::out | std::stringstream::binary);
 
 				if (!nemesis::decode(file_stream, string_stream))
+					return;
+
+				if (!tile_manager.setTiles(reinterpret_cast<const uchar*>(string_stream.str().c_str()), static_cast<int>(string_stream.str().length())))
+				{
+					// TODO: Should probably show an error message or something.
+				}
+			}
+		}
+	);
+
+	connect(ui->actionLoad_Kosinski_Compressed_Tile_Graphics, &QAction::triggered, this,
+		[this]()
+		{
+			const QString file_path = QFileDialog::getOpenFileName(this, "Open Tile Graphics File");
+
+			if (!file_path.isNull())
+			{
+				std::ifstream file_stream(file_path.toStdString(), std::ifstream::in | std::ifstream::binary);
+
+				if (!file_stream.is_open())
+					return;
+
+				std::stringstream string_stream(std::stringstream::in | std::stringstream::out | std::stringstream::binary);
+
+				if (!kosinski::decode(file_stream, string_stream))
 					return;
 
 				if (!tile_manager.setTiles(reinterpret_cast<const uchar*>(string_stream.str().c_str()), static_cast<int>(string_stream.str().length())))
