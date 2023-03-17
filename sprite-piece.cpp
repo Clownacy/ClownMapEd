@@ -1,24 +1,22 @@
 #include "sprite-piece.h"
 
-#include "read-stream.h"
-
-SpritePiece SpritePiece::fromStream(QDataStream &stream)
+SpritePiece SpritePiece::fromDataStream(DataStream &stream)
 {
 	SpritePiece piece;
 
 	// This is specifically Sonic 2's mappings format.
-	piece.y = Read<qint8>(stream);
-	const unsigned int size = Read<quint8>(stream);
+	piece.y = stream.read<qint8>();
+	const unsigned int size = stream.read<quint8>();
 	piece.width = ((size >> 2) & 3) + 1;
 	piece.height = ((size >> 0) & 3) + 1;
-	const unsigned int art_tile = Read<quint16>(stream);
+	const unsigned int art_tile = stream.read<quint16>();
 	piece.priority = (art_tile & (1 << 15)) != 0;
 	piece.palette_line = (art_tile >> 13) & 3;
 	piece.y_flip = (art_tile & (1 << 12)) != 0;
 	piece.x_flip = (art_tile & (1 << 11)) != 0;
 	piece.tile_index = art_tile & 0x7FF;
-	Read<quint16>(stream); // TODO - 2-player data?
-	piece.x = Read<qint16>(stream);
+	stream.read<quint16>(); // TODO - 2-player data?
+	piece.x = stream.read<qint16>();
 
 	return piece;
 }

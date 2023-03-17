@@ -2,18 +2,14 @@
 
 #include <climits>
 
-#include <QDataStream>
-
-#include "read-stream.h"
-
 SpriteFrame::SpriteFrame()
 {
 
 }
 
-void SpriteFrame::fromDataStream(QDataStream &stream)
+void SpriteFrame::fromDataStream(DataStream &stream)
 {
-	const unsigned int total_pieces = Read<quint16>(stream);
+	const unsigned int total_pieces = stream.read<quint16>();
 	pieces.resize(total_pieces);
 	pieces.squeeze();
 
@@ -26,7 +22,7 @@ void SpriteFrame::fromDataStream(QDataStream &stream)
 	{
 		SpritePiece &piece = pieces[current_piece];
 
-		piece = SpritePiece::fromStream(stream);
+		piece = SpritePiece::fromDataStream(stream);
 
 		if (x1 > piece.x)
 			x1 = piece.x;

@@ -15,6 +15,7 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 set(PROJECT_SOURCES
 	colour-button.cpp
 	colour-button.h
+	data-stream.h
 	main.cpp
 	main-window.cpp
 	main-window.h
@@ -23,7 +24,6 @@ set(PROJECT_SOURCES
 	palette.h
 	palette-editor.cpp
 	palette-editor.h
-	read-stream.h
 	sprite-frame.cpp
 	sprite-frame.h
 	sprite-mappings.cpp

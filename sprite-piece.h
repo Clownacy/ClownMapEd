@@ -1,14 +1,14 @@
 #ifndef SPRITE_PIECE_H
 #define SPRITE_PIECE_H
 
-#include <QDataStream>
 #include <QPainter>
 
+#include "data-stream.h"
 #include "tile-manager.h"
 
 struct SpritePiece
 {
-	static SpritePiece fromStream(QDataStream &stream);
+	static SpritePiece fromDataStream(DataStream &stream);
 
 	void draw(QPainter &painter, const TileManager &tile_manager, int x_offset = 0, int y_offset = 0) const;
 
