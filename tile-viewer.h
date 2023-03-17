@@ -1,13 +1,13 @@
 #ifndef TILE_VIEWER_H
 #define TILE_VIEWER_H
 
-#include <QAbstractButton>
 #include <QColor>
 #include <QObject>
+#include <QWidget>
 
 #include "tile-manager.h"
 
-class TileViewer : public QAbstractButton
+class TileViewer : public QWidget
 {
 	Q_OBJECT
 
@@ -16,15 +16,15 @@ public:
 
 	void setBackgroundColour(const QColor &colour);
 
-public slots:
-	void refresh();
-
 private:
 	void deleteButtons();
 	void paintEvent(QPaintEvent *event) override;
+	void mousePressEvent(QMouseEvent *event) override;
 
 	const TileManager &tile_manager;
 	QColor background_colour;
+	int selection_start = 0;
+	int selection_end = 0;
 };
 
 #endif // TILE_VIEWER_H

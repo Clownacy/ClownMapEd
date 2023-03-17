@@ -90,8 +90,6 @@ MainWindow::MainWindow(QWidget* const parent)
 			tile_viewer.setBackgroundColour(palette.getColourQColor(0, 0));
 		}
 	);
-
-	connect(&tile_manager, &TileManager::regenerated, &tile_viewer, &TileViewer::refresh);
 }
 
 MainWindow::~MainWindow()

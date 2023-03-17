@@ -29,19 +29,17 @@ public:
 		regenerate();
 	}
 
-	const QPixmap& pixmaps(const std::size_t tile_index) const
+	const QPixmap& pixmaps(const int tile_index) const
 	{
-		// TODO: Stop using QVector because its developers are complete and
-		// utter morons who use a plain `int` to represent the size of a vector.
-		if (tile_index < static_cast<std::size_t>(tiles.size()))
+		if (tile_index < tiles.size())
 			return tiles[tile_index].pixmap();
 		else
 			return invalid_pixmap;
 	}
 
-	const std::size_t total_tiles() const
+	const int total_tiles() const
 	{
-		return static_cast<std::size_t>(tiles.size());
+		return tiles.size();
 	}
 
 public slots:
