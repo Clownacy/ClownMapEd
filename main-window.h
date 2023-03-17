@@ -1,8 +1,6 @@
 #ifndef MAIN_WINDOW_H
 #define MAIN_WINDOW_H
 
-#include <vector>
-
 #include <QHBoxLayout>
 #include <QMainWindow>
 #include <QVBoxLayout>
@@ -30,7 +28,7 @@ public:
 private:
 	Ui::MainWindow *ui;
 	Palette palette;
-	std::vector<unsigned char> tiles_bytes;
+	QVector<unsigned char> tiles_bytes;
 	SpriteMappings sprite_mappings;
 	TilePixmaps tile_pixmaps;
 	SpriteViewer sprite_viewer;

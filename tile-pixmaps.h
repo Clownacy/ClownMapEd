@@ -2,10 +2,10 @@
 #define TILE_PIXMAPS_H
 
 #include <cstddef>
-#include <vector>
 
 #include <QObject>
 #include <QPixmap>
+#include <QVector>
 
 #include "palette.h"
 
@@ -14,9 +14,9 @@ class TilePixmaps : public QObject
 	Q_OBJECT;
 
 public:
-	TilePixmaps(const std::vector<unsigned char> *tile_bytes = nullptr, const Palette *palette = nullptr);
+	TilePixmaps(const QVector<unsigned char> *tile_bytes = nullptr, const Palette *palette = nullptr);
 
-	void setTiles(const std::vector<unsigned char> &tile_bytes)
+	void setTiles(const QVector<unsigned char> &tile_bytes)
 	{
 		tiles_bytes = &tile_bytes;
 		regenerate();
@@ -48,10 +48,10 @@ signals:
 	void regenerated();
 
 private:
-	const std::vector<unsigned char> *tiles_bytes = nullptr;
+	const QVector<unsigned char> *tiles_bytes = nullptr;
 	const Palette *palette = nullptr;
 
-	std::vector<QPixmap> pixmaps;
+	QVector<QPixmap> pixmaps;
 	QPixmap invalid_pixmap;
 };
 

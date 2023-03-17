@@ -1,9 +1,8 @@
 #ifndef SPRITE_MAPPINGS_H
 #define SPRITE_MAPPINGS_H
 
-#include <vector>
-
 #include <QString>
+#include <QVector>
 
 class SpriteMappings
 {
@@ -32,10 +31,10 @@ public:
 
 	void loadFromFile(const QString &file_path);
 
-	std::vector<Frame> frames;
+	QVector<Frame> frames;
 
 private:
-	std::vector<Piece> pieces;
+	QVector<Piece> pieces;
 };
 
 #endif // SPRITE_MAPPINGS_H

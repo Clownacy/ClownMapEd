@@ -1,6 +1,6 @@
 #include "tile-pixmaps.h"
 
-TilePixmaps::TilePixmaps(const std::vector<unsigned char>* const tile_bytes, const Palette* const palette)
+TilePixmaps::TilePixmaps(const QVector<unsigned char>* const tile_bytes, const Palette* const palette)
 	: tiles_bytes(tile_bytes)
     , palette(palette)
 {
