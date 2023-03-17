@@ -1,5 +1,7 @@
 #include "sprite-frame.h"
 
+#include <climits>
+
 #include <QDataStream>
 
 #include "read-stream.h"
@@ -48,6 +50,6 @@ void SpriteFrame::fromDataStream(QDataStream &stream)
 
 void SpriteFrame::draw(QPainter &painter, const TilePixmaps &tile_pixmaps, int x_offset, int y_offset) const
 {
-	for (int current_piece = 0; current_piece < pieces.size(); ++current_piece)
-		pieces[current_piece].draw(painter, tile_pixmaps, x_offset, y_offset);
+	for (auto &piece : pieces)
+		piece.draw(painter, tile_pixmaps, x_offset, y_offset);
 }
