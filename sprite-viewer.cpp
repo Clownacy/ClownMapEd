@@ -2,6 +2,8 @@
 
 #include <QPainter>
 
+#include "utilities.h"
+
 SpriteViewer::SpriteViewer(const TileManager &tile_manager, const SpriteMappings &sprite_mappings)
 	: QWidget()
 	, selected_sprite_index(0)
@@ -17,12 +19,11 @@ void SpriteViewer::paintEvent(QPaintEvent* const event)
 
 	QPainter painter(this);
 
-	const qreal dpi_scale_x = qRound((qreal)logicalDpiX() / 96);
-	const qreal dpi_scale_y = qRound((qreal)logicalDpiY() / 96);
+	const QSizeF dpi_scale = Utilities::GetDPIScale(this);
 
 	QTransform transform;
 	transform.translate(width() / 2, height() / 2); // Centre origin.
-	transform.scale(dpi_scale_x, dpi_scale_y); // Apply DPI scale.
+	transform.scale(dpi_scale.width(), dpi_scale.height()); // Apply DPI scale.
 	transform.scale(1.5, 1.5); // Apply general scale.
 	painter.setTransform(transform);
 

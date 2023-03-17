@@ -26,7 +26,7 @@ void SpriteFrame::fromDataStream(QDataStream &stream)
 	{
 		SpritePiece &piece = pieces[current_piece];
 
-		piece.fromDataStream(stream);
+		piece = SpritePiece::fromStream(stream);
 
 		if (x1 > piece.x)
 			x1 = piece.x;

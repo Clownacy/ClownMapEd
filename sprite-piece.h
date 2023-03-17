@@ -6,23 +6,21 @@
 
 #include "tile-manager.h"
 
-class SpritePiece
+struct SpritePiece
 {
-public:
-	SpritePiece();
+	static SpritePiece fromStream(QDataStream &stream);
 
-	void fromDataStream(QDataStream &stream);
 	void draw(QPainter &painter, const TileManager &tile_manager, int x_offset = 0, int y_offset = 0) const;
 
-	int x = 0;
-	int y = 0;
-	int width = 1;
-	int height = 1;
-	bool priority = false;
-	unsigned int palette_line = 0;
-	bool y_flip = false;
-	bool x_flip = false;
-	unsigned int tile_index = 0;
+	int x;
+	int y;
+	int width;
+	int height;
+	bool priority;
+	int palette_line;
+	bool y_flip;
+	bool x_flip;
+	int tile_index;
 };
 
 #endif // SPRITE_PIECE_H

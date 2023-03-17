@@ -10,10 +10,12 @@ MainWindow::MainWindow(QWidget* const parent)
     , tile_manager(&tiles_bytes, &palette)
 	, sprite_viewer(tile_manager, sprite_mappings)
     , palette_editor(palette)
+	, piece_picker(tile_manager)
     , tile_viewer(tile_manager)
 {
 	ui->setupUi(this);
 
+	horizontal_box.addWidget(&piece_picker);
 	horizontal_box.addWidget(&palette_editor);
 	horizontal_box.addWidget(&sprite_viewer);
 
@@ -86,6 +88,7 @@ MainWindow::MainWindow(QWidget* const parent)
 			}
 		}
 	);
+
 	connect(&palette, &Palette::allColoursChanged, this,
 		[this]()
 		{
@@ -93,6 +96,8 @@ MainWindow::MainWindow(QWidget* const parent)
 			tile_viewer.setBackgroundColour(palette.getColourQColor(0, 0));
 		}
 	);
+
+	connect(&tile_viewer, &TileViewer::tileSelected, &piece_picker, &SpritePiecePicker::setSelectedTile);
 }
 
 MainWindow::~MainWindow()

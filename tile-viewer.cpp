@@ -84,5 +84,7 @@ void TileViewer::mousePressEvent(QMouseEvent* const event)
 		selection_start = tile_y * tiles_per_row + tile_x;
 		selection_end = selection_start + 1;
 		update();
+
+		emit tileSelected(selection_start);
 	}
 }

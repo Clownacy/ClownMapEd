@@ -30,6 +30,10 @@ set(PROJECT_SOURCES
 	sprite-mappings.h
 	sprite-piece.cpp
 	sprite-piece.h
+	sprite-piece-button.cpp
+	sprite-piece-button.h
+	sprite-piece-picker.cpp
+	sprite-piece-picker.h
 	sprite-viewer.cpp
 	sprite-viewer.h
 	tile.cpp
@@ -38,6 +42,8 @@ set(PROJECT_SOURCES
 	tile-manager.h
 	tile-viewer.cpp
 	tile-viewer.h
+	utilities.cpp
+	utilities.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

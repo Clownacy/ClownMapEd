@@ -16,6 +16,9 @@ public:
 
 	void setBackgroundColour(const QColor &colour);
 
+signals:
+	void tileSelected(int tile);
+
 private:
 	void deleteButtons();
 	void getGridDimensions(int &width, int &height);
