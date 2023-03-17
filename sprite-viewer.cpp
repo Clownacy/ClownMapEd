@@ -25,7 +25,7 @@ void SpriteViewer::paintEvent(QPaintEvent* const event)
 	transform.scale(1.5, 1.5); // Apply general scale.
 	painter.setTransform(transform);
 
-	const QVector<SpriteFrame> &frames = sprite_mappings.frames();
+	const QVector<SpriteFrame> &frames = sprite_mappings.frames;
 
 	if (frames.size() == 0)
 		return;
@@ -82,7 +82,7 @@ void SpriteViewer::paintEvent(QPaintEvent* const event)
 
 void SpriteViewer::selectNextSprite()
 {
-	if (selected_sprite_index != sprite_mappings.frames().size() - 1)
+	if (selected_sprite_index != sprite_mappings.frames.size() - 1)
 	{
 		++selected_sprite_index;
 		update();

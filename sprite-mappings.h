@@ -1,28 +1,17 @@
 #ifndef SPRITE_MAPPINGS_H
 #define SPRITE_MAPPINGS_H
 
-#include <cstddef>
-
-#include <QPainter>
+#include <QFile>
 #include <QString>
 #include <QVector>
 
 #include "sprite-frame.h"
 
-class SpriteMappings
+struct SpriteMappings
 {
-public:
-	SpriteMappings();
+	static SpriteMappings fromFile(QFile &file);
 
-	bool loadFromFile(const QString &file_path);
-
-	const QVector<SpriteFrame>& frames() const
-	{
-		return m_frames;
-	}
-
-private:
-	QVector<SpriteFrame> m_frames;
+	QVector<SpriteFrame> frames;
 };
 
 #endif // SPRITE_MAPPINGS_H

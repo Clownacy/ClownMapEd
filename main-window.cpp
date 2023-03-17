@@ -73,7 +73,13 @@ MainWindow::MainWindow(QWidget* const parent)
 			const QString file_path = QFileDialog::getOpenFileName(this, "Open Mappings File");
 
 			if (!file_path.isNull())
-				sprite_mappings.loadFromFile(file_path);
+			{
+				QFile file(file_path);
+				if (!file.open(QFile::ReadOnly))
+					return;
+
+				sprite_mappings = SpriteMappings::fromFile(file);
+			}
 		}
 	);
 

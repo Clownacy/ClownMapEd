@@ -2,23 +2,12 @@
 
 #include <climits>
 
-#include <QFile>
-
 #include "data-stream.h"
 
-SpriteMappings::SpriteMappings()
+SpriteMappings SpriteMappings::fromFile(QFile &file)
 {
-
-}
-
-bool SpriteMappings::loadFromFile(const QString &file_path)
-{
-	QFile file(file_path);
-	if (!file.open(QFile::ReadOnly))
-		return false;
-
 	DataStream stream(&file);
-	stream.setByteOrder(QDataStream::BigEndian);
+	stream.setByteOrder(DataStream::BigEndian);
 
 	unsigned int earliest_frame = stream.read<quint16>();
 	unsigned int total_frames = 1;
@@ -36,16 +25,17 @@ bool SpriteMappings::loadFromFile(const QString &file_path)
 			earliest_frame = frame_offset;
 	}
 
-	m_frames.resize(total_frames);
-	m_frames.squeeze();
+	SpriteMappings mappings;
+
+	mappings.frames.resize(total_frames);
 
 	for (unsigned int current_frame = 0; current_frame < total_frames; ++current_frame)
 	{
 		file.seek(current_frame * 2);
 		file.seek(stream.read<quint16>());
 
-		m_frames[current_frame] = SpriteFrame::fromDataStream(stream);
+		mappings.frames[current_frame] = SpriteFrame::fromDataStream(stream);
 	}
 
-	return true;
+	return mappings;
 }

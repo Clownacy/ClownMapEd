@@ -2,6 +2,8 @@
 
 SpritePiece SpritePiece::fromDataStream(DataStream &stream)
 {
+	stream.setByteOrder(DataStream::BigEndian);
+
 	SpritePiece piece;
 
 	// This is specifically Sonic 2's mappings format.

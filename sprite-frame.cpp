@@ -4,6 +4,8 @@
 
 SpriteFrame SpriteFrame::fromDataStream(DataStream &stream)
 {
+	stream.setByteOrder(DataStream::BigEndian);
+
 	SpriteFrame frame;
 
 	const unsigned int total_pieces = stream.read<quint16>();
