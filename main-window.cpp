@@ -79,6 +79,7 @@ MainWindow::MainWindow(QWidget* const parent)
 					return;
 
 				sprite_mappings = SpriteMappings::fromFile(file);
+				sprite_viewer.update();
 			}
 		}
 	);
