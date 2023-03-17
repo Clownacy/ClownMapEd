@@ -86,7 +86,7 @@ void SpriteViewer::selectNextSprite()
 	if (selected_sprite_index != sprite_mappings.frames().size() - 1)
 	{
 		++selected_sprite_index;
-		repaint();
+		update();
 	}
 }
 
@@ -95,7 +95,7 @@ void SpriteViewer::selectPreviousSprite()
 	if (selected_sprite_index != 0)
 	{
 		--selected_sprite_index;
-		repaint();
+		update();
 	}
 }
 
