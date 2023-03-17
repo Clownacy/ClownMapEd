@@ -26,6 +26,9 @@ MainWindow::MainWindow(QWidget* const parent)
 	sprite_viewer.setBackgroundColour(palette.getColourQColor(0, 0));
 	tile_viewer.setBackgroundColour(palette.getColourQColor(0, 0));
 
+	horizontal_box.setMargin(vertical_box.margin());
+	vertical_box.setMargin(0);
+
 	connect(ui->actionOpen_Tiles, &QAction::triggered, this,
 		[this]()
 		{

@@ -17,7 +17,7 @@ static inline T DivideCeiling(T a, T b)
 TileViewer::TileViewer(const TileManager &tile_manager)
 	: tile_manager(tile_manager)
 {
-	this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 }
 
 void TileViewer::setBackgroundColour(const QColor &colour)
@@ -28,7 +28,7 @@ void TileViewer::setBackgroundColour(const QColor &colour)
 void TileViewer::getGridDimensions(int &columns, int &rows)
 {
 	columns = width() / size_of_tile;
-	rows = qMin(height() / size_of_tile, DivideCeiling(tile_manager.total_tiles(), columns));
+	rows = qMin(DivideCeiling(height(), size_of_tile), DivideCeiling(tile_manager.total_tiles(), columns));
 }
 
 void TileViewer::paintEvent(QPaintEvent* const event)
