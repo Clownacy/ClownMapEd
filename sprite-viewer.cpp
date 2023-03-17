@@ -5,7 +5,6 @@
 SpriteViewer::SpriteViewer(const TilePixmaps &tile_pixmaps, const SpriteMappings &sprite_mappings)
 	: QWidget()
 	, selected_sprite_index(0)
-	, pixmap("oozlostbackground2.png")
     , sprite_mappings(sprite_mappings)
     , tile_pixmaps(tile_pixmaps)
 {

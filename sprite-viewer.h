@@ -1,7 +1,6 @@
 #ifndef SPRITE_VIEWER_H
 #define SPRITE_VIEWER_H
 
-#include <QPixmap>
 #include <QWidget>
 
 #include "sprite-mappings.h"
@@ -24,7 +23,6 @@ protected:
 
 private:
 	unsigned int selected_sprite_index = 0;
-	QPixmap pixmap;
 	const SpriteMappings &sprite_mappings;
 	const TilePixmaps &tile_pixmaps;
 };
