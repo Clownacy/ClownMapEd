@@ -4,6 +4,8 @@
 #include <QtGlobal>
 #include <QPainter>
 
+#include "utilities.h"
+
 SpritePieceButton::SpritePieceButton(const TileManager &tile_manager)
 	: tile_manager(tile_manager)
 {

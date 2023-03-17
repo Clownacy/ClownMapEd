@@ -5,9 +5,7 @@
 #include "utilities.h"
 
 SpriteViewer::SpriteViewer(const TileManager &tile_manager, const SpriteMappings &sprite_mappings)
-	: QWidget()
-	, selected_sprite_index(0)
-    , sprite_mappings(sprite_mappings)
+	: sprite_mappings(sprite_mappings)
     , tile_manager(tile_manager)
 {
 	setAutoFillBackground(true);
@@ -59,7 +57,7 @@ void SpriteViewer::paintEvent(QPaintEvent* const event)
 	// Draw sprites to the left of the selected sprite.
 	x_offset = 0;
 
-	for (unsigned int i = selected_sprite_index; i-- > 0; )
+	for (int i = selected_sprite_index; i-- > 0; )
 	{
 		x_offset += qMin(-16, frames[i + 1].x1);
 		x_offset -= frames[i].x2;

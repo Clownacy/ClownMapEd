@@ -22,7 +22,7 @@ protected:
 	void paintEvent(QPaintEvent *event) override;
 
 private:
-	unsigned int selected_sprite_index = 0;
+	int selected_sprite_index = 0;
 	const SpriteMappings &sprite_mappings;
 	const TileManager &tile_manager;
 };

@@ -5,7 +5,6 @@
 
 #include "sprite-piece.h"
 #include "tile-manager.h"
-#include "utilities.h"
 
 class SpritePieceButton : public QAbstractButton
 {

@@ -12,11 +12,11 @@ SpriteMappings::SpriteMappings()
 
 }
 
-void SpriteMappings::loadFromFile(const QString &file_path)
+bool SpriteMappings::loadFromFile(const QString &file_path)
 {
 	QFile file(file_path);
 	if (!file.open(QFile::ReadOnly))
-		return;
+		return false;
 
 	QDataStream in_stream(&file);
 	in_stream.setByteOrder(QDataStream::BigEndian);
@@ -47,4 +47,6 @@ void SpriteMappings::loadFromFile(const QString &file_path)
 
 		m_frames[current_frame].fromDataStream(in_stream);
 	}
+
+	return true;
 }

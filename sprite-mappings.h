@@ -14,7 +14,7 @@ class SpriteMappings
 public:
 	SpriteMappings();
 
-	void loadFromFile(const QString &file_path);
+	bool loadFromFile(const QString &file_path);
 
 	const QVector<SpriteFrame>& frames() const
 	{
