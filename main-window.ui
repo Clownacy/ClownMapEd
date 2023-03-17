@@ -28,6 +28,7 @@
      <string>&amp;File</string>
     </property>
     <addaction name="actionOpen_Tiles"/>
+    <addaction name="actionOpen_Nemesis_Compressed_Graphics"/>
     <addaction name="actionOpen"/>
     <addaction name="actionOpen_Mappings"/>
    </widget>
@@ -35,17 +36,22 @@
   </widget>
   <action name="actionOpen">
    <property name="text">
-    <string>Open &amp;Palette...</string>
+    <string>Load &amp;Primary or Full Palette...</string>
    </property>
   </action>
   <action name="actionOpen_Tiles">
    <property name="text">
-    <string>Open &amp;Tiles...</string>
+    <string>Load &amp;Uncompressed Tile Graphics...</string>
    </property>
   </action>
   <action name="actionOpen_Mappings">
    <property name="text">
-    <string>Open Mappings...</string>
+    <string>Load Sprite &amp;Mappings...</string>
+   </property>
+  </action>
+  <action name="actionOpen_Nemesis_Compressed_Graphics">
+   <property name="text">
+    <string>Load &amp;Nemesis-Compressed Tile Graphics...</string>
    </property>
   </action>
  </widget>

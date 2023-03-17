@@ -3,6 +3,8 @@
 
 #include <fstream>
 
+#include <QDataStream>
+#include <QFile>
 #include <QFileDialog>
 #include <QKeyEvent>
 
@@ -38,7 +40,33 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionOpen_Tiles, &QAction::triggered, this,
 		[this]()
 		{
-			const QString file_path = QFileDialog::getOpenFileName(this, "Open Tile File");
+			const QString file_path = QFileDialog::getOpenFileName(this, "Open Tile Graphics File");
+
+			if (!file_path.isNull())
+			{
+				QFile file(file_path);
+
+				if (!file.open(QFile::ReadOnly))
+					return;
+
+				QDataStream stream(&file);
+
+				QVector<uchar> bytes;
+				bytes.resize(file.size());
+				stream.readRawData(reinterpret_cast<char*>(bytes.data()), bytes.size());
+
+				if (!tile_manager.setTiles(bytes.data(), bytes.size()))
+				{
+					// TODO: Should probably show an error message or something.
+				}
+			}
+		}
+	);
+
+	connect(ui->actionOpen_Nemesis_Compressed_Graphics, &QAction::triggered, this,
+		[this]()
+		{
+			const QString file_path = QFileDialog::getOpenFileName(this, "Open Tile Graphics File");
 
 			if (!file_path.isNull())
 			{
@@ -77,7 +105,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionOpen_Mappings, &QAction::triggered, this,
 		[this]()
 		{
-			const QString file_path = QFileDialog::getOpenFileName(this, "Open Mappings File");
+			const QString file_path = QFileDialog::getOpenFileName(this, "Open Sprite Mappings File");
 
 			if (!file_path.isNull())
 			{
