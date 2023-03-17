@@ -9,7 +9,6 @@ ColourButton::ColourButton()
 {
 
 }
-
 void ColourButton::paintEvent(QPaintEvent* const event)
 {
 	Q_UNUSED(event);

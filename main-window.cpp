@@ -2,8 +2,6 @@
 #include "./ui_main-window.h"
 
 #include <QFileDialog>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
 #include <QKeyEvent>
 
 MainWindow::MainWindow(QWidget* const parent)
@@ -16,20 +14,17 @@ MainWindow::MainWindow(QWidget* const parent)
 {
 	ui->setupUi(this);
 
-	auto horizontal_box = new QHBoxLayout();
+	horizontal_box.addWidget(&palette_editor);
+	horizontal_box.addWidget(&sprite_viewer);
 
-	horizontal_box->addWidget(&palette_editor);
-	horizontal_box->addWidget(&sprite_viewer);
-
-	auto vertical_box = new QVBoxLayout();
-
-	vertical_box->addLayout(horizontal_box);
+	vertical_box.addLayout(&horizontal_box);
 //	vbox->addsp
-	vertical_box->addWidget(&tile_viewer);
+	vertical_box.addWidget(&tile_viewer);
 
-	centralWidget()->setLayout(vertical_box);
+	centralWidget()->setLayout(&vertical_box);
 
 	sprite_viewer.setBackgroundColour(palette.getColourQColor(0, 0));
+	tile_viewer.setBackgroundColour(palette.getColourQColor(0, 0));
 
 	connect(ui->actionOpen_Tiles, &QAction::triggered, this,
 		[this]()
@@ -82,13 +77,17 @@ MainWindow::MainWindow(QWidget* const parent)
 		[this](const unsigned int palette_line, const unsigned int palette_index, const QColor &colour)
 		{
 			if (palette_line == 0 && palette_index == 0)
+			{
 				sprite_viewer.setBackgroundColour(colour);
+				tile_viewer.setBackgroundColour(colour);
+			}
 		}
 	);
 	connect(&palette, &Palette::allColoursChanged, this,
 		[this]()
 		{
 			sprite_viewer.setBackgroundColour(palette.getColourQColor(0, 0));
+			tile_viewer.setBackgroundColour(palette.getColourQColor(0, 0));
 		}
 	);
 

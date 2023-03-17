@@ -3,7 +3,9 @@
 
 #include <vector>
 
+#include <QHBoxLayout>
 #include <QMainWindow>
+#include <QVBoxLayout>
 
 #include "palette.h"
 #include "palette-editor.h"
@@ -34,6 +36,8 @@ private:
 	SpriteViewer sprite_viewer;
 	PaletteEditor palette_editor;
 	TileViewer tile_viewer;
+	QVBoxLayout vertical_box;
+	QHBoxLayout horizontal_box;
 };
 
 #endif // MAIN_WINDOW_H
