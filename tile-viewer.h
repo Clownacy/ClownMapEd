@@ -18,6 +18,7 @@ public:
 
 private:
 	void deleteButtons();
+	void getGridDimensions(int &width, int &height);
 	void paintEvent(QPaintEvent *event) override;
 	void mousePressEvent(QMouseEvent *event) override;
 

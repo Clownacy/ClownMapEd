@@ -25,12 +25,18 @@ void TileViewer::setBackgroundColour(const QColor &colour)
 	background_colour = colour;
 }
 
+void TileViewer::getGridDimensions(int &columns, int &rows)
+{
+	columns = width() / size_of_tile;
+	rows = qMin(height() / size_of_tile, DivideCeiling(tile_manager.total_tiles(), columns));
+}
+
 void TileViewer::paintEvent(QPaintEvent* const event)
 {
 	QWidget::paintEvent(event);
 
-	const int tiles_per_row = width() / size_of_tile;
-	const int total_rows = qMin(height() / size_of_tile, DivideCeiling(tile_manager.total_tiles(), tiles_per_row));
+	int tiles_per_row, total_rows;
+	getGridDimensions(tiles_per_row, total_rows);
 
 	int current_tile = 0;
 
@@ -67,8 +73,9 @@ void TileViewer::mousePressEvent(QMouseEvent* const event)
 {
 	QWidget::mousePressEvent(event);
 
-	const int tiles_per_row = width() / size_of_tile;
-	const int total_rows = qMin(height() / size_of_tile, DivideCeiling(tile_manager.total_tiles(), tiles_per_row));
+	int tiles_per_row, total_rows;
+	getGridDimensions(tiles_per_row, total_rows);
+
 	const int tile_x = event->x() / size_of_tile;
 	const int tile_y = event->y() / size_of_tile;
 
