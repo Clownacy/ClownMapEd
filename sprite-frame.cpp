@@ -19,8 +19,9 @@ SpriteFrame SpriteFrame::fromDataStream(DataStream &stream)
 
 void SpriteFrame::draw(QPainter &painter, const TileManager &tile_manager, const int x_offset, const int y_offset) const
 {
-	for (auto &piece : pieces)
-		piece.draw(painter, tile_manager, x_offset, y_offset);
+	// Must draw in reverse order.
+	for (auto piece = pieces.crbegin(); piece != pieces.crend(); ++piece)
+		piece->draw(painter, tile_manager, x_offset, y_offset);
 }
 
 QRect SpriteFrame::rect() const
