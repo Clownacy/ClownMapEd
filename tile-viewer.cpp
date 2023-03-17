@@ -2,39 +2,55 @@
 
 #include <cstddef>
 
-#include <QIcon>
-
-#include "pixmap-button.h"
+#include <QtGlobal>
+#include <QPainter>
 
 TileViewer::TileViewer(const TilePixmaps &tile_pixmaps)
 	: tile_pixmaps(tile_pixmaps)
-	, flow_layout(0, 0, 0)
 {
-	setLayout(&flow_layout);
+	this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
 	refresh();
 }
 
 void TileViewer::refresh()
 {
-	for (QLayoutItem *item = flow_layout.itemAt(0); item != nullptr; item = flow_layout.itemAt(0))
-		flow_layout.removeItem(item);
 
-	for (std::size_t i = 0; i < tile_pixmaps.total_pixmaps(); ++i)
-	{
-		PixmapButton* const button = new PixmapButton(this);
-
-		button->setPixmap(tile_pixmaps[i]);
-
-		button->setFixedSize(24, 24);
-
-		flow_layout.addWidget(button);
-	}
 }
 
 void TileViewer::setBackgroundColour(const QColor &colour)
 {
-	QPalette palette;
-	palette.setColor(QPalette::Window, colour);
-	setPalette(palette);
+	background_colour = colour;
+}
+
+template <typename T>
+static inline T DivideCeiling(T a, T b)
+{
+	return (a + (b - 1)) / b;
+}
+
+void TileViewer::paintEvent(QPaintEvent* const event)
+{
+	const std::size_t size_of_tile = 24;
+	const std::size_t tiles_per_row = width() / size_of_tile;
+	const std::size_t total_rows = qMin(height() / size_of_tile, DivideCeiling(tile_pixmaps.total_pixmaps(), tiles_per_row));
+
+	std::size_t current_tile = 0;
+
+	QPainter painter(this);
+
+	QBrush brush;
+	brush.setColor(background_colour);
+	brush.setStyle(Qt::SolidPattern);
+	painter.setBrush(brush);
+	painter.setPen(Qt::NoPen);
+
+	for (std::size_t y = 0; y < total_rows; ++y)
+	{
+		const std::size_t length_of_row = qMin(tiles_per_row, tile_pixmaps.total_pixmaps() - y * tiles_per_row);
+		painter.drawRect(QRect(0, y * size_of_tile, length_of_row * size_of_tile, size_of_tile));
+
+		for (std::size_t x = 0; x < length_of_row; ++x)
+			painter.drawPixmap(QRect(x * size_of_tile, y * size_of_tile, size_of_tile, size_of_tile), tile_pixmaps[current_tile++]);
+	}
 }

@@ -1,16 +1,13 @@
 #ifndef TILE_VIEWER_H
 #define TILE_VIEWER_H
 
-#include <cstddef>
-
+#include <QAbstractButton>
+#include <QColor>
 #include <QObject>
-#include <QPushButton>
-#include <QWidget>
 
-#include "flowlayout.h"
 #include "tile-pixmaps.h"
 
-class TileViewer : public QWidget
+class TileViewer : public QAbstractButton
 {
 	Q_OBJECT
 
@@ -24,9 +21,10 @@ public slots:
 
 private:
 	void deleteButtons();
+	void paintEvent(QPaintEvent *event) override;
 
 	const TilePixmaps &tile_pixmaps;
-	FlowLayout flow_layout;
+	QColor background_colour;
 };
 
 #endif // TILEVIEWER_H
