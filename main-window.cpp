@@ -1,8 +1,12 @@
 #include "main-window.h"
 #include "./ui_main-window.h"
 
+#include <fstream>
+
 #include <QFileDialog>
 #include <QKeyEvent>
+
+#include "nemesis.h"
 
 MainWindow::MainWindow(QWidget* const parent)
 	: QMainWindow(parent)
@@ -38,16 +42,27 @@ MainWindow::MainWindow(QWidget* const parent)
 
 			if (!file_path.isNull())
 			{
-				QFile file(file_path);
-				if (!file.open(QFile::ReadOnly))
+				std::ifstream file_stream(file_path.toStdString(), std::ifstream::in | std::ifstream::binary);
+
+				if (!file_stream.is_open())
 					return;
 
-				QDataStream stream(&file);
+				std::stringstream string_stream(std::stringstream::in | std::stringstream::out | std::stringstream::binary);
+				if (!nemesis::decode(file_stream, string_stream))
+					return;
 
-				tiles_bytes.resize(file.size());
+				//QFile file(file_path);
+				//if (!file.open(QFile::ReadOnly))
+				//	return;
+
+				//QDataStream stream(&file);
+
+//				tiles_bytes.resize(file.size());
+				tiles_bytes.resize(string_stream.str().length());
 				tiles_bytes.squeeze();
 
-				stream.readRawData(reinterpret_cast<char*>(tiles_bytes.data()), tiles_bytes.size());
+//				stream.readRawData(reinterpret_cast<char*>(tiles_bytes.data()), tiles_bytes.size());
+				string_stream.read(reinterpret_cast<char*>(tiles_bytes.data()), tiles_bytes.size());
 
 				tile_manager.setTiles(tiles_bytes);
 			}

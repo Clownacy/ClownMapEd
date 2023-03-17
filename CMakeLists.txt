@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.5)
 
 project(clownmaped VERSION 0.1 LANGUAGES CXX)
 
+######
+# Qt #
+######
+
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -86,3 +90,28 @@ install(TARGETS clownmaped
 if(QT_VERSION_MAJOR EQUAL 6)
 	qt_finalize_executable(clownmaped)
 endif()
+
+##########
+# mdcomp #
+##########
+
+# We're using the Shell Extension's fork of FW-KENSC/mdcomp because
+# upstream has a hard dependency on Boost which is revolting.
+set(mdcomp_directory "FW-KENSC-ShellExt/FW-KENSC-ShellExt/FW-KENSC")
+
+add_library(mdcomp STATIC
+	# General stuff.
+	"${mdcomp_directory}/basic_decoder.h"
+	"${mdcomp_directory}/bigendian_io.h"
+	"${mdcomp_directory}/bitstream.h"
+	"${mdcomp_directory}/ignore_unused_variable_warning.h"
+	"${mdcomp_directory}/lzss.h"
+	"${mdcomp_directory}/moduled_adaptor.h"
+	# Format-specific stuff.
+	"${mdcomp_directory}/nemesis.cc"
+	"${mdcomp_directory}/nemesis.h"
+)
+
+target_include_directories(mdcomp PUBLIC ${mdcomp_directory})
+
+target_link_libraries(clownmaped PRIVATE mdcomp)
