@@ -20,11 +20,6 @@ TileViewer::TileViewer(const TileManager &tile_manager)
 	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 }
 
-void TileViewer::setBackgroundColour(const QColor &colour)
-{
-	background_colour = colour;
-}
-
 void TileViewer::getGridDimensions(int &columns, int &rows)
 {
 	columns = width() / size_of_tile;
@@ -57,7 +52,7 @@ void TileViewer::paintEvent(QPaintEvent* const event)
 
 		// Draw tiles in this row.
 		for (int x = 0; x < length_of_row; ++x)
-			painter.drawPixmap(x * size_of_tile, y * size_of_tile, size_of_tile, size_of_tile, tile_manager.pixmaps(current_tile++, 0)); // TODO: Selected starting palette line.
+			painter.drawPixmap(x * size_of_tile, y * size_of_tile, size_of_tile, size_of_tile, tile_manager.pixmaps(current_tile++, palette_line));
 	}
 
 	// Draw the selection.

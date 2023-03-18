@@ -14,7 +14,16 @@ class TileViewer : public QWidget
 public:
 	TileViewer(const TileManager &tile_manager);
 
-	void setBackgroundColour(const QColor &colour);
+	void setBackgroundColour(const QColor &colour)
+	{
+		background_colour = colour;
+	}
+
+	void setPaletteLine(const int palette_line)
+	{
+		this->palette_line = palette_line;
+		update();
+	}
 
 signals:
 	void tileSelected(int tile);
@@ -29,6 +38,7 @@ private:
 	QColor background_colour;
 	int selection_start = 0;
 	int selection_end = 0;
+	int palette_line = 0;
 };
 
 #endif // TILE_VIEWER_H

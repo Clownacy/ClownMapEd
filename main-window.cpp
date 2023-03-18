@@ -219,5 +219,21 @@ void MainWindow::keyPressEvent(QKeyEvent* const event)
 		case Qt::Key::Key_BracketRight:
 			sprite_viewer.selectNextSprite();
 			break;
+
+		case Qt::Key::Key_1:
+			tile_viewer.setPaletteLine(0);
+			break;
+
+		case Qt::Key::Key_2:
+			tile_viewer.setPaletteLine(1);
+			break;
+
+		case Qt::Key::Key_3:
+			tile_viewer.setPaletteLine(2);
+			break;
+
+		case Qt::Key::Key_4:
+			tile_viewer.setPaletteLine(3);
+			break;
 	}
 }
