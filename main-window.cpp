@@ -231,6 +231,7 @@ void MainWindow::keyPressEvent(QKeyEvent* const event)
 		{
 			const int palette_line = event->key() - Qt::Key::Key_1;
 			piece_picker.setPaletteLine(palette_line);
+			sprite_viewer.setStartingPaletteLine(palette_line);
 			tile_viewer.setPaletteLine(palette_line);
 			break;
 		}

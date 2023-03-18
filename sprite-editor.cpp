@@ -50,7 +50,7 @@ void SpriteEditor::paintEvent(QPaintEvent* const event)
 	painter.drawRect(outline_rect);
 
 	// Draw selected sprite.
-	selected_sprite.draw(painter, tile_manager);
+	selected_sprite.draw(painter, tile_manager, starting_palette_line);
 
 	int x_offset;
 
@@ -61,7 +61,7 @@ void SpriteEditor::paintEvent(QPaintEvent* const event)
 	{
 		x_offset += qMin(-16, frames[i + 1].left());
 		x_offset -= frames[i].right();
-		frames[i].draw(painter, tile_manager, x_offset, 0);
+		frames[i].draw(painter, tile_manager, starting_palette_line, x_offset, 0);
 	}
 
 	// Draw sprites to the right of the selected sprite.
@@ -71,7 +71,7 @@ void SpriteEditor::paintEvent(QPaintEvent* const event)
 	{
 		x_offset += qMax(16, frames[i - 1].right());
 		x_offset -= frames[i].left();
-		frames[i].draw(painter, tile_manager, x_offset, 0);
+		frames[i].draw(painter, tile_manager, starting_palette_line, x_offset, 0);
 	}
 
 	// TODO: Remove.

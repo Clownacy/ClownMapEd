@@ -23,7 +23,7 @@ SpritePiece SpritePiece::fromDataStream(DataStream &stream)
 	return piece;
 }
 
-void SpritePiece::draw(QPainter &painter, const TileManager &tile_manager, const int x_offset, const int y_offset) const
+void SpritePiece::draw(QPainter &painter, const TileManager &tile_manager, const int starting_palette_line, const int x_offset, const int y_offset) const
 {
 	const QTransform flip_transform = QTransform::fromScale(x_flip ? -1 : 1, y_flip ? -1 : 1);
 
@@ -44,7 +44,7 @@ void SpritePiece::draw(QPainter &painter, const TileManager &tile_manager, const
 				8
 			);
 
-			painter.drawPixmap(rect, tile_manager.pixmaps(current_tile_index++, palette_line).transformed(flip_transform), QRectF(0, 0, 8, 8));
+			painter.drawPixmap(rect, tile_manager.pixmaps(current_tile_index++, (starting_palette_line + palette_line) % 4).transformed(flip_transform), QRectF(0, 0, 8, 8));
 		}
 	}
 }
