@@ -31,12 +31,12 @@ private:
 	Palette palette;
 	SpriteMappings sprite_mappings;
 	TileManager tile_manager;
-	SpriteEditor sprite_viewer;
+	SpriteEditor sprite_editor;
 	PaletteEditor palette_editor;
-	SpritePiecePicker piece_picker;
+	SpritePiecePicker sprite_piece_picker;
 	TileViewer tile_viewer;
-	QVBoxLayout vertical_box;
-	QHBoxLayout horizontal_box;
+	QVBoxLayout vertical_layout;
+	QHBoxLayout horizontal_layout;
 };
 
 #endif // MAIN_WINDOW_H

@@ -15,28 +15,28 @@ MainWindow::MainWindow(QWidget* const parent)
 	: QMainWindow(parent)
 	, ui(new Ui::MainWindow)
     , tile_manager(nullptr, 0, palette)
-	, sprite_viewer(tile_manager, sprite_mappings)
+	, sprite_editor(tile_manager, sprite_mappings)
     , palette_editor(palette)
-	, piece_picker(tile_manager)
+	, sprite_piece_picker(tile_manager)
     , tile_viewer(tile_manager)
 {
 	ui->setupUi(this);
 
-	horizontal_box.addWidget(&piece_picker);
-	horizontal_box.addWidget(&palette_editor);
-	horizontal_box.addWidget(&sprite_viewer);
+	horizontal_layout.addWidget(&sprite_piece_picker);
+	horizontal_layout.addWidget(&palette_editor);
+	horizontal_layout.addWidget(&sprite_editor);
 
-	vertical_box.addLayout(&horizontal_box);
+	vertical_layout.addLayout(&horizontal_layout);
 //	vbox->addsp
-	vertical_box.addWidget(&tile_viewer);
+	vertical_layout.addWidget(&tile_viewer);
 
-	centralWidget()->setLayout(&vertical_box);
+	centralWidget()->setLayout(&vertical_layout);
 
-	sprite_viewer.setBackgroundColour(palette.getColourQColor(0, 0));
+	sprite_editor.setBackgroundColour(palette.getColourQColor(0, 0));
 	tile_viewer.setBackgroundColour(palette.getColourQColor(0, 0));
 
-	horizontal_box.setMargin(vertical_box.margin());
-	vertical_box.setMargin(0);
+	horizontal_layout.setMargin(vertical_layout.margin());
+	vertical_layout.setMargin(0);
 
 	connect(ui->actionOpen_Tiles, &QAction::triggered, this,
 		[this]()
@@ -165,7 +165,7 @@ MainWindow::MainWindow(QWidget* const parent)
 					return;
 
 				sprite_mappings = SpriteMappings::fromFile(file);
-				sprite_viewer.update();
+				sprite_editor.update();
 			}
 		}
 	);
@@ -177,9 +177,9 @@ MainWindow::MainWindow(QWidget* const parent)
 		{
 			if (palette_line == 0 && palette_index == 0)
 			{
-				sprite_viewer.setBackgroundColour(colour);
+				sprite_editor.setBackgroundColour(colour);
 				tile_viewer.setBackgroundColour(colour);
-				piece_picker.setBackgroundColour(colour);
+				sprite_piece_picker.setBackgroundColour(colour);
 			}
 		}
 	);
@@ -189,19 +189,19 @@ MainWindow::MainWindow(QWidget* const parent)
 		{
 			const QColor &background_colour = palette.getColourQColor(0, 0);
 
-			sprite_viewer.setBackgroundColour(background_colour);
+			sprite_editor.setBackgroundColour(background_colour);
 			tile_viewer.setBackgroundColour(background_colour);
-			piece_picker.setBackgroundColour(background_colour);
+			sprite_piece_picker.setBackgroundColour(background_colour);
 		}
 	);
 
-	connect(&tile_viewer, &TileViewer::tileSelected, &piece_picker, &SpritePiecePicker::setSelectedTile);
+	connect(&tile_viewer, &TileViewer::tileSelected, &sprite_piece_picker, &SpritePiecePicker::setSelectedTile);
 
 	connect(&tile_manager, &TileManager::regenerated, &tile_viewer,
 		[this]()
 		{
-			piece_picker.update();
-			sprite_viewer.update();
+			sprite_piece_picker.update();
+			sprite_editor.update();
 			tile_viewer.update();
 		}
 	);
@@ -217,11 +217,11 @@ void MainWindow::keyPressEvent(QKeyEvent* const event)
 	switch (event->key())
 	{
 		case Qt::Key::Key_BracketLeft:
-			sprite_viewer.selectPreviousSprite();
+			sprite_editor.selectPreviousSprite();
 			break;
 
 		case Qt::Key::Key_BracketRight:
-			sprite_viewer.selectNextSprite();
+			sprite_editor.selectNextSprite();
 			break;
 
 		case Qt::Key::Key_1:
@@ -230,8 +230,8 @@ void MainWindow::keyPressEvent(QKeyEvent* const event)
 		case Qt::Key::Key_4:
 		{
 			const int palette_line = event->key() - Qt::Key::Key_1;
-			piece_picker.setPaletteLine(palette_line);
-			sprite_viewer.setStartingPaletteLine(palette_line);
+			sprite_piece_picker.setPaletteLine(palette_line);
+			sprite_editor.setStartingPaletteLine(palette_line);
 			tile_viewer.setPaletteLine(palette_line);
 			break;
 		}
