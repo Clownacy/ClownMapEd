@@ -1,6 +1,8 @@
 #ifndef MAIN_WINDOW_H
 #define MAIN_WINDOW_H
 
+#include <iostream>
+
 #include <QHBoxLayout>
 #include <QMainWindow>
 #include <QVBoxLayout>
@@ -27,6 +29,8 @@ public:
 	void keyPressEvent(QKeyEvent *event) override;
 
 private:
+	void loadTileFile(bool (*decompression_function)(std::istream &src, std::iostream &dst));
+
 	Ui::MainWindow *ui;
 	Palette palette;
 	SpriteMappings sprite_mappings;

@@ -11,6 +11,29 @@
 #include "kosinski.h"
 #include "nemesis.h"
 
+void MainWindow::loadTileFile(bool (* const decompression_function)(std::istream &src, std::iostream &dst))
+{
+	const QString file_path = QFileDialog::getOpenFileName(this, "Open Tile Graphics File");
+
+	if (!file_path.isNull())
+	{
+		std::ifstream file_stream(file_path.toStdString(), std::ifstream::in | std::ifstream::binary);
+
+		if (!file_stream.is_open())
+			return;
+
+		std::stringstream string_stream(std::stringstream::in | std::stringstream::out | std::stringstream::binary);
+
+		if (!decompression_function(file_stream, string_stream))
+			return;
+
+		if (!tile_manager.setTiles(reinterpret_cast<const uchar*>(string_stream.str().c_str()), static_cast<int>(string_stream.str().length())))
+		{
+			// TODO: Should probably show an error message or something.
+		}
+	}
+}
+
 MainWindow::MainWindow(QWidget* const parent)
 	: QMainWindow(parent)
 	, ui(new Ui::MainWindow)
@@ -41,101 +64,33 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionOpen_Tiles, &QAction::triggered, this,
 		[this]()
 		{
-			const QString file_path = QFileDialog::getOpenFileName(this, "Open Tile Graphics File");
-
-			if (!file_path.isNull())
-			{
-				QFile file(file_path);
-
-				if (!file.open(QFile::ReadOnly))
-					return;
-
-				QDataStream stream(&file);
-
-				QVector<uchar> bytes;
-				bytes.resize(file.size());
-				stream.readRawData(reinterpret_cast<char*>(bytes.data()), bytes.size());
-
-				if (!tile_manager.setTiles(bytes.data(), bytes.size()))
+			loadTileFile([](std::istream &src, std::iostream &dst)
 				{
-					// TODO: Should probably show an error message or something.
+					dst << src.rdbuf();
+					return true;
 				}
-			}
+			);
 		}
 	);
 
 	connect(ui->actionOpen_Nemesis_Compressed_Graphics, &QAction::triggered, this,
 		[this]()
 		{
-			const QString file_path = QFileDialog::getOpenFileName(this, "Open Tile Graphics File");
-
-			if (!file_path.isNull())
-			{
-				std::ifstream file_stream(file_path.toStdString(), std::ifstream::in | std::ifstream::binary);
-
-				if (!file_stream.is_open())
-					return;
-
-				std::stringstream string_stream(std::stringstream::in | std::stringstream::out | std::stringstream::binary);
-
-				if (!nemesis::decode(file_stream, string_stream))
-					return;
-
-				if (!tile_manager.setTiles(reinterpret_cast<const uchar*>(string_stream.str().c_str()), static_cast<int>(string_stream.str().length())))
-				{
-					// TODO: Should probably show an error message or something.
-				}
-			}
+			loadTileFile([](std::istream &src, std::iostream &dst){return nemesis::decode(src, dst);});
 		}
 	);
 
 	connect(ui->actionLoad_Kosinski_Compressed_Tile_Graphics, &QAction::triggered, this,
 		[this]()
 		{
-			const QString file_path = QFileDialog::getOpenFileName(this, "Open Tile Graphics File");
-
-			if (!file_path.isNull())
-			{
-				std::ifstream file_stream(file_path.toStdString(), std::ifstream::in | std::ifstream::binary);
-
-				if (!file_stream.is_open())
-					return;
-
-				std::stringstream string_stream(std::stringstream::in | std::stringstream::out | std::stringstream::binary);
-
-				if (!kosinski::decode(file_stream, string_stream))
-					return;
-
-				if (!tile_manager.setTiles(reinterpret_cast<const uchar*>(string_stream.str().c_str()), static_cast<int>(string_stream.str().length())))
-				{
-					// TODO: Should probably show an error message or something.
-				}
-			}
+			loadTileFile(kosinski::decode);
 		}
 	);
 
 	connect(ui->actionLoad_KosinskiM_Compressed_Tile_Graphics, &QAction::triggered, this,
 		[this]()
 		{
-			const QString file_path = QFileDialog::getOpenFileName(this, "Open Tile Graphics File");
-
-			if (!file_path.isNull())
-			{
-				std::ifstream file_stream(file_path.toStdString(), std::ifstream::in | std::ifstream::binary);
-
-				if (!file_stream.is_open())
-					return;
-
-				std::stringstream string_stream(std::stringstream::in | std::stringstream::out | std::stringstream::binary);
-
-				if (!kosinski::moduled_decode(file_stream, string_stream))
-					return;
-
-				if (!tile_manager.setTiles(reinterpret_cast<const uchar*>(string_stream.str().c_str()), static_cast<int>(string_stream.str().length())))
-				{
-					// TODO: Should probably show an error message or something.
-				}
-			}
+			loadTileFile([](std::istream &src, std::iostream &dst){return kosinski::moduled_decode(src, dst);});
 		}
 	);
 
