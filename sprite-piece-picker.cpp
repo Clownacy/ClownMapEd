@@ -1,27 +1,33 @@
 #include "sprite-piece-picker.h"
 
-#include "sprite-piece-button.h"
-
 SpritePiecePicker::SpritePiecePicker(TileManager &tile_manager)
 	: tile_manager(tile_manager)
+	, buttons{{
+		SpritePieceButton(tile_manager), SpritePieceButton(tile_manager), SpritePieceButton(tile_manager), SpritePieceButton(tile_manager),
+		SpritePieceButton(tile_manager), SpritePieceButton(tile_manager), SpritePieceButton(tile_manager), SpritePieceButton(tile_manager),
+		SpritePieceButton(tile_manager), SpritePieceButton(tile_manager), SpritePieceButton(tile_manager), SpritePieceButton(tile_manager),
+		SpritePieceButton(tile_manager), SpritePieceButton(tile_manager), SpritePieceButton(tile_manager), SpritePieceButton(tile_manager)
+	}}
 {
 	setLayout(&grid_layout);
 	setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
 
+	for (int y = 0; y < 4; ++y)
+		for (int x = 0; x < 4; ++x)
+			grid_layout.addWidget(&buttons[y * 4 + x], y, x);
+
 	setSelectedTile(0);
+}
+
+void SpritePiecePicker::setBackgroundColour(const QColor &colour)
+{
+	for (auto &button : buttons)
+		button.setBackgroundColour(colour);
 }
 
 void SpritePiecePicker::setSelectedTile(const int tile_index)
 {
 	for (int y = 0; y < 4; ++y)
-	{
 		for (int x = 0; x < 4; ++x)
-		{
-			const SpritePiece piece = {0, 0, x + 1, y + 1, false, 0, false, false, tile_index};
-
-			SpritePieceButton* const button = new SpritePieceButton(tile_manager);
-			button->setSpritePiece(piece);
-			grid_layout.addWidget(button, y, x);
-		}
-	}
+			buttons[y * 4 + x].setSpritePiece({0, 0, x + 1, y + 1, false, 0, false, false, tile_index});
 }

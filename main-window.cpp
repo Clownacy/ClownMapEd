@@ -179,6 +179,7 @@ MainWindow::MainWindow(QWidget* const parent)
 			{
 				sprite_viewer.setBackgroundColour(colour);
 				tile_viewer.setBackgroundColour(colour);
+				piece_picker.setBackgroundColour(colour);
 			}
 		}
 	);
@@ -186,8 +187,11 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(&palette, &Palette::allColoursChanged, this,
 		[this]()
 		{
-			sprite_viewer.setBackgroundColour(palette.getColourQColor(0, 0));
-			tile_viewer.setBackgroundColour(palette.getColourQColor(0, 0));
+			const QColor &background_colour = palette.getColourQColor(0, 0);
+
+			sprite_viewer.setBackgroundColour(background_colour);
+			tile_viewer.setBackgroundColour(background_colour);
+			piece_picker.setBackgroundColour(background_colour);
 		}
 	);
 

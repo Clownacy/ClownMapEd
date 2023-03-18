@@ -26,7 +26,7 @@ void SpritePieceButton::paintEvent(QPaintEvent* const event)
 	QPainter painter(this);
 
 	QBrush brush;
-	brush.setColor(Qt::black);
+	brush.setColor(background_colour);
 	brush.setStyle(Qt::BrushStyle::SolidPattern);
 	painter.setBrush(brush);
 	painter.setPen(Qt::NoPen);
