@@ -27,62 +27,67 @@
     <property name="title">
      <string>&amp;File</string>
     </property>
-    <addaction name="actionOpen_Tiles"/>
-    <addaction name="actionOpen_Nemesis_Compressed_Graphics"/>
-    <addaction name="actionLoad_Kosinski_Compressed_Tile_Graphics"/>
-    <addaction name="actionLoad_KosinskiM_Compressed_Tile_Graphics"/>
-    <addaction name="actionLoad_Kosinski_Compressed_Tile_Graphics_2"/>
-    <addaction name="actionLoad_Moduled_Kosinski_Compressed_Tile_Graphics"/>
-    <addaction name="actionLoad_Comper_Compressed_Tile_Graphics"/>
-    <addaction name="separator"/>
-    <addaction name="actionOpen"/>
-    <addaction name="actionOpen_Mappings"/>
+    <widget class="QMenu" name="menuLoad_Tile_Graphics">
+     <property name="title">
+      <string>Load Tile &amp;Graphics</string>
+     </property>
+     <addaction name="actionLoadTilesUncompressed"/>
+     <addaction name="actionLoadTilesNemesis"/>
+     <addaction name="actionLoadTilesKosinski"/>
+     <addaction name="actionLoadTilesModuledKosinski"/>
+     <addaction name="actionLoadTilesKosinskiPlus"/>
+     <addaction name="actionLoadTilesModuledKosinskiPlus"/>
+     <addaction name="actionLoadTilesComper"/>
+    </widget>
+    <addaction name="menuLoad_Tile_Graphics"/>
+    <addaction name="actionLoadPrimaryPalette"/>
+    <addaction name="actionLoadMappings"/>
    </widget>
    <addaction name="menuFile"/>
   </widget>
-  <action name="actionOpen">
+  <action name="actionLoadPrimaryPalette">
    <property name="text">
     <string>Load &amp;Primary or Full Palette...</string>
    </property>
   </action>
-  <action name="actionOpen_Tiles">
-   <property name="text">
-    <string>Load &amp;Uncompressed Tile Graphics...</string>
-   </property>
-  </action>
-  <action name="actionOpen_Mappings">
+  <action name="actionLoadMappings">
    <property name="text">
     <string>Load Sprite &amp;Mappings...</string>
    </property>
   </action>
-  <action name="actionOpen_Nemesis_Compressed_Graphics">
+  <action name="actionLoadTilesUncompressed">
    <property name="text">
-    <string>Load &amp;Nemesis-Compressed Tile Graphics...</string>
+    <string>&amp;Uncompressed...</string>
    </property>
   </action>
-  <action name="actionLoad_Kosinski_Compressed_Tile_Graphics">
+  <action name="actionLoadTilesNemesis">
    <property name="text">
-    <string>Load &amp;Kosinski-Compressed Tile Graphics...</string>
+    <string>&amp;Nemesis...</string>
    </property>
   </action>
-  <action name="actionLoad_KosinskiM_Compressed_Tile_Graphics">
+  <action name="actionLoadTilesKosinski">
    <property name="text">
-    <string>Load &amp;Moduled Kosinski-Compressed Tile Graphics...</string>
+    <string>&amp;Kosinski...</string>
    </property>
   </action>
-  <action name="actionLoad_Comper_Compressed_Tile_Graphics">
+  <action name="actionLoadTilesModuledKosinski">
    <property name="text">
-    <string>Load &amp;Comper-Compressed Tile Graphics...</string>
+    <string>&amp;Moduled Kosinski...</string>
    </property>
   </action>
-  <action name="actionLoad_Kosinski_Compressed_Tile_Graphics_2">
+  <action name="actionLoadTilesKosinskiPlus">
    <property name="text">
-    <string>Load Kosinski+-Compressed Tile Graphics...</string>
+    <string>Kosinski+...</string>
    </property>
   </action>
-  <action name="actionLoad_Moduled_Kosinski_Compressed_Tile_Graphics">
+  <action name="actionLoadTilesComper">
    <property name="text">
-    <string>Load Moduled Kosinski+-Compressed Tile Graphics...</string>
+    <string>&amp;Comper...</string>
+   </property>
+  </action>
+  <action name="actionLoadTilesModuledKosinskiPlus">
+   <property name="text">
+    <string>Moduled Kosinski+...</string>
    </property>
   </action>
  </widget>
