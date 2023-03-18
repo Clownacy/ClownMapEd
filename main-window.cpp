@@ -171,9 +171,12 @@ MainWindow::MainWindow(QWidget* const parent)
 				if (earliest_tile_index > piece.tile_index)
 					earliest_tile_index = piece.tile_index;
 
-			sprite_piece_picker.setSelectedTile(earliest_tile_index);
-			// TODO: Multiple selection spans.
-			tile_viewer.setSelection(earliest_tile_index, earliest_tile_index + 1);
+			if (earliest_tile_index != INT_MAX)
+			{
+				sprite_piece_picker.setSelectedTile(earliest_tile_index);
+				// TODO: Multiple selection spans.
+				tile_viewer.setSelection(earliest_tile_index, earliest_tile_index + 1);
+			}
 		}
 	);
 }
