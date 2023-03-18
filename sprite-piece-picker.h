@@ -18,13 +18,27 @@ public:
 
 	void setBackgroundColour(const QColor &colour);
 
+	void setPaletteLine(const int palette_line)
+	{
+		this->palette_line = palette_line;
+		updateSpritePieces();
+	}
+
 public slots:
-	void setSelectedTile(int tile_index);
+	void setSelectedTile(const int tile_index)
+	{
+		this->tile_index = tile_index;
+		updateSpritePieces();
+	}
 
 private:
+	void updateSpritePieces();
+
 	const TileManager &tile_manager;
 	QGridLayout grid_layout;
 	std::array<SpritePieceButton, 4 * 4> buttons;
+	int tile_index = 0;
+	int palette_line = 0;
 };
 
 #endif // SPRITE_PIECE_PICKER_H

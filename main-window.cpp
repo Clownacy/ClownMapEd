@@ -225,19 +225,14 @@ void MainWindow::keyPressEvent(QKeyEvent* const event)
 			break;
 
 		case Qt::Key::Key_1:
-			tile_viewer.setPaletteLine(0);
-			break;
-
 		case Qt::Key::Key_2:
-			tile_viewer.setPaletteLine(1);
-			break;
-
 		case Qt::Key::Key_3:
-			tile_viewer.setPaletteLine(2);
-			break;
-
 		case Qt::Key::Key_4:
-			tile_viewer.setPaletteLine(3);
+		{
+			const int palette_line = event->key() - Qt::Key::Key_1;
+			piece_picker.setPaletteLine(palette_line);
+			tile_viewer.setPaletteLine(palette_line);
 			break;
+		}
 	}
 }

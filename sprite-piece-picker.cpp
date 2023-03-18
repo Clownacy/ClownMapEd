@@ -25,9 +25,9 @@ void SpritePiecePicker::setBackgroundColour(const QColor &colour)
 		button.setBackgroundColour(colour);
 }
 
-void SpritePiecePicker::setSelectedTile(const int tile_index)
+void SpritePiecePicker::updateSpritePieces()
 {
 	for (int y = 0; y < 4; ++y)
 		for (int x = 0; x < 4; ++x)
-			buttons[y * 4 + x].setSpritePiece({0, 0, x + 1, y + 1, false, 0, false, false, tile_index});
+			buttons[y * 4 + x].setSpritePiece({0, 0, x + 1, y + 1, false, palette_line, false, false, tile_index});
 }

@@ -17,6 +17,7 @@ void SpritePieceButton::setSpritePiece(const SpritePiece &sprite_piece)
 	const QSizeF dpi_scale = Utilities::GetDPIScale(this);
 	m_sprite_piece = sprite_piece;
 	setFixedSize(sprite_piece.width * 8 * 1.5 * dpi_scale.width(), sprite_piece.height * 8 * 1.5 * dpi_scale.height());
+	update();
 }
 
 void SpritePieceButton::paintEvent(QPaintEvent* const event)
