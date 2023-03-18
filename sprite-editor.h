@@ -24,6 +24,9 @@ public:
 		update();
 	}
 
+signals:
+	void selectedSpriteChanged(int selected_sprite_index);
+
 protected:
 	void paintEvent(QPaintEvent *event) override;
 

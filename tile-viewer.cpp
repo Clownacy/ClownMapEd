@@ -20,6 +20,15 @@ TileViewer::TileViewer(const TileManager &tile_manager)
 	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 }
 
+void TileViewer::setSelection(const int start, const int end)
+{
+	selection_start = start;
+	selection_end = end;
+	update();
+
+	emit tileSelected(selection_start);
+}
+
 void TileViewer::getGridDimensions(int &columns, int &rows)
 {
 	columns = width() / size_of_tile;
@@ -75,11 +84,5 @@ void TileViewer::mousePressEvent(QMouseEvent* const event)
 	const int tile_y = event->y() / size_of_tile;
 
 	if (tile_x < tiles_per_row && tile_y < total_rows)
-	{
-		selection_start = tile_y * tiles_per_row + tile_x;
-		selection_end = selection_start + 1;
-		update();
-
-		emit tileSelected(selection_start);
-	}
+		setSelection(tile_y * tiles_per_row + tile_x, selection_start + 1);
 }

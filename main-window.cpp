@@ -1,6 +1,7 @@
 #include "main-window.h"
 #include "./ui_main-window.h"
 
+#include <climits>
 #include <fstream>
 
 #include <QDataStream>
@@ -158,6 +159,21 @@ MainWindow::MainWindow(QWidget* const parent)
 			sprite_piece_picker.update();
 			sprite_editor.update();
 			tile_viewer.update();
+		}
+	);
+
+	connect(&sprite_editor, &SpriteEditor::selectedSpriteChanged, this,
+		[this](const int sprite_index)
+		{
+			int earliest_tile_index = INT_MAX;
+
+			for (auto &piece : sprite_mappings.frames[sprite_index].pieces)
+				if (earliest_tile_index > piece.tile_index)
+					earliest_tile_index = piece.tile_index;
+
+			sprite_piece_picker.setSelectedTile(earliest_tile_index);
+			// TODO: Multiple selection spans.
+			tile_viewer.setSelection(earliest_tile_index, earliest_tile_index + 1);
 		}
 	);
 }

@@ -26,6 +26,8 @@ public:
 		update();
 	}
 
+	void setSelection(int start, int end);
+
 signals:
 	void tileSelected(int tile);
 

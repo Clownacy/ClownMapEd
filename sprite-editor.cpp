@@ -86,6 +86,8 @@ void SpriteEditor::selectNextSprite()
 	{
 		++selected_sprite_index;
 		update();
+
+		emit selectedSpriteChanged(selected_sprite_index);
 	}
 }
 
@@ -95,6 +97,8 @@ void SpriteEditor::selectPreviousSprite()
 	{
 		--selected_sprite_index;
 		update();
+
+		emit selectedSpriteChanged(selected_sprite_index);
 	}
 }
 
