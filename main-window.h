@@ -26,10 +26,10 @@ class MainWindow : public QMainWindow
 public:
 	MainWindow(QWidget *parent = nullptr);
 	~MainWindow();
-	void keyPressEvent(QKeyEvent *event) override;
 
 private:
 	void loadTileFile(bool (*decompression_function)(std::istream &src, std::iostream &dst));
+	void setStartingPaletteLine(int line);
 
 	Ui::MainWindow *ui;
 	Palette palette;

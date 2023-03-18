@@ -13,6 +13,7 @@ class SpriteEditor : public QWidget
 public:
 	SpriteEditor(const TileManager &tile_manager, const SpriteMappings &sprite_mappings);
 
+public slots:
 	void selectNextSprite();
 	void selectPreviousSprite();
 

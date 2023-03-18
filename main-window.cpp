@@ -37,6 +37,13 @@ void MainWindow::loadTileFile(bool (* const decompression_function)(std::istream
 	}
 }
 
+void MainWindow::setStartingPaletteLine(const int line)
+{
+	sprite_piece_picker.setPaletteLine(line);
+	sprite_editor.setStartingPaletteLine(line);
+	tile_viewer.setPaletteLine(line);
+}
+
 MainWindow::MainWindow(QWidget* const parent)
 	: QMainWindow(parent)
 	, ui(new Ui::MainWindow)
@@ -202,35 +209,18 @@ MainWindow::MainWindow(QWidget* const parent)
 			}
 		}
 	);
+
+	connect(ui->actionNext_Sprite, &QAction::triggered, &sprite_editor, &SpriteEditor::selectNextSprite);
+	connect(ui->actionPrevious_Sprite, &QAction::triggered, &sprite_editor, &SpriteEditor::selectPreviousSprite);
+
+	connect(ui->actionRender_Starting_with_Palette_Line_1, &QAction::triggered, this, [this](){setStartingPaletteLine(0);});
+	connect(ui->actionRender_Starting_with_Palette_Line_2, &QAction::triggered, this, [this](){setStartingPaletteLine(1);});
+	connect(ui->actionRender_Starting_with_Palette_Line_3, &QAction::triggered, this, [this](){setStartingPaletteLine(2);});
+	connect(ui->actionRender_Starting_with_Palette_Line_4, &QAction::triggered, this, [this](){setStartingPaletteLine(3);});
+
 }
 
 MainWindow::~MainWindow()
 {
 	delete ui;
-}
-
-void MainWindow::keyPressEvent(QKeyEvent* const event)
-{
-	switch (event->key())
-	{
-		case Qt::Key::Key_BracketLeft:
-			sprite_editor.selectPreviousSprite();
-			break;
-
-		case Qt::Key::Key_BracketRight:
-			sprite_editor.selectNextSprite();
-			break;
-
-		case Qt::Key::Key_1:
-		case Qt::Key::Key_2:
-		case Qt::Key::Key_3:
-		case Qt::Key::Key_4:
-		{
-			const int palette_line = event->key() - Qt::Key::Key_1;
-			sprite_piece_picker.setPaletteLine(palette_line);
-			sprite_editor.setStartingPaletteLine(palette_line);
-			tile_viewer.setPaletteLine(palette_line);
-			break;
-		}
-	}
 }

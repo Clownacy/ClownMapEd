@@ -43,7 +43,37 @@
     <addaction name="actionLoadPrimaryPalette"/>
     <addaction name="actionLoadMappings"/>
    </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>&amp;Edit</string>
+    </property>
+    <widget class="QMenu" name="menu_Sprite">
+     <property name="title">
+      <string>&amp;Sprite</string>
+     </property>
+     <addaction name="actionNext_Sprite"/>
+     <addaction name="actionPrevious_Sprite"/>
+    </widget>
+    <addaction name="menu_Sprite"/>
+   </widget>
+   <widget class="QMenu" name="menu_Settings">
+    <property name="title">
+     <string>&amp;Settings</string>
+    </property>
+    <widget class="QMenu" name="menuTile_Rendering">
+     <property name="title">
+      <string>Tile &amp;Rendering</string>
+     </property>
+     <addaction name="actionRender_Starting_with_Palette_Line_1"/>
+     <addaction name="actionRender_Starting_with_Palette_Line_2"/>
+     <addaction name="actionRender_Starting_with_Palette_Line_3"/>
+     <addaction name="actionRender_Starting_with_Palette_Line_4"/>
+    </widget>
+    <addaction name="menuTile_Rendering"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuEdit"/>
+   <addaction name="menu_Settings"/>
   </widget>
   <action name="actionLoadPrimaryPalette">
    <property name="text">
@@ -88,6 +118,54 @@
   <action name="actionLoadTilesModuledKosinskiPlus">
    <property name="text">
     <string>Moduled Kosinski+...</string>
+   </property>
+  </action>
+  <action name="actionNext_Sprite">
+   <property name="text">
+    <string>&amp;Next Sprite</string>
+   </property>
+   <property name="shortcut">
+    <string>]</string>
+   </property>
+  </action>
+  <action name="actionPrevious_Sprite">
+   <property name="text">
+    <string>&amp;Previous Sprite</string>
+   </property>
+   <property name="shortcut">
+    <string>[</string>
+   </property>
+  </action>
+  <action name="actionRender_Starting_with_Palette_Line_1">
+   <property name="text">
+    <string>Render Starting with Palette Line &amp;1</string>
+   </property>
+   <property name="shortcut">
+    <string>1</string>
+   </property>
+  </action>
+  <action name="actionRender_Starting_with_Palette_Line_2">
+   <property name="text">
+    <string>Render Starting with Palette Line &amp;2</string>
+   </property>
+   <property name="shortcut">
+    <string>2</string>
+   </property>
+  </action>
+  <action name="actionRender_Starting_with_Palette_Line_3">
+   <property name="text">
+    <string>Render Starting with Palette Line &amp;3</string>
+   </property>
+   <property name="shortcut">
+    <string>3</string>
+   </property>
+  </action>
+  <action name="actionRender_Starting_with_Palette_Line_4">
+   <property name="text">
+    <string>Render Starting with Palette Line &amp;4</string>
+   </property>
+   <property name="shortcut">
+    <string>4</string>
    </property>
   </action>
  </widget>
