@@ -31,6 +31,7 @@
     <addaction name="actionOpen_Nemesis_Compressed_Graphics"/>
     <addaction name="actionLoad_Kosinski_Compressed_Tile_Graphics"/>
     <addaction name="actionLoad_KosinskiM_Compressed_Tile_Graphics"/>
+    <addaction name="actionLoad_Comper_Compressed_Tile_Graphics"/>
     <addaction name="separator"/>
     <addaction name="actionOpen"/>
     <addaction name="actionOpen_Mappings"/>
@@ -65,6 +66,11 @@
   <action name="actionLoad_KosinskiM_Compressed_Tile_Graphics">
    <property name="text">
     <string>Load Kosinski&amp;M-Compressed Tile Graphics...</string>
+   </property>
+  </action>
+  <action name="actionLoad_Comper_Compressed_Tile_Graphics">
+   <property name="text">
+    <string>Load &amp;Comper-Compressed Tile Graphics...</string>
    </property>
   </action>
  </widget>

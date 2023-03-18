@@ -108,6 +108,8 @@ add_library(mdcomp STATIC
 	"${mdcomp_directory}/lzss.h"
 	"${mdcomp_directory}/moduled_adaptor.h"
 	# Format-specific stuff.
+	"${mdcomp_directory}/comper.cc"
+	"${mdcomp_directory}/comper.h"
 	"${mdcomp_directory}/kosinski.cc"
 	"${mdcomp_directory}/kosinski.h"
 	"${mdcomp_directory}/nemesis.cc"

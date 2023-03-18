@@ -9,6 +9,7 @@
 #include <QFileDialog>
 #include <QKeyEvent>
 
+#include "comper.h"
 #include "kosinski.h"
 #include "nemesis.h"
 
@@ -92,6 +93,13 @@ MainWindow::MainWindow(QWidget* const parent)
 		[this]()
 		{
 			loadTileFile([](std::istream &src, std::iostream &dst){return kosinski::moduled_decode(src, dst);});
+		}
+	);
+
+	connect(ui->actionLoad_Comper_Compressed_Tile_Graphics, &QAction::triggered, this,
+		[this]()
+		{
+			loadTileFile(comper::decode);
 		}
 	);
 
