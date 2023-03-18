@@ -14,18 +14,18 @@ class Tile
 public:
 	Tile(std::array<uchar, 8 * 8 / 2> &bytes, const Palette &palette);
 
-	const QPixmap& pixmap() const
-	{
-		return m_pixmap;
-	}
-
 	void changePalette(const Palette &palette);
 
+	const std::array<QPixmap, 4>& pixmaps() const
+	{
+		return m_pixmaps;
+	}
+
 private:
-	void regeneratePixmap(const Palette &palette);
+	void regeneratePixmaps(const Palette &palette);
 
 	std::array<uchar, 8 * 8 / 2> m_bytes;
-	QPixmap m_pixmap;
+	std::array<QPixmap, 4> m_pixmaps;
 };
 
 #endif // TILE_H

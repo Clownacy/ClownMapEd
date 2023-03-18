@@ -57,7 +57,7 @@ void TileViewer::paintEvent(QPaintEvent* const event)
 
 		// Draw tiles in this row.
 		for (int x = 0; x < length_of_row; ++x)
-			painter.drawPixmap(x * size_of_tile, y * size_of_tile, size_of_tile, size_of_tile, tile_manager.pixmaps(current_tile++));
+			painter.drawPixmap(x * size_of_tile, y * size_of_tile, size_of_tile, size_of_tile, tile_manager.pixmaps(current_tile++, 0)); // TODO: Selected starting palette line.
 	}
 
 	// Draw the selection.
