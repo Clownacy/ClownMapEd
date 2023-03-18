@@ -17,6 +17,7 @@ public:
 	void setBackgroundColour(const QColor &colour)
 	{
 		background_colour = colour;
+		update();
 	}
 
 	void setPaletteLine(const int palette_line)
