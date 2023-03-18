@@ -112,6 +112,8 @@ add_library(mdcomp STATIC
 	"${mdcomp_directory}/comper.h"
 	"${mdcomp_directory}/kosinski.cc"
 	"${mdcomp_directory}/kosinski.h"
+	"${mdcomp_directory}/kosplus.cc"
+	"${mdcomp_directory}/kosplus.h"
 	"${mdcomp_directory}/nemesis.cc"
 	"${mdcomp_directory}/nemesis.h"
 )

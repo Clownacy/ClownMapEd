@@ -11,6 +11,7 @@
 
 #include "comper.h"
 #include "kosinski.h"
+#include "kosplus.h"
 #include "nemesis.h"
 
 void MainWindow::loadTileFile(bool (* const decompression_function)(std::istream &src, std::iostream &dst))
@@ -93,6 +94,20 @@ MainWindow::MainWindow(QWidget* const parent)
 		[this]()
 		{
 			loadTileFile([](std::istream &src, std::iostream &dst){return kosinski::moduled_decode(src, dst);});
+		}
+	);
+
+	connect(ui->actionLoad_Kosinski_Compressed_Tile_Graphics_2, &QAction::triggered, this,
+		[this]()
+		{
+			loadTileFile(kosplus::decode);
+		}
+	);
+
+	connect(ui->actionLoad_Moduled_Kosinski_Compressed_Tile_Graphics, &QAction::triggered, this,
+		[this]()
+		{
+			loadTileFile([](std::istream &src, std::iostream &dst){return kosplus::moduled_decode(src, dst);});
 		}
 	);
 
