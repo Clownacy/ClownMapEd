@@ -4,11 +4,14 @@
 
 #include "utilities.h"
 
-SpriteEditor::SpriteEditor(const TileManager &tile_manager, const SpriteMappings &sprite_mappings)
-	: sprite_mappings(sprite_mappings)
+SpriteEditor::SpriteEditor(const TileManager &tile_manager, const SpriteMappingsManager &sprite_mappings_manager)
+	: sprite_mappings(sprite_mappings_manager.sprite_mappings())
     , tile_manager(tile_manager)
 {
 	setAutoFillBackground(true);
+
+	connect(&tile_manager, &TileManager::regenerated, this, [this](){update();});
+	connect(&sprite_mappings_manager, &SpriteMappingsManager::mappingsModified, this, [this](){update();});
 }
 
 void SpriteEditor::paintEvent(QPaintEvent* const event)

@@ -48,7 +48,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	: QMainWindow(parent)
 	, ui(new Ui::MainWindow)
     , tile_manager(nullptr, 0, palette)
-	, sprite_editor(tile_manager, sprite_mappings_manager.sprite_mappings())
+	, sprite_editor(tile_manager, sprite_mappings_manager)
     , palette_editor(palette)
 	, sprite_piece_picker(tile_manager)
     , tile_viewer(tile_manager)
@@ -155,8 +155,6 @@ MainWindow::MainWindow(QWidget* const parent)
 		}
 	);
 
-	connect(&palette, &Palette::singleColourChanged, &tile_manager, &TileManager::regenerate);
-
 	connect(&palette, &Palette::singleColourChanged, this,
 		[this](const unsigned int palette_line, const unsigned int palette_index, const QColor &colour)
 		{
@@ -181,15 +179,6 @@ MainWindow::MainWindow(QWidget* const parent)
 	);
 
 	connect(&tile_viewer, &TileViewer::tileSelected, &sprite_piece_picker, &SpritePiecePicker::setSelectedTile);
-
-	connect(&tile_manager, &TileManager::regenerated, &tile_viewer,
-		[this]()
-		{
-			sprite_piece_picker.update();
-			sprite_editor.update();
-			tile_viewer.update();
-		}
-	);
 
 	connect(&sprite_editor, &SpriteEditor::selectedSpriteChanged, this,
 		[this](const int sprite_index)
@@ -216,8 +205,6 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionRender_Starting_with_Palette_Line_2, &QAction::triggered, this, [this](){setStartingPaletteLine(1);});
 	connect(ui->actionRender_Starting_with_Palette_Line_3, &QAction::triggered, this, [this](){setStartingPaletteLine(2);});
 	connect(ui->actionRender_Starting_with_Palette_Line_4, &QAction::triggered, this, [this](){setStartingPaletteLine(3);});
-
-	connect(&sprite_mappings_manager, &SpriteMappingsManager::mappingsModified, this, [this](){sprite_editor.update();});
 }
 
 MainWindow::~MainWindow()

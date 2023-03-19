@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-#include "sprite-mappings.h"
+#include "sprite-mappings-manager.h"
 #include "tile-manager.h"
 
 class SpriteEditor : public QWidget
@@ -11,7 +11,7 @@ class SpriteEditor : public QWidget
 	Q_OBJECT
 
 public:
-	SpriteEditor(const TileManager &tile_manager, const SpriteMappings &sprite_mappings);
+	SpriteEditor(const TileManager &tile_manager, const SpriteMappingsManager &sprite_mappings_manager);
 
 public slots:
 	void selectNextSprite();

@@ -28,6 +28,9 @@ TileManager::TileManager(const uchar* const tile_bytes, const int total_bytes, c
 
 	invalid_pixmap = QPixmap::fromImage(QImage(reinterpret_cast<uchar*>(invalid_pixmap_raw_data), 8, 8, QImage::Format::Format_ARGB4444_Premultiplied));
 
+	connect(&palette, &Palette::singleColourChanged, this, &TileManager::regenerate);
+	connect(&palette, &Palette::allColoursChanged, this, &TileManager::regenerate);
+
 	regenerate();
 }
 
