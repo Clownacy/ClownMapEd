@@ -155,6 +155,8 @@ MainWindow::MainWindow(QWidget* const parent)
 		}
 	);
 
+	connect(ui->actionExit, &QAction::triggered, this, &QMainWindow::close);
+
 	connect(&palette, &Palette::changed, this,
 		[this]()
 		{

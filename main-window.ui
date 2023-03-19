@@ -42,6 +42,8 @@
     <addaction name="menuLoad_Tile_Graphics"/>
     <addaction name="actionLoadPrimaryPalette"/>
     <addaction name="actionLoadMappings"/>
+    <addaction name="separator"/>
+    <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -426,6 +428,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Alt+Shift+'</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>E&amp;xit</string>
    </property>
   </action>
  </widget>
