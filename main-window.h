@@ -10,7 +10,7 @@
 #include "palette.h"
 #include "palette-editor.h"
 #include "sprite-editor.h"
-#include "sprite-mappings.h"
+#include "sprite-mappings-manager.h"
 #include "sprite-piece-picker.h"
 #include "tile-manager.h"
 #include "tile-viewer.h"
@@ -33,7 +33,7 @@ private:
 
 	Ui::MainWindow *ui;
 	Palette palette;
-	SpriteMappings sprite_mappings;
+	SpriteMappingsManager sprite_mappings_manager;
 	TileManager tile_manager;
 	SpriteEditor sprite_editor;
 	PaletteEditor palette_editor;

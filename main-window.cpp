@@ -48,7 +48,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	: QMainWindow(parent)
 	, ui(new Ui::MainWindow)
     , tile_manager(nullptr, 0, palette)
-	, sprite_editor(tile_manager, sprite_mappings)
+	, sprite_editor(tile_manager, sprite_mappings_manager.sprite_mappings())
     , palette_editor(palette)
 	, sprite_piece_picker(tile_manager)
     , tile_viewer(tile_manager)
@@ -150,8 +150,7 @@ MainWindow::MainWindow(QWidget* const parent)
 				if (!file.open(QFile::ReadOnly))
 					return;
 
-				sprite_mappings = SpriteMappings::fromFile(file);
-				sprite_editor.update();
+				sprite_mappings_manager.lock()(SpriteMappings::fromFile(file));
 			}
 		}
 	);
@@ -197,7 +196,7 @@ MainWindow::MainWindow(QWidget* const parent)
 		{
 			int earliest_tile_index = INT_MAX;
 
-			for (auto &piece : sprite_mappings.frames[sprite_index].pieces)
+			for (auto &piece : sprite_mappings_manager.sprite_mappings().frames[sprite_index].pieces)
 				if (earliest_tile_index > piece.tile_index)
 					earliest_tile_index = piece.tile_index;
 
@@ -218,6 +217,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionRender_Starting_with_Palette_Line_3, &QAction::triggered, this, [this](){setStartingPaletteLine(2);});
 	connect(ui->actionRender_Starting_with_Palette_Line_4, &QAction::triggered, this, [this](){setStartingPaletteLine(3);});
 
+	connect(&sprite_mappings_manager, &SpriteMappingsManager::mappingsModified, this, [this](){sprite_editor.update();});
 }
 
 MainWindow::~MainWindow()
