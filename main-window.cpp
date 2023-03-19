@@ -71,6 +71,45 @@ MainWindow::MainWindow(QWidget* const parent)
 	horizontal_layout.setMargin(vertical_layout.margin());
 	vertical_layout.setMargin(0);
 
+	///////////////////
+	// Misc. Signals //
+	///////////////////
+
+	connect(&palette, &Palette::changed, this,
+		[this]()
+		{
+			const QColor &background_colour = palette.colour(0, 0);
+
+			sprite_editor.setBackgroundColour(background_colour);
+			tile_viewer.setBackgroundColour(background_colour);
+			sprite_piece_picker.setBackgroundColour(background_colour);
+		}
+	);
+
+	connect(&tile_viewer, &TileViewer::tileSelected, &sprite_piece_picker, &SpritePiecePicker::setSelectedTile);
+
+	connect(&sprite_editor, &SpriteEditor::selectedSpriteChanged, this,
+		[this]()
+		{
+			int earliest_tile_index = INT_MAX;
+
+			for (auto &piece : sprite_mappings_manager.sprite_mappings().frames[sprite_editor.selected_sprite_index()].pieces)
+				if (earliest_tile_index > piece.tile_index)
+					earliest_tile_index = piece.tile_index;
+
+			if (earliest_tile_index != INT_MAX)
+			{
+				sprite_piece_picker.setSelectedTile(earliest_tile_index);
+				// TODO: Multiple selection spans.
+				tile_viewer.setSelection(earliest_tile_index, earliest_tile_index + 1);
+			}
+		}
+	);
+
+	///////////////////
+	// Menubar: File //
+	///////////////////
+
 	connect(ui->actionLoadTilesUncompressed, &QAction::triggered, this,
 		[this]()
 		{
@@ -157,36 +196,9 @@ MainWindow::MainWindow(QWidget* const parent)
 
 	connect(ui->actionExit, &QAction::triggered, this, &QMainWindow::close);
 
-	connect(&palette, &Palette::changed, this,
-		[this]()
-		{
-			const QColor &background_colour = palette.colour(0, 0);
-
-			sprite_editor.setBackgroundColour(background_colour);
-			tile_viewer.setBackgroundColour(background_colour);
-			sprite_piece_picker.setBackgroundColour(background_colour);
-		}
-	);
-
-	connect(&tile_viewer, &TileViewer::tileSelected, &sprite_piece_picker, &SpritePiecePicker::setSelectedTile);
-
-	connect(&sprite_editor, &SpriteEditor::selectedSpriteChanged, this,
-		[this]()
-		{
-			int earliest_tile_index = INT_MAX;
-
-			for (auto &piece : sprite_mappings_manager.sprite_mappings().frames[sprite_editor.selected_sprite_index()].pieces)
-				if (earliest_tile_index > piece.tile_index)
-					earliest_tile_index = piece.tile_index;
-
-			if (earliest_tile_index != INT_MAX)
-			{
-				sprite_piece_picker.setSelectedTile(earliest_tile_index);
-				// TODO: Multiple selection spans.
-				tile_viewer.setSelection(earliest_tile_index, earliest_tile_index + 1);
-			}
-		}
-	);
+	//////////////////////////
+	// Menubar: Edit/Sprite //
+	//////////////////////////
 
 	connect(ui->actionNext_Sprite, &QAction::triggered, this, [this](){sprite_editor.setSelectedSprite(sprite_editor.selected_sprite_index() + 1);});
 	connect(ui->actionPrevious_Sprite, &QAction::triggered, this, [this](){sprite_editor.setSelectedSprite(sprite_editor.selected_sprite_index() - 1);});
@@ -255,6 +267,10 @@ MainWindow::MainWindow(QWidget* const parent)
 			sprite_mappings_manager.lock()->frames.remove(sprite_editor.selected_sprite_index());
 		}
 	);
+
+	/////////////////////////
+	// Menubar: Edit/Piece //
+	/////////////////////////
 
 	connect(ui->actionNext_Sprite_Piece, &QAction::triggered, this,
 		[this]()
@@ -401,6 +417,10 @@ MainWindow::MainWindow(QWidget* const parent)
 		}
 	);
 
+	//////////////////////////////////
+	// Menubar: Edit/Transformation //
+	//////////////////////////////////
+
 	connect(ui->actionCycle_Palette, &QAction::triggered, this,
 		[this]()
 		{
@@ -438,6 +458,10 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionRender_Starting_with_Palette_Line_2, &QAction::triggered, this, [this](){setStartingPaletteLine(1);});
 	connect(ui->actionRender_Starting_with_Palette_Line_3, &QAction::triggered, this, [this](){setStartingPaletteLine(2);});
 	connect(ui->actionRender_Starting_with_Palette_Line_4, &QAction::triggered, this, [this](){setStartingPaletteLine(3);});
+
+	////////////////////////
+	// Menubar Activation //
+	////////////////////////
 
 	auto update_menubar = [this]()
 	{
@@ -491,6 +515,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(&sprite_editor, &SpriteEditor::selectedSpriteChanged, this, update_menubar);
 	connect(&sprite_mappings_manager, &SpriteMappingsManager::mappingsModified, this, update_menubar);
 
+	// Manually update the menubar upon startup so that the various options are properly enabled.
 	update_menubar();
 }
 
