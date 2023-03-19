@@ -254,10 +254,63 @@ MainWindow::MainWindow(QWidget* const parent)
 		}
 	);
 
+	connect(ui->actionCycle_Palette, &QAction::triggered, this,
+		[this]()
+		{
+			auto mappings = sprite_mappings_manager.lock();
+			auto &frame = mappings->frames[sprite_editor.selected_sprite_index()];
+
+			for (auto &piece : frame.pieces)
+				piece.palette_line = (piece.palette_line + 1) % 4;
+		}
+	);
+
+	auto move_frame = [this](const int x, const int y)
+	{
+		auto mappings = sprite_mappings_manager.lock();
+		auto &frame = mappings->frames[sprite_editor.selected_sprite_index()];
+
+		for (auto &piece : frame.pieces)
+		{
+			piece.x += x;
+			piece.y += y;
+		}
+	};
+
+	connect(ui->actionMove_Left_8_Pixels, &QAction::triggered, this, [move_frame](){move_frame(-8, 0);});
+	connect(ui->actionMove_Right_8_Pixels, &QAction::triggered, this, [move_frame](){move_frame(8, 0);});
+	connect(ui->actionMove_Up_8_Pixels, &QAction::triggered, this, [move_frame](){move_frame(0, -8);});
+	connect(ui->actionMove_Down_8_Pixels, &QAction::triggered, this, [move_frame](){move_frame(0, 8);});
+
+	connect(ui->actionMove_Left_1_Pixel, &QAction::triggered, this, [move_frame](){move_frame(-1, 0);});
+	connect(ui->actionMove_Right_1_Pixel, &QAction::triggered, this, [move_frame](){move_frame(1, 0);});
+	connect(ui->actionMove_Up_1_Pixel, &QAction::triggered, this, [move_frame](){move_frame(0, -1);});
+	connect(ui->actionMove_Down_1_Pixel, &QAction::triggered, this, [move_frame](){move_frame(0, 1);});
+
 	connect(ui->actionRender_Starting_with_Palette_Line_1, &QAction::triggered, this, [this](){setStartingPaletteLine(0);});
 	connect(ui->actionRender_Starting_with_Palette_Line_2, &QAction::triggered, this, [this](){setStartingPaletteLine(1);});
 	connect(ui->actionRender_Starting_with_Palette_Line_3, &QAction::triggered, this, [this](){setStartingPaletteLine(2);});
 	connect(ui->actionRender_Starting_with_Palette_Line_4, &QAction::triggered, this, [this](){setStartingPaletteLine(3);});
+
+	auto update_menubar = [this]()
+	{
+		const int selected_sprite_index = sprite_editor.selected_sprite_index();
+		const bool first = selected_sprite_index == 0;
+		const bool last = selected_sprite_index == sprite_mappings_manager.sprite_mappings().frames.size() - 1;
+
+		ui->actionNext_Sprite->setDisabled(last);
+		ui->actionPrevious_Sprite->setDisabled(first);
+		ui->actionSwap_Sprite_with_Next->setDisabled(last);
+		ui->actionSwap_Sprite_with_Previous->setDisabled(first);
+		ui->actionPrevious_Sprite->setDisabled(first);
+		ui->actionFirst_Sprite->setDisabled(first);
+		ui->actionLast_Sprite->setDisabled(last);
+	};
+
+	connect(&sprite_editor, &SpriteEditor::selectedSpriteChanged, this, update_menubar);
+	connect(&sprite_mappings_manager, &SpriteMappingsManager::mappingsModified, this, update_menubar);
+
+	update_menubar();
 }
 
 MainWindow::~MainWindow()

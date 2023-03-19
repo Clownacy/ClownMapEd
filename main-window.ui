@@ -62,7 +62,24 @@
      <addaction name="actionDuplicate_Sprite"/>
      <addaction name="actionDelete_Sprite"/>
     </widget>
+    <widget class="QMenu" name="menuTransformation">
+     <property name="title">
+      <string>Transformation</string>
+     </property>
+     <addaction name="actionCycle_Palette"/>
+     <addaction name="separator"/>
+     <addaction name="actionMove_Left_8_Pixels"/>
+     <addaction name="actionMove_Right_8_Pixels"/>
+     <addaction name="actionMove_Up_8_Pixels"/>
+     <addaction name="actionMove_Down_8_Pixels"/>
+     <addaction name="separator"/>
+     <addaction name="actionMove_Left_1_Pixel"/>
+     <addaction name="actionMove_Right_1_Pixel"/>
+     <addaction name="actionMove_Up_1_Pixel"/>
+     <addaction name="actionMove_Down_1_Pixel"/>
+    </widget>
     <addaction name="menu_Sprite"/>
+    <addaction name="menuTransformation"/>
    </widget>
    <widget class="QMenu" name="menu_Settings">
     <property name="title">
@@ -230,6 +247,78 @@
    </property>
    <property name="shortcut">
     <string>End</string>
+   </property>
+  </action>
+  <action name="actionMove_Left_8_Pixels">
+   <property name="text">
+    <string>Move Left 8 Pixels</string>
+   </property>
+   <property name="shortcut">
+    <string>Left</string>
+   </property>
+  </action>
+  <action name="actionMove_Right_8_Pixels">
+   <property name="text">
+    <string>Move Right 8 Pixels</string>
+   </property>
+   <property name="shortcut">
+    <string>Right</string>
+   </property>
+  </action>
+  <action name="actionMove_Up_8_Pixels">
+   <property name="text">
+    <string>Move Up 8 Pixels</string>
+   </property>
+   <property name="shortcut">
+    <string>Up</string>
+   </property>
+  </action>
+  <action name="actionMove_Down_8_Pixels">
+   <property name="text">
+    <string>Move Down 8 Pixels</string>
+   </property>
+   <property name="shortcut">
+    <string>Down</string>
+   </property>
+  </action>
+  <action name="actionMove_Left_1_Pixel">
+   <property name="text">
+    <string>Move Left 1 Pixel</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+Left</string>
+   </property>
+  </action>
+  <action name="actionMove_Right_1_Pixel">
+   <property name="text">
+    <string>Move Right 1 Pixel</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+Right</string>
+   </property>
+  </action>
+  <action name="actionMove_Up_1_Pixel">
+   <property name="text">
+    <string>Move Up 1 Pixel</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+Up</string>
+   </property>
+  </action>
+  <action name="actionMove_Down_1_Pixel">
+   <property name="text">
+    <string>Move Down 1 Pixel</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+Down</string>
+   </property>
+  </action>
+  <action name="actionCycle_Palette">
+   <property name="text">
+    <string>Cycle Palette</string>
+   </property>
+   <property name="shortcut">
+    <string>P</string>
    </property>
   </action>
  </widget>
