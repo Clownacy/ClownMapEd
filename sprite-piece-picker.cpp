@@ -17,8 +17,6 @@ SpritePiecePicker::SpritePiecePicker(TileManager &tile_manager)
 			grid_layout.addWidget(&buttons[y * 4 + x], y, x);
 
 	setSelectedTile(0);
-
-	connect(&tile_manager, &TileManager::regenerated, this, qOverload<>(&SpritePiecePicker::update));
 }
 
 void SpritePiecePicker::setBackgroundColour(const QColor &colour)

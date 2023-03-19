@@ -9,7 +9,7 @@
 SpritePieceButton::SpritePieceButton(const TileManager &tile_manager)
 	: tile_manager(tile_manager)
 {
-
+	connect(&tile_manager, &TileManager::regenerated, this, qOverload<>(&SpritePieceButton::update));
 }
 
 void SpritePieceButton::setSpritePiece(const SpritePiece &sprite_piece)
