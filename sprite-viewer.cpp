@@ -1,10 +1,10 @@
-#include "sprite-editor.h"
+#include "sprite-viewer.h"
 
 #include <QPainter>
 
 #include "utilities.h"
 
-SpriteEditor::SpriteEditor(const TileManager &tile_manager, const SpriteMappingsManager &sprite_mappings_manager)
+SpriteViewer::SpriteViewer(const TileManager &tile_manager, const SpriteMappingsManager &sprite_mappings_manager)
 	: sprite_mappings(sprite_mappings_manager.sprite_mappings())
     , tile_manager(tile_manager)
 {
@@ -21,7 +21,7 @@ SpriteEditor::SpriteEditor(const TileManager &tile_manager, const SpriteMappings
 	);
 }
 
-void SpriteEditor::paintEvent(QPaintEvent* const event)
+void SpriteViewer::paintEvent(QPaintEvent* const event)
 {
 	QWidget::paintEvent(event);
 
@@ -90,7 +90,7 @@ void SpriteEditor::paintEvent(QPaintEvent* const event)
 	//painter.drawText(rect(), Qt::AlignCenter, QString(std::to_string(0).c_str()));
 }
 
-void SpriteEditor::setSelectedSprite(const int sprite_index)
+void SpriteViewer::setSelectedSprite(const int sprite_index)
 {
 	m_selected_sprite_index = qBound(0, sprite_index, sprite_mappings.frames.size() - 1);
 	m_selected_piece_index = -1;
@@ -99,7 +99,7 @@ void SpriteEditor::setSelectedSprite(const int sprite_index)
 	emit selectedSpriteChanged();
 }
 
-void SpriteEditor::setSelectedPiece(const int piece_index)
+void SpriteViewer::setSelectedPiece(const int piece_index)
 {
 	m_selected_piece_index = ((piece_index + 1) % (sprite_mappings.frames[m_selected_sprite_index].pieces.size() + 1)) - 1;
 	if (m_selected_piece_index < -1)
@@ -109,7 +109,7 @@ void SpriteEditor::setSelectedPiece(const int piece_index)
 	emit selectedSpriteChanged();
 }
 
-void SpriteEditor::setBackgroundColour(const QColor &colour)
+void SpriteViewer::setBackgroundColour(const QColor &colour)
 {
 	QPalette palette;
 	palette.setColor(QPalette::Window, colour);

@@ -9,9 +9,9 @@
 
 #include "palette.h"
 #include "palette-editor.h"
-#include "sprite-editor.h"
 #include "sprite-mappings-manager.h"
 #include "sprite-piece-picker.h"
+#include "sprite-viewer.h"
 #include "tile-manager.h"
 #include "tile-viewer.h"
 
@@ -35,7 +35,7 @@ private:
 	Palette palette;
 	SpriteMappingsManager sprite_mappings_manager;
 	TileManager tile_manager;
-	SpriteEditor sprite_editor;
+	SpriteViewer sprite_viewer;
 	PaletteEditor palette_editor;
 	SpritePiecePicker sprite_piece_picker;
 	TileViewer tile_viewer;

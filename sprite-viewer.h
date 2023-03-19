@@ -1,17 +1,17 @@
-#ifndef SPRITE_EDITOR_H
-#define SPRITE_EDITOR_H
+#ifndef SPRITE_VIEWER_H
+#define SPRITE_VIEWER_H
 
 #include <QWidget>
 
 #include "sprite-mappings-manager.h"
 #include "tile-manager.h"
 
-class SpriteEditor : public QWidget
+class SpriteViewer : public QWidget
 {
 	Q_OBJECT
 
 public:
-	SpriteEditor(const TileManager &tile_manager, const SpriteMappingsManager &sprite_mappings_manager);
+	SpriteViewer(const TileManager &tile_manager, const SpriteMappingsManager &sprite_mappings_manager);
 
 	int selected_sprite_index() const
 	{
@@ -49,4 +49,4 @@ private:
 	const TileManager &tile_manager;
 };
 
-#endif // SPRITE_EDITOR_H
+#endif // SPRITE_VIEWER_H

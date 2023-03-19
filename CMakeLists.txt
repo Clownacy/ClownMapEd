@@ -28,8 +28,8 @@ set(PROJECT_SOURCES
 	palette.h
 	palette-editor.cpp
 	palette-editor.h
-	sprite-editor.cpp
-	sprite-editor.h
+	sprite-viewer.cpp
+	sprite-viewer.h
 	sprite-frame.cpp
 	sprite-frame.h
 	sprite-mappings.cpp
