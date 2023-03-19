@@ -24,12 +24,20 @@ public:
 		updateSpritePieces();
 	}
 
+	int selected_tile() const
+	{
+		return tile_index;
+	}
+
 public slots:
 	void setSelectedTile(const int tile_index)
 	{
 		this->tile_index = tile_index;
 		updateSpritePieces();
 	}
+
+signals:
+	void pieceSelected(int width, int height);
 
 private:
 	void updateSpritePieces();

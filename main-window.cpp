@@ -106,6 +106,16 @@ MainWindow::MainWindow(QWidget* const parent)
 		}
 	);
 
+	connect(&sprite_piece_picker, &SpritePiecePicker::pieceSelected, this,
+		[this](const int width, const int height)
+		{
+			auto mappings = this->sprite_mappings_manager.lock();
+			auto &pieces = mappings->frames[sprite_viewer.selected_sprite_index()].pieces;
+			pieces.append(SpritePiece{0, 0, width, height, false, 0, false, false, sprite_piece_picker.selected_tile()});
+			sprite_viewer.setSelectedPiece(pieces.size() - 1);
+		}
+	);
+
 	///////////////////
 	// Menubar: File //
 	///////////////////

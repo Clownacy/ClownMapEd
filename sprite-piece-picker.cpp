@@ -17,6 +17,9 @@ SpritePiecePicker::SpritePiecePicker(TileManager &tile_manager)
 			grid_layout.addWidget(&buttons[y * 4 + x], y, x);
 
 	setSelectedTile(0);
+
+	for (int i = 0; i < buttons.size(); ++i)
+		connect(&buttons[i], &SpritePieceButton::clicked, this, [this, i](){emit pieceSelected(i % 4 + 1, i / 4 + 1);});
 }
 
 void SpritePiecePicker::setBackgroundColour(const QColor &colour)
