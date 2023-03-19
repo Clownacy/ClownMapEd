@@ -26,9 +26,9 @@ void Tile::regeneratePixmaps(const Palette &palette)
 			}
 			else
 			{
-				const Palette::Colour colour = palette.getColour(line, palette_index);
+				const QColor colour = palette.colour(line, palette_index);
 
-				pixmap_data[i] = (0xF << 12) | ((colour.red >> 4) << 8) | ((colour.green >> 4) << 4) | ((colour.blue >> 4) << 0);
+				pixmap_data[i] = (0xF << 12) | ((colour.red() >> 4) << 8) | ((colour.green() >> 4) << 4) | ((colour.blue() >> 4) << 0);
 			}
 		}
 

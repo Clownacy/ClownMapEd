@@ -65,8 +65,8 @@ MainWindow::MainWindow(QWidget* const parent)
 
 	centralWidget()->setLayout(&vertical_layout);
 
-	sprite_editor.setBackgroundColour(palette.getColourQColor(0, 0));
-	tile_viewer.setBackgroundColour(palette.getColourQColor(0, 0));
+	sprite_editor.setBackgroundColour(palette.colour(0, 0));
+	tile_viewer.setBackgroundColour(palette.colour(0, 0));
 
 	horizontal_layout.setMargin(vertical_layout.margin());
 	vertical_layout.setMargin(0);
@@ -158,7 +158,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(&palette, &Palette::changed, this,
 		[this]()
 		{
-			const QColor &background_colour = palette.getColourQColor(0, 0);
+			const QColor &background_colour = palette.colour(0, 0);
 
 			sprite_editor.setBackgroundColour(background_colour);
 			tile_viewer.setBackgroundColour(background_colour);

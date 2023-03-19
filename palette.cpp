@@ -1,7 +1,8 @@
 #include "palette.h"
 
-#include <QDataStream>
 #include <QFile>
+
+#include "data-stream.h"
 
 Palette::Palette()
 {
@@ -40,7 +41,7 @@ Palette::Palette()
 					break;
 			}
 
-			colours[line][index] = colour;
+			colours[line][index] = MDToQColor(colour);
 		}
 	}
 }
@@ -51,29 +52,16 @@ void Palette::loadFromFile(const QString &file_path)
 	if (!file.open(QFile::ReadOnly))
 		return;
 
-	QDataStream in_stream(&file);
-	in_stream.setByteOrder(QDataStream::BigEndian);
+	DataStream stream(&file);
+	stream.setByteOrder(DataStream::BigEndian);
 
 	const std::size_t total_colours = file.size() / 2;
 
 	for (std::size_t i = 0; i < std::min(static_cast<std::size_t>(4), total_colours / 16); ++i)
 		for (std::size_t j = 0; j < std::min(static_cast<std::size_t>(16), total_colours - i * 16); ++j)
-			in_stream >> colours[i][j];
+			colours[i][j] = MDToQColor(stream.read<quint16>());
 
 	emit changed();
-}
-
-Palette::Colour Palette::getColour(const unsigned int palette_line, const unsigned int palette_index) const
-{
-	Palette::Colour colour;
-
-	const QColor qt_colour = MDToQColor(colours[palette_line][palette_index]);
-
-	colour.red = qt_colour.red();
-	colour.green = qt_colour.green();
-	colour.blue = qt_colour.blue();
-
-	return colour;
 }
 
 void Palette::setColour(const unsigned int palette_line, const unsigned int palette_index, const QColor &colour)
@@ -81,7 +69,7 @@ void Palette::setColour(const unsigned int palette_line, const unsigned int pale
 	if (palette_line >= 4 || palette_index >= 16)
 		return;
 
-	colours[palette_line][palette_index] = QColorToMD(colour);
+	colours[palette_line][palette_index] = MDToQColor(QColorToMD(colour));
 
 	emit changed();
 }

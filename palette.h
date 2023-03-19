@@ -20,10 +20,9 @@ public:
 	Palette();
 
 	void loadFromFile(const QString &file_path);
-	Colour getColour(unsigned int palette_line, unsigned int palette_index) const;
-	QColor getColourQColor(unsigned int palette_line, unsigned int palette_index) const
+	QColor colour(unsigned int palette_line, unsigned int palette_index) const
 	{
-		return MDToQColor(colours[palette_line][palette_index]);
+		return colours[palette_line][palette_index];
 	}
 	void setColour(unsigned int palette_line, unsigned int palette_index, const QColor &colour);
 
@@ -34,7 +33,7 @@ private:
 	static QColor MDToQColor(unsigned int md_colour);
 	static unsigned int QColorToMD(const QColor &colour);
 
-	quint16 colours[4][16];
+	QColor colours[4][16];
 };
 
 #endif // PALETTE_H
