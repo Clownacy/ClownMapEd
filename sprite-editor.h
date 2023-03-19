@@ -18,8 +18,14 @@ public:
 		return m_selected_sprite_index;
 	}
 
+	int selected_piece_index() const
+	{
+		return m_selected_piece_index;
+	}
+
 public slots:
 	void setSelectedSprite(int sprite_index);
+	void setSelectedPiece(int piece_index);
 
 	void setBackgroundColour(const QColor &colour);
 
@@ -30,13 +36,14 @@ public slots:
 	}
 
 signals:
-	void selectedSpriteChanged(int selected_sprite_index);
+	void selectedSpriteChanged();
 
 protected:
 	void paintEvent(QPaintEvent *event) override;
 
 private:
 	int m_selected_sprite_index = 0;
+	int m_selected_piece_index = -1;
 	int starting_palette_line = 0;
 	const SpriteMappings &sprite_mappings;
 	const TileManager &tile_manager;

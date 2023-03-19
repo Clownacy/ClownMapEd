@@ -33,14 +33,12 @@ QRect SpriteFrame::rect() const
 
 	for (auto &piece : pieces)
 	{
-		if (x1 > piece.x)
-			x1 = piece.x;
-		if (x2 < piece.x + piece.width * 8)
-			x2 = piece.x + piece.width * 8;
-		if (y1 > piece.y)
-			y1 = piece.y;
-		if (y2 < piece.y + piece.height * 8)
-			y2 = piece.y + piece.height * 8;
+		const QRect rect = piece.rect();
+
+		x1 = qMin(x1, rect.left());
+		x2 = qMax(x2, rect.right());
+		y1 = qMin(y1, rect.top());
+		y2 = qMax(y2, rect.bottom());
 	}
 
 	if (x1 == INT_MAX)

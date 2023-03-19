@@ -169,11 +169,11 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(&tile_viewer, &TileViewer::tileSelected, &sprite_piece_picker, &SpritePiecePicker::setSelectedTile);
 
 	connect(&sprite_editor, &SpriteEditor::selectedSpriteChanged, this,
-		[this](const int sprite_index)
+		[this]()
 		{
 			int earliest_tile_index = INT_MAX;
 
-			for (auto &piece : sprite_mappings_manager.sprite_mappings().frames[sprite_index].pieces)
+			for (auto &piece : sprite_mappings_manager.sprite_mappings().frames[sprite_editor.selected_sprite_index()].pieces)
 				if (earliest_tile_index > piece.tile_index)
 					earliest_tile_index = piece.tile_index;
 
@@ -254,6 +254,151 @@ MainWindow::MainWindow(QWidget* const parent)
 		}
 	);
 
+	connect(ui->actionNext_Sprite_Piece, &QAction::triggered, this,
+		[this]()
+		{
+			sprite_editor.setSelectedPiece(sprite_editor.selected_piece_index() + 1);
+		}
+	);
+
+	connect(ui->actionPrevious_Sprite_Piece, &QAction::triggered, this,
+		[this]()
+		{
+			sprite_editor.setSelectedPiece(sprite_editor.selected_piece_index() - 1);
+		}
+	);
+
+	connect(ui->actionDelete_Sprite_Piece, &QAction::triggered, this,
+		[this]()
+		{
+			sprite_mappings_manager.lock()->frames[sprite_editor.selected_sprite_index()].pieces.remove(sprite_editor.selected_piece_index());
+			sprite_editor.setSelectedPiece(sprite_editor.selected_piece_index() - 1);
+		}
+	);
+
+	connect(ui->actionDuplicate_Sprite_Piece, &QAction::triggered, this,
+		[this]()
+		{
+			auto mappings = sprite_mappings_manager.lock();
+			auto &pieces = mappings->frames[sprite_editor.selected_sprite_index()].pieces;
+			const int selected_piece_index = sprite_editor.selected_piece_index();
+
+			pieces.insert(selected_piece_index + 1, pieces[selected_piece_index]);
+			sprite_editor.setSelectedPiece(selected_piece_index + 1);
+		}
+	);
+
+	connect(ui->actionMove_Piece_into_Next_Sprite, &QAction::triggered, this,
+		[this]()
+		{
+			const int selected_sprite_index = sprite_editor.selected_sprite_index();
+			const int next_sprite_index = selected_sprite_index + 1;
+			const int selected_piece_index = sprite_editor.selected_piece_index();
+			auto mappings = sprite_mappings_manager.lock();
+			auto &frames = mappings->frames;
+			auto &pieces = frames[selected_sprite_index].pieces;
+
+			frames[next_sprite_index].pieces.append(pieces[selected_piece_index]);
+			pieces.remove(selected_piece_index);
+
+			sprite_editor.setSelectedSprite(next_sprite_index);
+			sprite_editor.setSelectedPiece(frames[next_sprite_index].pieces.size() - 1);
+		}
+	);
+
+	connect(ui->actionMove_Piece_into_Previous_Sprite, &QAction::triggered, this,
+		[this]()
+		{
+			const int selected_sprite_index = sprite_editor.selected_sprite_index();
+			const int previous_sprite_index = selected_sprite_index - 1;
+			const int selected_piece_index = sprite_editor.selected_piece_index();
+			auto mappings = sprite_mappings_manager.lock();
+			auto &frames = mappings->frames;
+			auto &pieces = frames[selected_sprite_index].pieces;
+
+			frames[previous_sprite_index].pieces.append(pieces[selected_piece_index]);
+			pieces.remove(selected_piece_index);
+
+			sprite_editor.setSelectedSprite(previous_sprite_index);
+			sprite_editor.setSelectedPiece(frames[previous_sprite_index].pieces.size() - 1);
+		}
+	);
+
+	connect(ui->actionMove_Piece_into_New_Sprite, &QAction::triggered, this,
+		[this]()
+		{
+			const int selected_sprite_index = sprite_editor.selected_sprite_index();
+			const int next_sprite_index = selected_sprite_index + 1;
+			const int selected_piece_index = sprite_editor.selected_piece_index();
+			auto mappings = sprite_mappings_manager.lock();
+			auto &frames = mappings->frames;
+			auto &pieces = frames[selected_sprite_index].pieces;
+
+			frames.insert(next_sprite_index, SpriteFrame());
+			frames[next_sprite_index].pieces.append(pieces[selected_piece_index]);
+			pieces.remove(selected_piece_index);
+
+			sprite_editor.setSelectedSprite(next_sprite_index);
+			sprite_editor.setSelectedPiece(frames[next_sprite_index].pieces.size() - 1);
+		}
+	);
+
+	connect(ui->actionMove_Piece_toward_Back, &QAction::triggered, this,
+		[this]()
+		{
+			auto mappings = sprite_mappings_manager.lock();
+			auto &pieces = mappings->frames[sprite_editor.selected_sprite_index()].pieces;
+			const int selected_piece_index = sprite_editor.selected_piece_index();
+			const int next_piece_index = selected_piece_index + 1;
+
+			pieces.move(selected_piece_index, next_piece_index);
+
+			sprite_editor.setSelectedPiece(next_piece_index);
+		}
+	);
+
+	connect(ui->actionMove_Piece_toward_Front, &QAction::triggered, this,
+		[this]()
+		{
+			auto mappings = sprite_mappings_manager.lock();
+			auto &pieces = mappings->frames[sprite_editor.selected_sprite_index()].pieces;
+			const int selected_piece_index = sprite_editor.selected_piece_index();
+			const int previous_piece_index = selected_piece_index - 1;
+
+			pieces.move(selected_piece_index, previous_piece_index);
+
+			sprite_editor.setSelectedPiece(previous_piece_index);
+		}
+	);
+
+	connect(ui->actionMove_Piece_Behind_Others, &QAction::triggered, this,
+		[this]()
+		{
+			auto mappings = sprite_mappings_manager.lock();
+			auto &pieces = mappings->frames[sprite_editor.selected_sprite_index()].pieces;
+			const int selected_piece_index = sprite_editor.selected_piece_index();
+			const int last_piece_index = pieces.size() - 1;
+
+			pieces.move(selected_piece_index, last_piece_index);
+
+			sprite_editor.setSelectedPiece(last_piece_index);
+		}
+	);
+
+	connect(ui->actionMove_Piece_in_Front_of_Others, &QAction::triggered, this,
+		[this]()
+		{
+			auto mappings = sprite_mappings_manager.lock();
+			auto &pieces = mappings->frames[sprite_editor.selected_sprite_index()].pieces;
+			const int selected_piece_index = sprite_editor.selected_piece_index();
+			const int first_piece_index = 0;
+
+			pieces.move(selected_piece_index, first_piece_index);
+
+			sprite_editor.setSelectedPiece(first_piece_index);
+		}
+	);
+
 	connect(ui->actionCycle_Palette, &QAction::triggered, this,
 		[this]()
 		{
@@ -295,16 +440,50 @@ MainWindow::MainWindow(QWidget* const parent)
 	auto update_menubar = [this]()
 	{
 		const int selected_sprite_index = sprite_editor.selected_sprite_index();
-		const bool first = selected_sprite_index == 0;
-		const bool last = selected_sprite_index == sprite_mappings_manager.sprite_mappings().frames.size() - 1;
+		const bool no_sprites = sprite_mappings_manager.sprite_mappings().frames.size() == 0;
+		const bool is_first_sprite = no_sprites || selected_sprite_index == 0;
+		const bool is_last_sprite = no_sprites || selected_sprite_index == sprite_mappings_manager.sprite_mappings().frames.size() - 1;
+		const bool no_sprite_selected = no_sprites;
 
-		ui->actionNext_Sprite->setDisabled(last);
-		ui->actionPrevious_Sprite->setDisabled(first);
-		ui->actionSwap_Sprite_with_Next->setDisabled(last);
-		ui->actionSwap_Sprite_with_Previous->setDisabled(first);
-		ui->actionPrevious_Sprite->setDisabled(first);
-		ui->actionFirst_Sprite->setDisabled(first);
-		ui->actionLast_Sprite->setDisabled(last);
+		ui->actionNext_Sprite->setDisabled(is_last_sprite);
+		ui->actionPrevious_Sprite->setDisabled(is_first_sprite);
+		ui->actionSwap_Sprite_with_Next->setDisabled(is_last_sprite);
+		ui->actionSwap_Sprite_with_Previous->setDisabled(is_first_sprite);
+		ui->actionPrevious_Sprite->setDisabled(is_first_sprite);
+		ui->actionFirst_Sprite->setDisabled(is_first_sprite);
+		ui->actionLast_Sprite->setDisabled(is_last_sprite);
+		ui->actionDuplicate_Sprite->setDisabled(no_sprite_selected);
+		ui->actionDelete_Sprite->setDisabled(no_sprite_selected);
+
+		const int selected_piece_index = sprite_editor.selected_piece_index();
+		const bool no_pieces = no_sprites || sprite_mappings_manager.sprite_mappings().frames[selected_sprite_index].pieces.size() == 0;
+		const bool is_first_piece = no_pieces || selected_piece_index == 0;
+		const bool is_last_piece = no_pieces || selected_piece_index == sprite_mappings_manager.sprite_mappings().frames[selected_sprite_index].pieces.size() - 1;
+		const bool no_piece_selected = no_pieces || selected_piece_index == -1;
+
+		ui->actionNext_Sprite_Piece->setDisabled(no_pieces);
+		ui->actionPrevious_Sprite_Piece->setDisabled(no_pieces);
+		ui->actionDuplicate_Sprite_Piece->setDisabled(no_piece_selected);
+		ui->actionDelete_Sprite_Piece->setDisabled(no_piece_selected);
+		ui->actionMove_Piece_into_Next_Sprite->setDisabled(no_piece_selected || is_last_sprite);
+		ui->actionMove_Piece_into_Previous_Sprite->setDisabled(no_piece_selected || is_first_sprite);
+		ui->actionMove_Piece_into_New_Sprite->setDisabled(no_piece_selected || is_last_sprite);
+		ui->actionMove_Piece_toward_Back->setDisabled(is_last_piece);
+		ui->actionMove_Piece_toward_Front->setDisabled(is_first_piece);
+		ui->actionMove_Piece_Behind_Others->setDisabled(is_last_piece);
+		ui->actionMove_Piece_in_Front_of_Others->setDisabled(is_first_piece);
+
+		const bool nothing_selected = no_sprite_selected;
+
+		ui->actionCycle_Palette->setDisabled(nothing_selected);
+		ui->actionMove_Left_8_Pixels->setDisabled(nothing_selected);
+		ui->actionMove_Right_8_Pixels->setDisabled(nothing_selected);
+		ui->actionMove_Up_8_Pixels->setDisabled(nothing_selected);
+		ui->actionMove_Down_8_Pixels->setDisabled(nothing_selected);
+		ui->actionMove_Left_1_Pixel->setDisabled(nothing_selected);
+		ui->actionMove_Right_1_Pixel->setDisabled(nothing_selected);
+		ui->actionMove_Up_1_Pixel->setDisabled(nothing_selected);
+		ui->actionMove_Down_1_Pixel->setDisabled(nothing_selected);
 	};
 
 	connect(&sprite_editor, &SpriteEditor::selectedSpriteChanged, this, update_menubar);

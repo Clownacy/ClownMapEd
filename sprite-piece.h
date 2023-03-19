@@ -2,6 +2,7 @@
 #define SPRITE_PIECE_H
 
 #include <QPainter>
+#include <QRect>
 
 #include "data-stream.h"
 #include "tile-manager.h"
@@ -11,6 +12,11 @@ struct SpritePiece
 	static SpritePiece fromDataStream(DataStream &stream);
 
 	void draw(QPainter &painter, const TileManager &tile_manager, int starting_palette_line = 0, int x_offset = 0, int y_offset = 0) const;
+
+	QRect rect() const
+	{
+		return QRect(x, y, width * 8, height * 8);
+	}
 
 	int x;
 	int y;

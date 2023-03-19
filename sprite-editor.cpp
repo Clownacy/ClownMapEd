@@ -43,7 +43,7 @@ void SpriteEditor::paintEvent(QPaintEvent* const event)
 	// Draw outline around selected sprite.
 	const SpriteFrame &selected_sprite = frames[m_selected_sprite_index];
 	const QColor background_colour = palette().color(QPalette::Window);
-	const QRect outline_rect = selected_sprite.rect();
+	const QRect outline_rect = m_selected_piece_index == -1 ? selected_sprite.rect() : selected_sprite.pieces[m_selected_piece_index].rect();
 
 	// Draw a solid colour outline.
 	// This appears to be the exact formula that SonMapEd uses for its selection box.
@@ -93,9 +93,20 @@ void SpriteEditor::paintEvent(QPaintEvent* const event)
 void SpriteEditor::setSelectedSprite(const int sprite_index)
 {
 	m_selected_sprite_index = qBound(0, sprite_index, sprite_mappings.frames.size() - 1);
+	m_selected_piece_index = -1;
 	update();
 
-	emit selectedSpriteChanged(m_selected_sprite_index);
+	emit selectedSpriteChanged();
+}
+
+void SpriteEditor::setSelectedPiece(const int piece_index)
+{
+	m_selected_piece_index = ((piece_index + 1) % (sprite_mappings.frames[m_selected_sprite_index].pieces.size() + 1)) - 1;
+	if (m_selected_piece_index < -1)
+		m_selected_piece_index += sprite_mappings.frames[m_selected_sprite_index].pieces.size() + 1;
+	update();
+
+	emit selectedSpriteChanged();
 }
 
 void SpriteEditor::setBackgroundColour(const QColor &colour)

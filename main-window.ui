@@ -78,7 +78,26 @@
      <addaction name="actionMove_Up_1_Pixel"/>
      <addaction name="actionMove_Down_1_Pixel"/>
     </widget>
+    <widget class="QMenu" name="menu_Piece">
+     <property name="title">
+      <string>&amp;Piece</string>
+     </property>
+     <addaction name="actionNext_Sprite_Piece"/>
+     <addaction name="actionPrevious_Sprite_Piece"/>
+     <addaction name="actionDelete_Sprite_Piece"/>
+     <addaction name="actionDuplicate_Sprite_Piece"/>
+     <addaction name="separator"/>
+     <addaction name="actionMove_Piece_into_Next_Sprite"/>
+     <addaction name="actionMove_Piece_into_Previous_Sprite"/>
+     <addaction name="actionMove_Piece_into_New_Sprite"/>
+     <addaction name="separator"/>
+     <addaction name="actionMove_Piece_toward_Back"/>
+     <addaction name="actionMove_Piece_toward_Front"/>
+     <addaction name="actionMove_Piece_Behind_Others"/>
+     <addaction name="actionMove_Piece_in_Front_of_Others"/>
+    </widget>
     <addaction name="menu_Sprite"/>
+    <addaction name="menu_Piece"/>
     <addaction name="menuTransformation"/>
    </widget>
    <widget class="QMenu" name="menu_Settings">
@@ -319,6 +338,94 @@
    </property>
    <property name="shortcut">
     <string>P</string>
+   </property>
+  </action>
+  <action name="actionNext_Sprite_Piece">
+   <property name="text">
+    <string>Next Sprite Piece</string>
+   </property>
+   <property name="shortcut">
+    <string>'</string>
+   </property>
+  </action>
+  <action name="actionPrevious_Sprite_Piece">
+   <property name="text">
+    <string>Previous Sprite Piece</string>
+   </property>
+   <property name="shortcut">
+    <string>;</string>
+   </property>
+  </action>
+  <action name="actionDelete_Sprite_Piece">
+   <property name="text">
+    <string>Delete Sprite Piece</string>
+   </property>
+   <property name="shortcut">
+    <string>Del</string>
+   </property>
+  </action>
+  <action name="actionDuplicate_Sprite_Piece">
+   <property name="text">
+    <string>Duplicate Sprite Piece</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+D</string>
+   </property>
+  </action>
+  <action name="actionMove_Piece_into_Next_Sprite">
+   <property name="text">
+    <string>Move Piece into Next Sprite</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+]</string>
+   </property>
+  </action>
+  <action name="actionMove_Piece_into_Previous_Sprite">
+   <property name="text">
+    <string>Move Piece into Previous Sprite</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+[</string>
+   </property>
+  </action>
+  <action name="actionMove_Piece_into_New_Sprite">
+   <property name="text">
+    <string>Move Piece into New Sprite</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+Ins</string>
+   </property>
+  </action>
+  <action name="actionMove_Piece_toward_Back">
+   <property name="text">
+    <string>Move Piece toward Back</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+;</string>
+   </property>
+  </action>
+  <action name="actionMove_Piece_toward_Front">
+   <property name="text">
+    <string>Move Piece toward Front</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+'</string>
+   </property>
+  </action>
+  <action name="actionMove_Piece_Behind_Others">
+   <property name="text">
+    <string>Move Piece Behind Others</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+Shift+;</string>
+   </property>
+  </action>
+  <action name="actionMove_Piece_in_Front_of_Others">
+   <property name="text">
+    <string>Move Piece in Front of Others</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+Shift+'</string>
    </property>
   </action>
  </widget>
