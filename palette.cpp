@@ -76,15 +76,14 @@ void Palette::setColour(const unsigned int palette_line, const unsigned int pale
 
 QColor Palette::MDToQColor(unsigned int md_colour)
 {
+	// This isn't exactly what SonMapEd does:
+	// For some reason, SonMapEd treats the colours as 4-bit-per-channel,
+	// when they're really only 3-bit-per-channel.
 	unsigned int red = (md_colour >> 1) & 7;
 	unsigned int green = (md_colour >> 5) & 7;
 	unsigned int blue = (md_colour >> 9) & 7;
 
-	red = (red << 5) | (red << 2) | (red >> 1);
-	green = (green << 5) | (green << 2) | (green >> 1);
-	blue = (blue << 5) | (blue << 2) | (blue >> 1);
-
-	return QColor(red, green, blue);
+	return QColor(red << 5, green << 5, blue << 5);
 }
 
 unsigned int Palette::QColorToMD(const QColor &colour)
