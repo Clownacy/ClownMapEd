@@ -19,7 +19,7 @@ TileViewer::TileViewer(const TileManager &tile_manager)
 {
 	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-	connect(&tile_manager, &TileManager::regenerated, this, [this](){update();});
+	connect(&tile_manager, &TileManager::regenerated, this, qOverload<>(&TileViewer::update));
 }
 
 void TileViewer::setSelection(const int start, const int end)

@@ -10,7 +10,7 @@ SpriteViewer::SpriteViewer(const TileManager &tile_manager, const SpriteMappings
 {
 	setAutoFillBackground(true);
 
-	connect(&tile_manager, &TileManager::regenerated, this, [this](){update();});
+	connect(&tile_manager, &TileManager::regenerated, this, qOverload<>(&SpriteViewer::update));
 
 	connect(&sprite_mappings_manager, &SpriteMappingsManager::mappingsModified, this,
 		[this]()

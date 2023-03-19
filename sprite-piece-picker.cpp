@@ -18,7 +18,7 @@ SpritePiecePicker::SpritePiecePicker(TileManager &tile_manager)
 
 	setSelectedTile(0);
 
-	connect(&tile_manager, &TileManager::regenerated, this, [this](){update();});
+	connect(&tile_manager, &TileManager::regenerated, this, qOverload<>(&SpritePiecePicker::update));
 }
 
 void SpritePiecePicker::setBackgroundColour(const QColor &colour)
