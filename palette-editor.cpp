@@ -41,9 +41,7 @@ PaletteEditor::PaletteEditor(Palette &palette)
 		}
 	}
 
-	connect(&palette, &Palette::singleColourChanged, this, &PaletteEditor::setButtonColour);
-
-	connect(&palette, &Palette::allColoursChanged, this,
+	connect(&palette, &Palette::changed, this,
 		[this]()
 		{
 			for (unsigned int line = 0; line < 4; ++line)

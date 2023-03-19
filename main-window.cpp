@@ -155,19 +155,7 @@ MainWindow::MainWindow(QWidget* const parent)
 		}
 	);
 
-	connect(&palette, &Palette::singleColourChanged, this,
-		[this](const unsigned int palette_line, const unsigned int palette_index, const QColor &colour)
-		{
-			if (palette_line == 0 && palette_index == 0)
-			{
-				sprite_editor.setBackgroundColour(colour);
-				tile_viewer.setBackgroundColour(colour);
-				sprite_piece_picker.setBackgroundColour(colour);
-			}
-		}
-	);
-
-	connect(&palette, &Palette::allColoursChanged, this,
+	connect(&palette, &Palette::changed, this,
 		[this]()
 		{
 			const QColor &background_colour = palette.getColourQColor(0, 0);
