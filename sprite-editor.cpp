@@ -11,7 +11,14 @@ SpriteEditor::SpriteEditor(const TileManager &tile_manager, const SpriteMappings
 	setAutoFillBackground(true);
 
 	connect(&tile_manager, &TileManager::regenerated, this, [this](){update();});
-	connect(&sprite_mappings_manager, &SpriteMappingsManager::mappingsModified, this, [this](){update();});
+
+	connect(&sprite_mappings_manager, &SpriteMappingsManager::mappingsModified, this,
+		[this]()
+		{
+			m_selected_sprite_index = qMin(m_selected_sprite_index, this->sprite_mappings.frames.size() - 1);
+			update();
+		}
+	);
 }
 
 void SpriteEditor::paintEvent(QPaintEvent* const event)
@@ -34,7 +41,7 @@ void SpriteEditor::paintEvent(QPaintEvent* const event)
 		return;
 
 	// Draw outline around selected sprite.
-	const SpriteFrame &selected_sprite = frames[selected_sprite_index];
+	const SpriteFrame &selected_sprite = frames[m_selected_sprite_index];
 	const QColor background_colour = palette().color(QPalette::Window);
 	const QRect outline_rect = selected_sprite.rect();
 
@@ -60,7 +67,7 @@ void SpriteEditor::paintEvent(QPaintEvent* const event)
 	// Draw sprites to the left of the selected sprite.
 	x_offset = 0;
 
-	for (int i = selected_sprite_index; i-- > 0; )
+	for (int i = m_selected_sprite_index; i-- > 0; )
 	{
 		x_offset += qMin(-16, frames[i + 1].left());
 		x_offset -= frames[i].right();
@@ -70,7 +77,7 @@ void SpriteEditor::paintEvent(QPaintEvent* const event)
 	// Draw sprites to the right of the selected sprite.
 	x_offset = 0;
 
-	for (int i = selected_sprite_index + 1; i < frames.size(); ++i)
+	for (int i = m_selected_sprite_index + 1; i < frames.size(); ++i)
 	{
 		x_offset += qMax(16, frames[i - 1].right());
 		x_offset -= frames[i].left();
@@ -83,26 +90,12 @@ void SpriteEditor::paintEvent(QPaintEvent* const event)
 	//painter.drawText(rect(), Qt::AlignCenter, QString(std::to_string(0).c_str()));
 }
 
-void SpriteEditor::selectNextSprite()
+void SpriteEditor::setSelectedSprite(const int sprite_index)
 {
-	if (selected_sprite_index != sprite_mappings.frames.size() - 1)
-	{
-		++selected_sprite_index;
-		update();
+	m_selected_sprite_index = qBound(0, sprite_index, sprite_mappings.frames.size() - 1);
+	update();
 
-		emit selectedSpriteChanged(selected_sprite_index);
-	}
-}
-
-void SpriteEditor::selectPreviousSprite()
-{
-	if (selected_sprite_index != 0)
-	{
-		--selected_sprite_index;
-		update();
-
-		emit selectedSpriteChanged(selected_sprite_index);
-	}
+	emit selectedSpriteChanged(m_selected_sprite_index);
 }
 
 void SpriteEditor::setBackgroundColour(const QColor &colour)

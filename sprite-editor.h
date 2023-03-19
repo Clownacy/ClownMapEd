@@ -13,9 +13,13 @@ class SpriteEditor : public QWidget
 public:
 	SpriteEditor(const TileManager &tile_manager, const SpriteMappingsManager &sprite_mappings_manager);
 
+	int selected_sprite_index() const
+	{
+		return m_selected_sprite_index;
+	}
+
 public slots:
-	void selectNextSprite();
-	void selectPreviousSprite();
+	void setSelectedSprite(int sprite_index);
 
 	void setBackgroundColour(const QColor &colour);
 
@@ -32,7 +36,7 @@ protected:
 	void paintEvent(QPaintEvent *event) override;
 
 private:
-	int selected_sprite_index = 0;
+	int m_selected_sprite_index = 0;
 	int starting_palette_line = 0;
 	const SpriteMappings &sprite_mappings;
 	const TileManager &tile_manager;

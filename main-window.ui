@@ -53,6 +53,14 @@
      </property>
      <addaction name="actionNext_Sprite"/>
      <addaction name="actionPrevious_Sprite"/>
+     <addaction name="actionSwap_Sprite_with_Next"/>
+     <addaction name="actionSwap_Sprite_with_Previous"/>
+     <addaction name="actionFirst_Sprite"/>
+     <addaction name="actionLast_Sprite"/>
+     <addaction name="separator"/>
+     <addaction name="actionInsert_New_Sprite"/>
+     <addaction name="actionDuplicate_Sprite"/>
+     <addaction name="actionDelete_Sprite"/>
     </widget>
     <addaction name="menu_Sprite"/>
    </widget>
@@ -166,6 +174,62 @@
    </property>
    <property name="shortcut">
     <string>4</string>
+   </property>
+  </action>
+  <action name="actionInsert_New_Sprite">
+   <property name="text">
+    <string>&amp;Insert New Sprite</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Ins</string>
+   </property>
+  </action>
+  <action name="actionDuplicate_Sprite">
+   <property name="text">
+    <string>D&amp;uplicate Sprite</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+D</string>
+   </property>
+  </action>
+  <action name="actionDelete_Sprite">
+   <property name="text">
+    <string>&amp;Delete Sprite</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Del</string>
+   </property>
+  </action>
+  <action name="actionSwap_Sprite_with_Next">
+   <property name="text">
+    <string>Swap Sprite with N&amp;ext</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+]</string>
+   </property>
+  </action>
+  <action name="actionSwap_Sprite_with_Previous">
+   <property name="text">
+    <string>Swap Sprite with P&amp;revious</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+[</string>
+   </property>
+  </action>
+  <action name="actionFirst_Sprite">
+   <property name="text">
+    <string>&amp;First Sprite</string>
+   </property>
+   <property name="shortcut">
+    <string>Home</string>
+   </property>
+  </action>
+  <action name="actionLast_Sprite">
+   <property name="text">
+    <string>&amp;Last Sprite</string>
+   </property>
+   <property name="shortcut">
+    <string>End</string>
    </property>
   </action>
  </widget>

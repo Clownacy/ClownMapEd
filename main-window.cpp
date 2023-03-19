@@ -186,8 +186,73 @@ MainWindow::MainWindow(QWidget* const parent)
 		}
 	);
 
-	connect(ui->actionNext_Sprite, &QAction::triggered, &sprite_editor, &SpriteEditor::selectNextSprite);
-	connect(ui->actionPrevious_Sprite, &QAction::triggered, &sprite_editor, &SpriteEditor::selectPreviousSprite);
+	connect(ui->actionNext_Sprite, &QAction::triggered, this, [this](){sprite_editor.setSelectedSprite(sprite_editor.selected_sprite_index() + 1);});
+	connect(ui->actionPrevious_Sprite, &QAction::triggered, this, [this](){sprite_editor.setSelectedSprite(sprite_editor.selected_sprite_index() - 1);});
+
+	connect(ui->actionSwap_Sprite_with_Next, &QAction::triggered, this,
+		[this]()
+		{
+			auto mappings = sprite_mappings_manager.lock();
+			auto &frames = mappings->frames;
+			const int selected_sprite_index = sprite_editor.selected_sprite_index();
+
+			frames.move(selected_sprite_index, selected_sprite_index + 1);
+			sprite_editor.setSelectedSprite(selected_sprite_index + 1);
+		}
+	);
+
+	connect(ui->actionSwap_Sprite_with_Previous, &QAction::triggered, this,
+		[this]()
+		{
+			auto mappings = sprite_mappings_manager.lock();
+			auto &frames = mappings->frames;
+			const int selected_sprite_index = sprite_editor.selected_sprite_index();
+
+			frames.move(selected_sprite_index, selected_sprite_index - 1);
+			sprite_editor.setSelectedSprite(selected_sprite_index - 1);
+		}
+	);
+
+	connect(ui->actionFirst_Sprite, &QAction::triggered, this,
+		[this]()
+		{
+			sprite_editor.setSelectedSprite(0);
+		}
+	);
+
+	connect(ui->actionLast_Sprite, &QAction::triggered, this,
+		[this]()
+		{
+			sprite_editor.setSelectedSprite(sprite_mappings_manager.sprite_mappings().frames.size() - 1);
+		}
+	);
+
+	connect(ui->actionInsert_New_Sprite, &QAction::triggered, this,
+		[this]()
+		{
+			sprite_mappings_manager.lock()->frames.insert(sprite_editor.selected_sprite_index() + 1, SpriteFrame());
+			sprite_editor.setSelectedSprite(sprite_editor.selected_sprite_index() + 1);
+		}
+	);
+
+	connect(ui->actionDuplicate_Sprite, &QAction::triggered, this,
+		[this]()
+		{
+			auto mappings = sprite_mappings_manager.lock();
+			auto &frames = mappings->frames;
+			const int selected_sprite_index = sprite_editor.selected_sprite_index();
+
+			frames.insert(selected_sprite_index + 1, frames[selected_sprite_index]);
+			sprite_editor.setSelectedSprite(selected_sprite_index + 1);
+		}
+	);
+
+	connect(ui->actionDelete_Sprite, &QAction::triggered, this,
+		[this]()
+		{
+			sprite_mappings_manager.lock()->frames.remove(sprite_editor.selected_sprite_index());
+		}
+	);
 
 	connect(ui->actionRender_Starting_with_Palette_Line_1, &QAction::triggered, this, [this](){setStartingPaletteLine(0);});
 	connect(ui->actionRender_Starting_with_Palette_Line_2, &QAction::triggered, this, [this](){setStartingPaletteLine(1);});
