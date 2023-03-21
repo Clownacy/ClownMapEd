@@ -15,7 +15,11 @@ SpriteViewer::SpriteViewer(const TileManager &tile_manager, const SpriteMappings
 	connect(&sprite_mappings_manager, &SpriteMappingsManager::mappingsModified, this,
 		[this]()
 		{
-			m_selected_sprite_index = qMin(m_selected_sprite_index, this->sprite_mappings.frames.size() - 1);
+			if (sprite_mappings.frames.size() == 0)
+				m_selected_sprite_index = -1;
+			else
+				m_selected_sprite_index = qBound(0, m_selected_sprite_index, this->sprite_mappings.frames.size() - 1);
+
 			update();
 		}
 	);

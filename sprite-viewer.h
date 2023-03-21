@@ -42,7 +42,7 @@ protected:
 	void paintEvent(QPaintEvent *event) override;
 
 private:
-	int m_selected_sprite_index = 0;
+	int m_selected_sprite_index = -1;
 	int m_selected_piece_index = -1;
 	int starting_palette_line = 0;
 	const SpriteMappings &sprite_mappings;

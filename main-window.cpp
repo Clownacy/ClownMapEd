@@ -110,6 +110,13 @@ MainWindow::MainWindow(QWidget* const parent)
 		[this](const int width, const int height)
 		{
 			auto mappings = this->sprite_mappings_manager.lock();
+
+			if (sprite_viewer.selected_sprite_index() == -1)
+			{
+				mappings->frames.append(SpriteFrame());
+				sprite_viewer.setSelectedSprite(0);
+			}
+
 			auto &pieces = mappings->frames[sprite_viewer.selected_sprite_index()].pieces;
 			pieces.append(SpritePiece{0, 0, width, height, false, 0, false, false, sprite_piece_picker.selected_tile()});
 			sprite_viewer.setSelectedPiece(pieces.size() - 1);
@@ -200,6 +207,7 @@ MainWindow::MainWindow(QWidget* const parent)
 					return;
 
 				sprite_mappings_manager.lock()(SpriteMappings::fromFile(file));
+				sprite_viewer.setSelectedSprite(0);
 			}
 		}
 	);
