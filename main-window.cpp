@@ -3,6 +3,7 @@
 
 #include <climits>
 #include <fstream>
+#include <functional>
 
 #include <QDataStream>
 #include <QFile>
@@ -93,9 +94,24 @@ MainWindow::MainWindow(QWidget* const parent)
 		{
 			int earliest_tile_index = INT_MAX;
 
-			for (auto &piece : sprite_mappings_manager.sprite_mappings().frames[sprite_viewer.selected_sprite_index()].pieces)
-				if (earliest_tile_index > piece.tile_index)
-					earliest_tile_index = piece.tile_index;
+			const int frame_index = sprite_viewer.selected_sprite_index();
+
+			if (frame_index != -1)
+			{
+				const auto &frames = sprite_mappings_manager.sprite_mappings().frames;
+				const int piece_index = sprite_viewer.selected_piece_index();
+
+				if (piece_index == -1)
+				{
+					for (auto &piece : frames[frame_index].pieces)
+						if (earliest_tile_index > piece.tile_index)
+							earliest_tile_index = piece.tile_index;
+				}
+				else
+				{
+					earliest_tile_index = frames[frame_index].pieces[piece_index].tile_index;
+				}
+			}
 
 			if (earliest_tile_index != INT_MAX)
 			{
@@ -120,6 +136,8 @@ MainWindow::MainWindow(QWidget* const parent)
 			auto &pieces = mappings->frames[sprite_viewer.selected_sprite_index()].pieces;
 			pieces.append(SpritePiece{0, 0, width, height, false, 0, false, false, sprite_piece_picker.selected_tile()});
 			sprite_viewer.setSelectedPiece(pieces.size() - 1);
+
+			sprite_piece_picker.setSelectedTile(sprite_piece_picker.selected_tile() + width * height);
 		}
 	);
 
@@ -439,38 +457,55 @@ MainWindow::MainWindow(QWidget* const parent)
 	// Menubar: Edit/Transformation //
 	//////////////////////////////////
 
-	connect(ui->actionCycle_Palette, &QAction::triggered, this,
-		[this]()
-		{
-			auto mappings = sprite_mappings_manager.lock();
-			auto &frame = mappings->frames[sprite_viewer.selected_sprite_index()];
-
-			for (auto &piece : frame.pieces)
-				piece.palette_line = (piece.palette_line + 1) % 4;
-		}
-	);
-
-	auto move_frame = [this](const int x, const int y)
+	auto transform_frame_or_piece = [this](std::function<void(SpritePiece &piece)> callback)
 	{
 		auto mappings = sprite_mappings_manager.lock();
 		auto &frame = mappings->frames[sprite_viewer.selected_sprite_index()];
+		const int piece_index = sprite_viewer.selected_piece_index();
 
-		for (auto &piece : frame.pieces)
+		if (piece_index != -1)
 		{
-			piece.x += x;
-			piece.y += y;
+			auto &piece = frame.pieces[piece_index];
+			callback(piece);
+		}
+		else
+		{
+			for (auto &piece : frame.pieces)
+				callback(piece);
 		}
 	};
 
-	connect(ui->actionMove_Left_8_Pixels, &QAction::triggered, this, [move_frame](){move_frame(-8, 0);});
-	connect(ui->actionMove_Right_8_Pixels, &QAction::triggered, this, [move_frame](){move_frame(8, 0);});
-	connect(ui->actionMove_Up_8_Pixels, &QAction::triggered, this, [move_frame](){move_frame(0, -8);});
-	connect(ui->actionMove_Down_8_Pixels, &QAction::triggered, this, [move_frame](){move_frame(0, 8);});
+	connect(ui->actionCycle_Palette, &QAction::triggered, this,
+		[transform_frame_or_piece]()
+		{
+			transform_frame_or_piece(
+				[](SpritePiece &piece)
+				{
+					piece.palette_line = (piece.palette_line + 1) % 4;
+				}
+			);
+		}
+	);
 
-	connect(ui->actionMove_Left_1_Pixel, &QAction::triggered, this, [move_frame](){move_frame(-1, 0);});
-	connect(ui->actionMove_Right_1_Pixel, &QAction::triggered, this, [move_frame](){move_frame(1, 0);});
-	connect(ui->actionMove_Up_1_Pixel, &QAction::triggered, this, [move_frame](){move_frame(0, -1);});
-	connect(ui->actionMove_Down_1_Pixel, &QAction::triggered, this, [move_frame](){move_frame(0, 1);});
+	auto move_frame_or_piece = [transform_frame_or_piece](const int x, const int y)
+	{
+		transform_frame_or_piece(
+			[x, y](SpritePiece &piece)
+			{
+				piece.x += x; piece.y += y;
+			}
+		);
+	};
+
+	connect(ui->actionMove_Left_8_Pixels, &QAction::triggered, this, [move_frame_or_piece](){move_frame_or_piece(-8, 0);});
+	connect(ui->actionMove_Right_8_Pixels, &QAction::triggered, this, [move_frame_or_piece](){move_frame_or_piece(8, 0);});
+	connect(ui->actionMove_Up_8_Pixels, &QAction::triggered, this, [move_frame_or_piece](){move_frame_or_piece(0, -8);});
+	connect(ui->actionMove_Down_8_Pixels, &QAction::triggered, this, [move_frame_or_piece](){move_frame_or_piece(0, 8);});
+
+	connect(ui->actionMove_Left_1_Pixel, &QAction::triggered, this, [move_frame_or_piece](){move_frame_or_piece(-1, 0);});
+	connect(ui->actionMove_Right_1_Pixel, &QAction::triggered, this, [move_frame_or_piece](){move_frame_or_piece(1, 0);});
+	connect(ui->actionMove_Up_1_Pixel, &QAction::triggered, this, [move_frame_or_piece](){move_frame_or_piece(0, -1);});
+	connect(ui->actionMove_Down_1_Pixel, &QAction::triggered, this, [move_frame_or_piece](){move_frame_or_piece(0, 1);});
 
 	connect(ui->actionRender_Starting_with_Palette_Line_1, &QAction::triggered, this, [this](){setStartingPaletteLine(0);});
 	connect(ui->actionRender_Starting_with_Palette_Line_2, &QAction::triggered, this, [this](){setStartingPaletteLine(1);});
