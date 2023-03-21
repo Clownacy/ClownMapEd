@@ -16,10 +16,22 @@ static inline T DivideCeiling(T a, T b)
 
 TileViewer::TileViewer(const TileManager &tile_manager)
 	: tile_manager(tile_manager)
+	, timer(this)
 {
 	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
 	connect(&tile_manager, &TileManager::regenerated, this, qOverload<>(&TileViewer::update));
+
+	connect(&timer, &QTimer::timeout, this,
+		[this]()
+		{
+			selection_flip_flop = !selection_flip_flop;
+			update();
+		}
+	);
+
+	// Flash the selection every two seconds.
+	timer.start(1000 * 2);
 }
 
 void TileViewer::setSelection(const int start, const int end)
@@ -67,12 +79,15 @@ void TileViewer::paintEvent(QPaintEvent* const event)
 	}
 
 	// Draw the selection.
-	brush.setColor(Qt::white);
-	painter.setBrush(brush);
-	painter.setCompositionMode(QPainter::RasterOp_SourceXorDestination);
+	if (selection_flip_flop)
+	{
+		brush.setColor(Qt::white);
+		painter.setBrush(brush);
+		painter.setCompositionMode(QPainter::RasterOp_SourceXorDestination);
 
-	for (int i = selection_start; i < selection_end; ++i)
-		painter.drawRect((i % tiles_per_row) * size_of_tile, (i / tiles_per_row) * size_of_tile, size_of_tile, size_of_tile);
+		for (int i = selection_start; i < selection_end; ++i)
+			painter.drawRect((i % tiles_per_row) * size_of_tile, (i / tiles_per_row) * size_of_tile, size_of_tile, size_of_tile);
+	}
 }
 
 void TileViewer::mousePressEvent(QMouseEvent* const event)

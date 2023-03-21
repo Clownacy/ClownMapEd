@@ -3,6 +3,7 @@
 
 #include <QColor>
 #include <QObject>
+#include <QTimer>
 #include <QWidget>
 
 #include "tile-manager.h"
@@ -39,6 +40,8 @@ private:
 
 	const TileManager &tile_manager;
 	QColor background_colour;
+	QTimer timer;
+	bool selection_flip_flop = false;
 	int selection_start = 0;
 	int selection_end = 0;
 	int palette_line = 0;
