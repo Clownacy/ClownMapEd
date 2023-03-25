@@ -31,17 +31,17 @@
      <property name="title">
       <string>Load Tile &amp;Graphics</string>
      </property>
-     <addaction name="actionLoadTilesUncompressed"/>
-     <addaction name="actionLoadTilesNemesis"/>
-     <addaction name="actionLoadTilesKosinski"/>
-     <addaction name="actionLoadTilesModuledKosinski"/>
-     <addaction name="actionLoadTilesKosinskiPlus"/>
-     <addaction name="actionLoadTilesModuledKosinskiPlus"/>
-     <addaction name="actionLoadTilesComper"/>
+     <addaction name="actionLoad_Tiles_Uncompressed"/>
+     <addaction name="actionLoad_Tiles_Nemesis"/>
+     <addaction name="actionLoad_Tiles_Kosinski"/>
+     <addaction name="actionLoad_Tiles_Moduled_Kosinski"/>
+     <addaction name="actionLoad_Tiles_Kosinski_Plus"/>
+     <addaction name="actionLoad_Tiles_Moduled_Kosinski_Plus"/>
+     <addaction name="actionLoad_Tiles_Comper"/>
     </widget>
     <addaction name="menuLoad_Tile_Graphics"/>
-    <addaction name="actionLoadPrimaryPalette"/>
-    <addaction name="actionLoadMappings"/>
+    <addaction name="actionLoad_Primary_Palette"/>
+    <addaction name="actionLoad_Mappings"/>
     <addaction name="actionLoad_Sprite_Pattern_Cues"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
@@ -144,47 +144,53 @@
    <addaction name="menu_View"/>
    <addaction name="menu_Settings"/>
   </widget>
-  <action name="actionLoadPrimaryPalette">
+  <action name="actionLoad_Primary_Palette">
    <property name="text">
     <string>Load &amp;Primary or Full Palette...</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
+   </property>
   </action>
-  <action name="actionLoadMappings">
+  <action name="actionLoad_Mappings">
    <property name="text">
     <string>Load Sprite &amp;Mappings...</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+M</string>
+   </property>
   </action>
-  <action name="actionLoadTilesUncompressed">
+  <action name="actionLoad_Tiles_Uncompressed">
    <property name="text">
     <string>&amp;Uncompressed...</string>
    </property>
   </action>
-  <action name="actionLoadTilesNemesis">
+  <action name="actionLoad_Tiles_Nemesis">
    <property name="text">
     <string>&amp;Nemesis...</string>
    </property>
   </action>
-  <action name="actionLoadTilesKosinski">
+  <action name="actionLoad_Tiles_Kosinski">
    <property name="text">
     <string>&amp;Kosinski...</string>
    </property>
   </action>
-  <action name="actionLoadTilesModuledKosinski">
+  <action name="actionLoad_Tiles_Moduled_Kosinski">
    <property name="text">
     <string>&amp;Moduled Kosinski...</string>
    </property>
   </action>
-  <action name="actionLoadTilesKosinskiPlus">
+  <action name="actionLoad_Tiles_Kosinski_Plus">
    <property name="text">
     <string>Kosinski+...</string>
    </property>
   </action>
-  <action name="actionLoadTilesComper">
+  <action name="actionLoad_Tiles_Comper">
    <property name="text">
     <string>&amp;Comper...</string>
    </property>
   </action>
-  <action name="actionLoadTilesModuledKosinskiPlus">
+  <action name="actionLoad_Tiles_Moduled_Kosinski_Plus">
    <property name="text">
     <string>Moduled Kosinski+...</string>
    </property>
@@ -525,6 +531,9 @@
   <action name="actionLoad_Sprite_Pattern_Cues">
    <property name="text">
     <string>Load Sprite Pattern &amp;Cues...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+C</string>
    </property>
   </action>
  </widget>

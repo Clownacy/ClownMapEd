@@ -147,7 +147,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	// Menubar: File //
 	///////////////////
 
-	connect(ui->actionLoadTilesUncompressed, &QAction::triggered, this,
+	connect(ui->actionLoad_Tiles_Uncompressed, &QAction::triggered, this,
 		[this]()
 		{
 			loadTileFile([](std::istream &src, std::iostream &dst)
@@ -159,49 +159,49 @@ MainWindow::MainWindow(QWidget* const parent)
 		}
 	);
 
-	connect(ui->actionLoadTilesNemesis, &QAction::triggered, this,
+	connect(ui->actionLoad_Tiles_Nemesis, &QAction::triggered, this,
 		[this]()
 		{
 			loadTileFile([](std::istream &src, std::iostream &dst){return nemesis::decode(src, dst);});
 		}
 	);
 
-	connect(ui->actionLoadTilesKosinski, &QAction::triggered, this,
+	connect(ui->actionLoad_Tiles_Kosinski, &QAction::triggered, this,
 		[this]()
 		{
 			loadTileFile(kosinski::decode);
 		}
 	);
 
-	connect(ui->actionLoadTilesModuledKosinski, &QAction::triggered, this,
+	connect(ui->actionLoad_Tiles_Moduled_Kosinski, &QAction::triggered, this,
 		[this]()
 		{
 			loadTileFile([](std::istream &src, std::iostream &dst){return kosinski::moduled_decode(src, dst);});
 		}
 	);
 
-	connect(ui->actionLoadTilesKosinskiPlus, &QAction::triggered, this,
+	connect(ui->actionLoad_Tiles_Kosinski_Plus, &QAction::triggered, this,
 		[this]()
 		{
 			loadTileFile(kosplus::decode);
 		}
 	);
 
-	connect(ui->actionLoadTilesModuledKosinskiPlus, &QAction::triggered, this,
+	connect(ui->actionLoad_Tiles_Moduled_Kosinski_Plus, &QAction::triggered, this,
 		[this]()
 		{
 			loadTileFile([](std::istream &src, std::iostream &dst){return kosplus::moduled_decode(src, dst);});
 		}
 	);
 
-	connect(ui->actionLoadTilesComper, &QAction::triggered, this,
+	connect(ui->actionLoad_Tiles_Comper, &QAction::triggered, this,
 		[this]()
 		{
 			loadTileFile(comper::decode);
 		}
 	);
 
-	connect(ui->actionLoadPrimaryPalette, &QAction::triggered, this,
+	connect(ui->actionLoad_Primary_Palette, &QAction::triggered, this,
 		[this]()
 		{
 			const QString file_path = QFileDialog::getOpenFileName(this, "Open Palette File");
@@ -215,7 +215,7 @@ MainWindow::MainWindow(QWidget* const parent)
 		}
 	);
 
-	connect(ui->actionLoadMappings, &QAction::triggered, this,
+	connect(ui->actionLoad_Mappings, &QAction::triggered, this,
 		[this]()
 		{
 			const QString file_path = QFileDialog::getOpenFileName(this, "Open Sprite Mappings File");
