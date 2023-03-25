@@ -41,8 +41,8 @@ DynamicPatternLoadCues DynamicPatternLoadCues::fromFile(QFile &file)
 		for (unsigned int current_copy = 0; current_copy < total_copies; ++current_copy)
 		{
 			const unsigned int word = stream.read<quint16>();
-			const unsigned int total_tiles = (word >> 4 * 3) + 1;
-			const unsigned int tile_index = word & 0xFFF;
+			const int total_tiles = (word >> 4 * 3) + 1;
+			const int tile_index = word & 0xFFF;
 
 			frame.copies[current_copy] = TileCopy{tile_index, total_tiles};
 		}
@@ -51,9 +51,9 @@ DynamicPatternLoadCues DynamicPatternLoadCues::fromFile(QFile &file)
 	return dplcs;
 }
 
-unsigned int DynamicPatternLoadCues::Frame::getMappedTile(const unsigned int tile_index) const
+int DynamicPatternLoadCues::Frame::getMappedTile(const int tile_index) const
 {
-	unsigned int base_tile = 0;
+	int base_tile = 0;
 
 	for (auto &copy : copies)
 	{
@@ -63,5 +63,5 @@ unsigned int DynamicPatternLoadCues::Frame::getMappedTile(const unsigned int til
 		base_tile += copy.length;
 	}
 
-	return static_cast<unsigned int>(-1);
+	return -1;
 }

@@ -18,7 +18,7 @@ SpritePiecePicker::SpritePiecePicker(TileManager &tile_manager)
 
 	setSelectedTile(0);
 
-	for (int i = 0; i < buttons.size(); ++i)
+	for (int i = 0; i < static_cast<int>(buttons.size()); ++i)
 		connect(&buttons[i], &SpritePieceButton::clicked, this, [this, i](){emit pieceSelected(i % 4 + 1, i / 4 + 1);});
 }
 

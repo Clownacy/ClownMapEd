@@ -10,15 +10,15 @@ struct DynamicPatternLoadCues
 {
 	struct TileCopy
 	{
-		unsigned int start;
-		unsigned int length;
+		int start;
+		int length;
 	};
 
 	struct Frame
 	{
 		QVector<TileCopy> copies;
 
-		unsigned int getMappedTile(unsigned int tile_index) const;
+		int getMappedTile(int tile_index) const;
 	};
 
 	QVector<Frame> frames;
