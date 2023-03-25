@@ -38,13 +38,13 @@ void SpritePiece::draw(QPainter &painter, const TileManager &tile_manager, const
 			const int tile_y_corrected = y_flip ? height - tile_y - 1 : tile_y;
 
 			const QRect rect(
-				x_offset + x + tile_x_corrected * 8,
-				y_offset + y + tile_y_corrected * 8,
-				8,
-				8
+				x_offset + x + tile_x_corrected * Tile::WIDTH,
+				y_offset + y + tile_y_corrected * Tile::HEIGHT,
+				Tile::WIDTH,
+				Tile::HEIGHT
 			);
 
-			painter.drawPixmap(rect, tile_manager.pixmaps(current_tile_index++, (starting_palette_line + palette_line) % 4).transformed(flip_transform), QRectF(0, 0, 8, 8));
+			painter.drawPixmap(rect, tile_manager.pixmaps(current_tile_index++, (starting_palette_line + palette_line) % 4).transformed(flip_transform), QRectF(0, 0, Tile::WIDTH, Tile::HEIGHT));
 		}
 	}
 }

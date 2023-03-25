@@ -1,6 +1,6 @@
 #include "tile.h"
 
-Tile::Tile(std::array<uchar, 8 * 8 / 2> &bytes, const Palette &palette)
+Tile::Tile(std::array<uchar, TOTAL_BYTES> &bytes, const Palette &palette)
 	: m_bytes(bytes)
 {
 	regeneratePixmaps(palette);
@@ -13,11 +13,11 @@ void Tile::changePalette(const Palette &palette)
 
 void Tile::regeneratePixmaps(const Palette &palette)
 {
-	quint16 pixmap_data[8 * 8];
+	quint16 pixmap_data[WIDTH * HEIGHT];
 
-	for (unsigned int line = 0; line < 4; ++line)
+	for (unsigned int line = 0; line < Palette::TOTAL_LINES; ++line)
 	{
-		for (unsigned int i = 0; i < 8 * 8; ++i)
+		for (unsigned int i = 0; i < WIDTH * HEIGHT; ++i)
 		{
 			const unsigned int palette_index = (m_bytes[i >> 1] >> (~(i << 2) & 4)) & 0xF;
 			if (palette_index == 0)
@@ -32,6 +32,6 @@ void Tile::regeneratePixmaps(const Palette &palette)
 			}
 		}
 
-		m_pixmaps[line] = QPixmap::fromImage(QImage(reinterpret_cast<uchar*>(pixmap_data), 8, 8, QImage::Format::Format_ARGB4444_Premultiplied));
+		m_pixmaps[line] = QPixmap::fromImage(QImage(reinterpret_cast<uchar*>(pixmap_data), WIDTH, HEIGHT, QImage::Format::Format_ARGB4444_Premultiplied));
 	}
 }

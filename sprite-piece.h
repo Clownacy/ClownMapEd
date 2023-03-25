@@ -15,7 +15,7 @@ struct SpritePiece
 
 	QRect rect() const
 	{
-		return QRect(x, y, width * 8, height * 8);
+		return QRect(x, y, width * Tile::WIDTH, height * Tile::HEIGHT);
 	}
 
 	int x;

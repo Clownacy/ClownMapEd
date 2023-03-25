@@ -46,8 +46,6 @@ public:
 		return tiles.size();
 	}
 
-	static constexpr int SIZE_OF_TILE = 8 * 8 / 2;
-
 public slots:
 	void regenerate();
 
@@ -57,7 +55,7 @@ signals:
 private:
 	bool setTilesInternal(const uchar* const tile_bytes, const int total_bytes);
 
-	QVector<std::array<uchar, SIZE_OF_TILE>> tile_bytes;
+	QVector<std::array<uchar, Tile::TOTAL_BYTES>> tile_bytes;
 	const Palette *palette;
 
 	QPixmap invalid_pixmap;

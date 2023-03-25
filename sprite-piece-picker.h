@@ -40,11 +40,14 @@ signals:
 	void pieceSelected(int width, int height);
 
 private:
+	static constexpr int MAX_PIECE_WIDTH = 4;
+	static constexpr int MAX_PIECE_HEIGHT = 4;
+
 	void updateSpritePieces();
 
 	const TileManager &tile_manager;
 	QGridLayout grid_layout;
-	std::array<SpritePieceButton, 4 * 4> buttons;
+	std::array<SpritePieceButton, MAX_PIECE_WIDTH * MAX_PIECE_HEIGHT> buttons;
 	int tile_index = 0;
 	int palette_line = 0;
 };

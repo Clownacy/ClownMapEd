@@ -12,7 +12,11 @@
 class Tile
 {
 public:
-	Tile(std::array<uchar, 8 * 8 / 2> &bytes, const Palette &palette);
+	static constexpr int WIDTH = 8;
+	static constexpr int HEIGHT = 8;
+	static constexpr int TOTAL_BYTES = WIDTH * HEIGHT / 2;
+
+	Tile(std::array<uchar, TOTAL_BYTES> &bytes, const Palette &palette);
 
 	void changePalette(const Palette &palette);
 
@@ -24,7 +28,7 @@ public:
 private:
 	void regeneratePixmaps(const Palette &palette);
 
-	std::array<uchar, 8 * 8 / 2> m_bytes;
+	std::array<uchar, TOTAL_BYTES> m_bytes;
 	std::array<QPixmap, 4> m_pixmaps;
 };
 

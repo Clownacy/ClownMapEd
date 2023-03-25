@@ -8,25 +8,44 @@ TileManager::TileManager(const uchar* const tile_bytes, const int total_bytes, c
 	if (tile_bytes != nullptr)
 		setTilesInternal(tile_bytes, total_bytes);
 
-	qint16 invalid_pixmap_raw_data[8][8];
+	qint16 invalid_pixmap_raw_data[Tile::HEIGHT][Tile::WIDTH];
 
-	for (unsigned int y = 0; y < 8; ++y)
-		for (unsigned int x = 0; x < 8; ++x)
+	for (int y = 0; y < Tile::HEIGHT; ++y)
+		for (int x = 0; x < Tile::WIDTH; ++x)
 			invalid_pixmap_raw_data[y][x] = 0;
 
-	for (unsigned int i = 0; i < 8; ++i)
-	{
-		const unsigned int colour = 0xFF00;
+	const qint16 colour = 0xFF00;
 
-		invalid_pixmap_raw_data[0][i] = colour;
-		invalid_pixmap_raw_data[7][i] = colour;
-		invalid_pixmap_raw_data[i][0] = colour;
-		invalid_pixmap_raw_data[i][7] = colour;
-		invalid_pixmap_raw_data[i][i] = colour;
-		invalid_pixmap_raw_data[i][i ^ 7] = colour;
+	for (int x = 0; x < Tile::WIDTH; ++x)
+	{
+		invalid_pixmap_raw_data[0][x] = colour;
+		invalid_pixmap_raw_data[Tile::HEIGHT - 1][x] = colour;
 	}
 
-	invalid_pixmap = QPixmap::fromImage(QImage(reinterpret_cast<uchar*>(invalid_pixmap_raw_data), 8, 8, QImage::Format::Format_ARGB4444_Premultiplied));
+	for (int y = 0; y < Tile::HEIGHT; ++y)
+	{
+		invalid_pixmap_raw_data[y][0] = colour;
+		invalid_pixmap_raw_data[y][Tile::WIDTH - 1] = colour;
+	}
+
+	if (Tile::WIDTH >= Tile::HEIGHT)
+	{
+		for (int x = 0; x < Tile::WIDTH; ++x)
+		{
+			invalid_pixmap_raw_data[x * Tile::HEIGHT / Tile::WIDTH][x] = colour;
+			invalid_pixmap_raw_data[(Tile::WIDTH - x - 1) * Tile::HEIGHT / Tile::WIDTH][x] = colour;
+		}
+	}
+	else
+	{
+		for (int y = 0; y < Tile::HEIGHT; ++y)
+		{
+			invalid_pixmap_raw_data[y][y * Tile::WIDTH / Tile::HEIGHT] = colour;
+			invalid_pixmap_raw_data[y][(Tile::HEIGHT - y - 1) * Tile::WIDTH / Tile::HEIGHT] = colour;
+		}
+	}
+
+	invalid_pixmap = QPixmap::fromImage(QImage(reinterpret_cast<uchar*>(invalid_pixmap_raw_data), Tile::WIDTH, Tile::HEIGHT, QImage::Format::Format_ARGB4444_Premultiplied));
 
 	connect(&palette, &Palette::changed, this, &TileManager::regenerate);
 
@@ -36,7 +55,7 @@ TileManager::TileManager(const uchar* const tile_bytes, const int total_bytes, c
 void TileManager::regenerate()
 {
 	tiles.clear();
-	tiles.reserve(tile_bytes.size() / SIZE_OF_TILE);
+	tiles.reserve(tile_bytes.size() / Tile::TOTAL_BYTES);
 
 	for (auto &single_tile_bytes : tile_bytes)
 		tiles.push_back(Tile(single_tile_bytes, *palette));
@@ -47,18 +66,18 @@ void TileManager::regenerate()
 bool TileManager::setTilesInternal(const uchar* const tile_bytes, const int total_bytes)
 {
 	// Bail if the file contains a partial tile (it probably isn't tile data).
-	if (total_bytes % SIZE_OF_TILE != 0)
+	if (total_bytes % Tile::TOTAL_BYTES != 0)
 		return false;
 
-	const int total_tiles = total_bytes / SIZE_OF_TILE;
+	const int total_tiles = total_bytes / Tile::TOTAL_BYTES;
 
 	this->tile_bytes.resize(total_tiles);
 	this->tile_bytes.squeeze();
 
 	for (int i = 0; i < total_tiles; ++i)
 	{
-		const uchar* const single_tile_bytes = tile_bytes + i * SIZE_OF_TILE;
-		std::copy(single_tile_bytes, single_tile_bytes + SIZE_OF_TILE, this->tile_bytes[i].begin());
+		const uchar* const single_tile_bytes = tile_bytes + i * Tile::TOTAL_BYTES;
+		std::copy(single_tile_bytes, single_tile_bytes + Tile::TOTAL_BYTES, this->tile_bytes[i].begin());
 	}
 
 	return true;
