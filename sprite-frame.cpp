@@ -20,8 +20,10 @@ SpriteFrame SpriteFrame::fromDataStream(DataStream &stream)
 void SpriteFrame::draw(QPainter &painter, const TileManager &tile_manager, const int starting_palette_line, const int x_offset, const int y_offset) const
 {
 	// Must draw in reverse order.
-	for (auto piece = pieces.crbegin(); piece != pieces.crend(); ++piece)
-		piece->draw(painter, tile_manager, starting_palette_line, x_offset, y_offset);
+	for (unsigned int i = 0; i < 2; ++i)
+		for (auto piece = pieces.crbegin(); piece != pieces.crend(); ++piece)
+			if (piece->priority == (i != 0))
+				piece->draw(painter, tile_manager, starting_palette_line, x_offset, y_offset);
 }
 
 QRect SpriteFrame::rect() const

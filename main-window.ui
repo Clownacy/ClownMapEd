@@ -70,6 +70,7 @@
       <string>Transformation</string>
      </property>
      <addaction name="actionCycle_Palette"/>
+     <addaction name="actionToggle_Foreground_Flag"/>
      <addaction name="separator"/>
      <addaction name="actionMove_Left_8_Pixels"/>
      <addaction name="actionMove_Right_8_Pixels"/>
@@ -534,6 +535,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+C</string>
+   </property>
+  </action>
+  <action name="actionToggle_Foreground_Flag">
+   <property name="text">
+    <string>Toggle Foreground Flag</string>
+   </property>
+   <property name="shortcut">
+    <string>F</string>
    </property>
   </action>
  </widget>

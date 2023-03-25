@@ -523,6 +523,18 @@ MainWindow::MainWindow(QWidget* const parent)
 		}
 	);
 
+	connect(ui->actionToggle_Foreground_Flag, &QAction::triggered, this,
+		[transform_frame_or_piece]()
+		{
+			transform_frame_or_piece(
+				[](SpritePiece &piece)
+				{
+					piece.priority = !piece.priority;
+				}
+			);
+		}
+	);
+
 	auto move_frame_or_piece = [transform_frame_or_piece](const int x, const int y)
 	{
 		transform_frame_or_piece(
