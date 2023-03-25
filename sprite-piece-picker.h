@@ -47,7 +47,7 @@ private:
 
 	const TileManager &tile_manager;
 	QGridLayout grid_layout;
-	std::array<SpritePieceButton, MAX_PIECE_WIDTH * MAX_PIECE_HEIGHT> buttons;
+	std::array<std::array<SpritePieceButton, MAX_PIECE_WIDTH>, MAX_PIECE_HEIGHT> buttons;
 	int tile_index = 0;
 	int palette_line = 0;
 };
