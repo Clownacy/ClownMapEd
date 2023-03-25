@@ -9,6 +9,7 @@ PaletteEditor::PaletteEditor(Palette &palette)
 	setSizePolicy(QSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum));
 	setLayout(&grid_layout);
 	grid_layout.setSpacing(0);
+	grid_layout.setContentsMargins(0, 0, 0, 0);
 
 	for (unsigned int line = 0; line < 4; ++line)
 	{
