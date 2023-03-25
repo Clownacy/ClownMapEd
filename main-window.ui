@@ -42,6 +42,7 @@
     <addaction name="menuLoad_Tile_Graphics"/>
     <addaction name="actionLoadPrimaryPalette"/>
     <addaction name="actionLoadMappings"/>
+    <addaction name="actionLoad_Sprite_Pattern_Cues"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
@@ -519,6 +520,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+PgDown</string>
+   </property>
+  </action>
+  <action name="actionLoad_Sprite_Pattern_Cues">
+   <property name="text">
+    <string>Load Sprite Pattern &amp;Cues...</string>
    </property>
   </action>
  </widget>

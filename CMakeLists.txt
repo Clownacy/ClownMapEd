@@ -20,6 +20,8 @@ set(PROJECT_SOURCES
 	"colour-button.cpp"
 	"colour-button.h"
 	"data-stream.h"
+	"dynamic-pattern-load-cues.cpp"
+	"dynamic-pattern-load-cues.h"
 	"main.cpp"
 	"main-window.cpp"
 	"main-window.h"

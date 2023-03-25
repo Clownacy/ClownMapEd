@@ -15,6 +15,8 @@
 #include "kosplus.h"
 #include "nemesis.h"
 
+#include "dynamic-pattern-load-cues.h"
+
 void MainWindow::loadTileFile(bool (* const decompression_function)(std::istream &src, std::iostream &dst))
 {
 	const QString file_path = QFileDialog::getOpenFileName(this, "Open Tile Graphics File");
@@ -226,6 +228,47 @@ MainWindow::MainWindow(QWidget* const parent)
 
 				sprite_mappings_manager.lock()(SpriteMappings::fromFile(file));
 				sprite_viewer.setSelectedSprite(0);
+			}
+		}
+	);
+
+	connect(ui->actionLoad_Sprite_Pattern_Cues, &QAction::triggered, this,
+		[this]()
+		{
+			const QString file_path = QFileDialog::getOpenFileName(this, "Open Dynamic Pattern Loading Cue File");
+
+			if (!file_path.isNull())
+			{
+				QFile file(file_path);
+				if (!file.open(QFile::ReadOnly))
+					return;
+
+				const DynamicPatternLoadCues dplcs = DynamicPatternLoadCues::fromFile(file);
+
+				auto mappings = sprite_mappings_manager.lock();
+
+				if (mappings->frames.size() == dplcs.frames.size())
+				{
+					for (auto &frame : mappings->frames)
+					{
+						const std::size_t frame_index = &frame - mappings->frames.data();
+
+						for (auto &piece : frame.pieces)
+						{
+							const unsigned int base_mapped_tile = dplcs.getMappedTile(frame_index, piece.tile_index);
+
+							for (unsigned int i = 0; i < piece.width * piece.height; ++i)
+							{
+								const unsigned int mapped_tile = dplcs.getMappedTile(frame_index, piece.tile_index + i);
+
+								if (mapped_tile == static_cast<unsigned int>(-1) || mapped_tile != base_mapped_tile + i)
+									return;
+							}
+
+							piece.tile_index = base_mapped_tile;
+						}
+					}
+				}
 			}
 		}
 	);
