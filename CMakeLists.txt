@@ -17,39 +17,39 @@ find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 set(PROJECT_SOURCES
-	colour-button.cpp
-	colour-button.h
-	data-stream.h
-	main.cpp
-	main-window.cpp
-	main-window.h
-	main-window.ui
-	palette.cpp
-	palette.h
-	palette-editor.cpp
-	palette-editor.h
-	sprite-viewer.cpp
-	sprite-viewer.h
-	sprite-frame.cpp
-	sprite-frame.h
-	sprite-mappings.cpp
-	sprite-mappings.h
-	sprite-mappings-manager.cpp
-	sprite-mappings-manager.h
-	sprite-piece.cpp
-	sprite-piece.h
-	sprite-piece-button.cpp
-	sprite-piece-button.h
-	sprite-piece-picker.cpp
-	sprite-piece-picker.h
-	tile.cpp
-	tile.h
-	tile-manager.cpp
-	tile-manager.h
-	tile-viewer.cpp
-	tile-viewer.h
-	utilities.cpp
-	utilities.h
+	"colour-button.cpp"
+	"colour-button.h"
+	"data-stream.h"
+	"main.cpp"
+	"main-window.cpp"
+	"main-window.h"
+	"main-window.ui"
+	"palette.cpp"
+	"palette.h"
+	"palette-editor.cpp"
+	"palette-editor.h"
+	"sprite-viewer.cpp"
+	"sprite-viewer.h"
+	"sprite-frame.cpp"
+	"sprite-frame.h"
+	"sprite-mappings.cpp"
+	"sprite-mappings.h"
+	"sprite-mappings-manager.cpp"
+	"sprite-mappings-manager.h"
+	"sprite-piece.cpp"
+	"sprite-piece.h"
+	"sprite-piece-button.cpp"
+	"sprite-piece-button.h"
+	"sprite-piece-picker.cpp"
+	"sprite-piece-picker.h"
+	"tile.cpp"
+	"tile.h"
+	"tile-manager.cpp"
+	"tile-manager.h"
+	"tile-viewer.cpp"
+	"tile-viewer.h"
+	"utilities.cpp"
+	"utilities.h"
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
