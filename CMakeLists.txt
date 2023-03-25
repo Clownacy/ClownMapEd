@@ -36,7 +36,6 @@ set(PROJECT_SOURCES
 	"sprite-frame.h"
 	"sprite-mappings.cpp"
 	"sprite-mappings.h"
-	"sprite-mappings-manager.cpp"
 	"sprite-mappings-manager.h"
 	"sprite-piece.cpp"
 	"sprite-piece.h"

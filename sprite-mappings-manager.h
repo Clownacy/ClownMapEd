@@ -12,8 +12,6 @@ class SpriteMappingsManager : public QObject
 	class Lock;
 
 public:
-	SpriteMappingsManager();
-
 	const SpriteMappings& sprite_mappings() const
 	{
 		return m_sprite_mappings;

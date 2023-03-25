@@ -28,9 +28,6 @@ public:
 	~MainWindow();
 
 private:
-	void loadTileFile(bool (*decompression_function)(std::istream &src, std::iostream &dst));
-	void setStartingPaletteLine(int line);
-
 	Ui::MainWindow *ui;
 	Palette palette;
 	SpriteMappingsManager sprite_mappings_manager;

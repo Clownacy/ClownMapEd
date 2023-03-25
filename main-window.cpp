@@ -17,36 +17,6 @@
 
 #include "dynamic-pattern-load-cues.h"
 
-void MainWindow::loadTileFile(bool (* const decompression_function)(std::istream &src, std::iostream &dst))
-{
-	const QString file_path = QFileDialog::getOpenFileName(this, "Open Tile Graphics File");
-
-	if (!file_path.isNull())
-	{
-		std::ifstream file_stream(file_path.toStdString(), std::ifstream::in | std::ifstream::binary);
-
-		if (!file_stream.is_open())
-			return;
-
-		std::stringstream string_stream(std::stringstream::in | std::stringstream::out | std::stringstream::binary);
-
-		if (!decompression_function(file_stream, string_stream))
-			return;
-
-		if (!tile_manager.setTiles(reinterpret_cast<const uchar*>(string_stream.str().c_str()), static_cast<int>(string_stream.str().length())))
-		{
-			// TODO: Should probably show an error message or something.
-		}
-	}
-}
-
-void MainWindow::setStartingPaletteLine(const int line)
-{
-	sprite_piece_picker.setPaletteLine(line);
-	sprite_viewer.setStartingPaletteLine(line);
-	tile_viewer.setPaletteLine(line);
-}
-
 MainWindow::MainWindow(QWidget* const parent)
 	: QMainWindow(parent)
 	, ui(new Ui::MainWindow)
@@ -147,10 +117,33 @@ MainWindow::MainWindow(QWidget* const parent)
 	// Menubar: File //
 	///////////////////
 
-	connect(ui->actionLoad_Tiles_Uncompressed, &QAction::triggered, this,
-		[this]()
+	auto load_tile_file = [this](bool (* const decompression_function)(std::istream &src, std::iostream &dst))
+	{
+		const QString file_path = QFileDialog::getOpenFileName(this, "Open Tile Graphics File");
+
+		if (!file_path.isNull())
 		{
-			loadTileFile([](std::istream &src, std::iostream &dst)
+			std::ifstream file_stream(file_path.toStdString(), std::ifstream::in | std::ifstream::binary);
+
+			if (!file_stream.is_open())
+				return;
+
+			std::stringstream string_stream(std::stringstream::in | std::stringstream::out | std::stringstream::binary);
+
+			if (!decompression_function(file_stream, string_stream))
+				return;
+
+			if (!tile_manager.setTiles(reinterpret_cast<const uchar*>(string_stream.str().c_str()), static_cast<int>(string_stream.str().length())))
+			{
+				// TODO: Should probably show an error message or something.
+			}
+		}
+	};
+
+	connect(ui->actionLoad_Tiles_Uncompressed, &QAction::triggered, this,
+		[load_tile_file]()
+		{
+			load_tile_file([](std::istream &src, std::iostream &dst)
 				{
 					dst << src.rdbuf();
 					return true;
@@ -160,44 +153,44 @@ MainWindow::MainWindow(QWidget* const parent)
 	);
 
 	connect(ui->actionLoad_Tiles_Nemesis, &QAction::triggered, this,
-		[this]()
+		[load_tile_file]()
 		{
-			loadTileFile([](std::istream &src, std::iostream &dst){return nemesis::decode(src, dst);});
+			load_tile_file([](std::istream &src, std::iostream &dst){return nemesis::decode(src, dst);});
 		}
 	);
 
 	connect(ui->actionLoad_Tiles_Kosinski, &QAction::triggered, this,
-		[this]()
+		[load_tile_file]()
 		{
-			loadTileFile(kosinski::decode);
+			load_tile_file(kosinski::decode);
 		}
 	);
 
 	connect(ui->actionLoad_Tiles_Moduled_Kosinski, &QAction::triggered, this,
-		[this]()
+		[load_tile_file]()
 		{
-			loadTileFile([](std::istream &src, std::iostream &dst){return kosinski::moduled_decode(src, dst);});
+			load_tile_file([](std::istream &src, std::iostream &dst){return kosinski::moduled_decode(src, dst);});
 		}
 	);
 
 	connect(ui->actionLoad_Tiles_Kosinski_Plus, &QAction::triggered, this,
-		[this]()
+		[load_tile_file]()
 		{
-			loadTileFile(kosplus::decode);
+			load_tile_file(kosplus::decode);
 		}
 	);
 
 	connect(ui->actionLoad_Tiles_Moduled_Kosinski_Plus, &QAction::triggered, this,
-		[this]()
+		[load_tile_file]()
 		{
-			loadTileFile([](std::istream &src, std::iostream &dst){return kosplus::moduled_decode(src, dst);});
+			load_tile_file([](std::istream &src, std::iostream &dst){return kosplus::moduled_decode(src, dst);});
 		}
 	);
 
 	connect(ui->actionLoad_Tiles_Comper, &QAction::triggered, this,
-		[this]()
+		[load_tile_file]()
 		{
-			loadTileFile(comper::decode);
+			load_tile_file(comper::decode);
 		}
 	);
 
@@ -630,10 +623,17 @@ MainWindow::MainWindow(QWidget* const parent)
 	// Settings/Tile Rendering //
 	/////////////////////////////
 
-	connect(ui->actionRender_Starting_with_Palette_Line_1, &QAction::triggered, this, [this](){setStartingPaletteLine(0);});
-	connect(ui->actionRender_Starting_with_Palette_Line_2, &QAction::triggered, this, [this](){setStartingPaletteLine(1);});
-	connect(ui->actionRender_Starting_with_Palette_Line_3, &QAction::triggered, this, [this](){setStartingPaletteLine(2);});
-	connect(ui->actionRender_Starting_with_Palette_Line_4, &QAction::triggered, this, [this](){setStartingPaletteLine(3);});
+	auto set_starting_palette_line = [this](const int line)
+	{
+		sprite_piece_picker.setPaletteLine(line);
+		sprite_viewer.setStartingPaletteLine(line);
+		tile_viewer.setPaletteLine(line);
+	};
+
+	connect(ui->actionRender_Starting_with_Palette_Line_1, &QAction::triggered, this, [set_starting_palette_line](){set_starting_palette_line(0);});
+	connect(ui->actionRender_Starting_with_Palette_Line_2, &QAction::triggered, this, [set_starting_palette_line](){set_starting_palette_line(1);});
+	connect(ui->actionRender_Starting_with_Palette_Line_3, &QAction::triggered, this, [set_starting_palette_line](){set_starting_palette_line(2);});
+	connect(ui->actionRender_Starting_with_Palette_Line_4, &QAction::triggered, this, [set_starting_palette_line](){set_starting_palette_line(3);});
 
 	////////////////////////
 	// Menubar Activation //
