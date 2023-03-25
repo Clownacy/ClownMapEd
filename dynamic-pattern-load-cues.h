@@ -14,10 +14,16 @@ struct DynamicPatternLoadCues
 		unsigned int length;
 	};
 
-	QVector<QVector<TileCopy>> frames;
+	struct Frame
+	{
+		QVector<TileCopy> copies;
+
+		unsigned int getMappedTile(unsigned int tile_index) const;
+	};
+
+	QVector<Frame> frames;
 
 	static DynamicPatternLoadCues fromFile(QFile &file);
-	unsigned int getMappedTile(std::size_t frame_index, unsigned int tile_index) const;
 };
 
 #endif // DYNAMIC_PATTERN_LOAD_CUES_H

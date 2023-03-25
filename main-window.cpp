@@ -249,17 +249,17 @@ MainWindow::MainWindow(QWidget* const parent)
 
 				if (mappings->frames.size() == dplcs.frames.size())
 				{
-					for (auto &frame : mappings->frames)
+					for (int frame_index = 0; frame_index < mappings->frames.size(); ++frame_index)
 					{
-						const std::size_t frame_index = &frame - mappings->frames.data();
+						auto &dplc_frame = dplcs.frames[frame_index];
 
-						for (auto &piece : frame.pieces)
+						for (auto &piece : mappings->frames[frame_index].pieces)
 						{
-							const unsigned int base_mapped_tile = dplcs.getMappedTile(frame_index, piece.tile_index);
+							const unsigned int base_mapped_tile = dplc_frame.getMappedTile(piece.tile_index);
 
 							for (unsigned int i = 0; i < piece.width * piece.height; ++i)
 							{
-								const unsigned int mapped_tile = dplcs.getMappedTile(frame_index, piece.tile_index + i);
+								const unsigned int mapped_tile = dplc_frame.getMappedTile(piece.tile_index + i);
 
 								if (mapped_tile == static_cast<unsigned int>(-1) || mapped_tile != base_mapped_tile + i)
 									return;

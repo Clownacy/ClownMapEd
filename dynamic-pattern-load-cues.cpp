@@ -29,14 +29,14 @@ DynamicPatternLoadCues DynamicPatternLoadCues::fromFile(QFile &file)
 
 	for (unsigned int current_frame = 0; current_frame < total_frames; ++current_frame)
 	{
-		QVector<TileCopy> &frame = dplcs.frames[current_frame];
+		Frame &frame = dplcs.frames[current_frame];
 
 		file.seek(current_frame * 2);
 		file.seek(stream.read<quint16>());
 
 		const unsigned int total_copies = stream.read<quint16>();
 
-		frame.resize(total_copies);
+		frame.copies.resize(total_copies);
 
 		for (unsigned int current_copy = 0; current_copy < total_copies; ++current_copy)
 		{
@@ -44,18 +44,18 @@ DynamicPatternLoadCues DynamicPatternLoadCues::fromFile(QFile &file)
 			const unsigned int total_tiles = (word >> 4 * 3) + 1;
 			const unsigned int tile_index = word & 0xFFF;
 
-			frame[current_copy] = TileCopy{tile_index, total_tiles};
+			frame.copies[current_copy] = TileCopy{tile_index, total_tiles};
 		}
 	}
 
 	return dplcs;
 }
 
-unsigned int DynamicPatternLoadCues::getMappedTile(const std::size_t frame_index, const unsigned int tile_index) const
+unsigned int DynamicPatternLoadCues::Frame::getMappedTile(const unsigned int tile_index) const
 {
 	unsigned int base_tile = 0;
 
-	for (auto &copy : frames[frame_index])
+	for (auto &copy : copies)
 	{
 		if (tile_index < base_tile + copy.length)
 			return copy.start + (tile_index - base_tile);
