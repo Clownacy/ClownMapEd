@@ -690,6 +690,7 @@ MainWindow::MainWindow(QWidget* const parent)
 		const bool nothing_selected = no_sprite_selected;
 
 		ui->actionCycle_Palette->setDisabled(nothing_selected);
+		ui->actionToggle_Foreground_Flag->setDisabled(nothing_selected);
 		ui->actionMove_Left_8_Pixels->setDisabled(nothing_selected);
 		ui->actionMove_Right_8_Pixels->setDisabled(nothing_selected);
 		ui->actionMove_Up_8_Pixels->setDisabled(nothing_selected);
