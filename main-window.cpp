@@ -507,6 +507,86 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionMove_Up_1_Pixel, &QAction::triggered, this, [move_frame_or_piece](){move_frame_or_piece(0, -1);});
 	connect(ui->actionMove_Down_1_Pixel, &QAction::triggered, this, [move_frame_or_piece](){move_frame_or_piece(0, 1);});
 
+	/////////////////
+	// View/Scroll //
+	/////////////////
+
+	connect(ui->actionScroll_Back_1_Row_Column, &QAction::triggered, this,
+		[this]()
+		{
+			int tiles_per_row, total_rows;
+			tile_viewer.getGridDimensions(tiles_per_row, total_rows);
+			Q_UNUSED(total_rows);
+			tile_viewer.setScroll(tile_viewer.scroll() - tiles_per_row * 1);
+		}
+	);
+
+	connect(ui->actionScroll_Forward_1_Row_Column, &QAction::triggered, this,
+		[this]()
+		{
+			int tiles_per_row, total_rows;
+			tile_viewer.getGridDimensions(tiles_per_row, total_rows);
+
+			Q_UNUSED(total_rows);
+			if (tile_viewer.scroll() < tile_manager.total_tiles() - tiles_per_row * 1)
+				tile_viewer.setScroll(tile_viewer.scroll() + tiles_per_row * 1);
+		}
+	);
+
+	connect(ui->actionScroll_Back_1_Tile, &QAction::triggered, this,
+		[this]()
+		{
+			tile_viewer.setScroll(tile_viewer.scroll() - 1);
+		}
+	);
+
+	connect(ui->actionScroll_Forward_1_Tile, &QAction::triggered, this,
+		[this]()
+		{
+			tile_viewer.setScroll(tile_viewer.scroll() + 1);
+		}
+	);
+
+	connect(ui->actionScroll_Back_8_Rows_Columns, &QAction::triggered, this,
+		[this]()
+		{
+			int tiles_per_row, total_rows;
+			tile_viewer.getGridDimensions(tiles_per_row, total_rows);
+			Q_UNUSED(total_rows);
+			tile_viewer.setScroll(tile_viewer.scroll() - tiles_per_row * 8);
+		}
+	);
+
+	connect(ui->actionScroll_Forward_8_Rows_Columns, &QAction::triggered, this,
+		[this]()
+		{
+			int tiles_per_row, total_rows;
+			tile_viewer.getGridDimensions(tiles_per_row, total_rows);
+
+			Q_UNUSED(total_rows);
+			if (tile_viewer.scroll() < tile_manager.total_tiles() - tiles_per_row * 8)
+				tile_viewer.setScroll(tile_viewer.scroll() + tiles_per_row * 8);
+		}
+	);
+
+	connect(ui->actionScroll_Back_8_Tiles, &QAction::triggered, this,
+		[this]()
+		{
+			tile_viewer.setScroll(tile_viewer.scroll() - 8);
+		}
+	);
+
+	connect(ui->actionScroll_Forward_8_Tiles, &QAction::triggered, this,
+		[this]()
+		{
+			tile_viewer.setScroll(tile_viewer.scroll() + 8);
+		}
+	);
+
+	/////////////////////////////
+	// Settings/Tile Rendering //
+	/////////////////////////////
+
 	connect(ui->actionRender_Starting_with_Palette_Line_1, &QAction::triggered, this, [this](){setStartingPaletteLine(0);});
 	connect(ui->actionRender_Starting_with_Palette_Line_2, &QAction::triggered, this, [this](){setStartingPaletteLine(1);});
 	connect(ui->actionRender_Starting_with_Palette_Line_3, &QAction::triggered, this, [this](){setStartingPaletteLine(2);});

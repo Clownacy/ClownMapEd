@@ -29,12 +29,24 @@ public:
 
 	void setSelection(int start, int end);
 
+	int scroll() const
+	{
+		return m_scroll;
+	}
+
+	void setScroll(const int scroll)
+	{
+		m_scroll = qBound(0, scroll, tile_manager.total_tiles() - 1);
+		update();
+	}
+
+	void getGridDimensions(int &width, int &height);
+
 signals:
 	void tileSelected(int tile);
 
 private:
 	void deleteButtons();
-	void getGridDimensions(int &width, int &height);
 	void paintEvent(QPaintEvent *event) override;
 	void mousePressEvent(QMouseEvent *event) override;
 
@@ -45,6 +57,7 @@ private:
 	int selection_start = 0;
 	int selection_end = 0;
 	int palette_line = 0;
+	int m_scroll = 0;
 };
 
 #endif // TILE_VIEWER_H

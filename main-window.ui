@@ -117,8 +117,30 @@
     </widget>
     <addaction name="menuTile_Rendering"/>
    </widget>
+   <widget class="QMenu" name="menu_View">
+    <property name="title">
+     <string>&amp;View</string>
+    </property>
+    <widget class="QMenu" name="menuScroll">
+     <property name="title">
+      <string>Scroll</string>
+     </property>
+     <addaction name="actionScroll_Back_1_Row_Column"/>
+     <addaction name="actionScroll_Forward_1_Row_Column"/>
+     <addaction name="actionScroll_Back_1_Tile"/>
+     <addaction name="actionScroll_Forward_1_Tile"/>
+     <addaction name="separator"/>
+     <addaction name="separator"/>
+     <addaction name="actionScroll_Back_8_Rows_Columns"/>
+     <addaction name="actionScroll_Forward_8_Rows_Columns"/>
+     <addaction name="actionScroll_Back_8_Tiles"/>
+     <addaction name="actionScroll_Forward_8_Tiles"/>
+    </widget>
+    <addaction name="menuScroll"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
+   <addaction name="menu_View"/>
    <addaction name="menu_Settings"/>
   </widget>
   <action name="actionLoadPrimaryPalette">
@@ -433,6 +455,70 @@
   <action name="actionExit">
    <property name="text">
     <string>E&amp;xit</string>
+   </property>
+  </action>
+  <action name="actionScroll_Back_1_Row_Column">
+   <property name="text">
+    <string>Scroll Back 1 Row/Column</string>
+   </property>
+   <property name="shortcut">
+    <string>PgUp</string>
+   </property>
+  </action>
+  <action name="actionScroll_Forward_1_Row_Column">
+   <property name="text">
+    <string>Scroll Forward 1 Row/Column</string>
+   </property>
+   <property name="shortcut">
+    <string>PgDown</string>
+   </property>
+  </action>
+  <action name="actionScroll_Back_1_Tile">
+   <property name="text">
+    <string>Scroll Back 1 Tile</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+PgUp</string>
+   </property>
+  </action>
+  <action name="actionScroll_Forward_1_Tile">
+   <property name="text">
+    <string>Scroll Forward 1 Tile</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+PgDown</string>
+   </property>
+  </action>
+  <action name="actionScroll_Back_8_Rows_Columns">
+   <property name="text">
+    <string>Scroll Back 8 Rows/Columns</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+PgUp</string>
+   </property>
+  </action>
+  <action name="actionScroll_Forward_8_Rows_Columns">
+   <property name="text">
+    <string>Scroll Forward 8 Rows/Columns</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+PgDown</string>
+   </property>
+  </action>
+  <action name="actionScroll_Back_8_Tiles">
+   <property name="text">
+    <string>Scroll Back 8 Tiles</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+PgUp</string>
+   </property>
+  </action>
+  <action name="actionScroll_Forward_8_Tiles">
+   <property name="text">
+    <string>Scroll Forward 8 Tiles</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+PgDown</string>
    </property>
   </action>
  </widget>

@@ -56,7 +56,7 @@ void TileViewer::paintEvent(QPaintEvent* const event)
 	int tiles_per_row, total_rows;
 	getGridDimensions(tiles_per_row, total_rows);
 
-	int current_tile = 0;
+	int current_tile = m_scroll;
 
 	QPainter painter(this);
 
@@ -66,9 +66,12 @@ void TileViewer::paintEvent(QPaintEvent* const event)
 	painter.setBrush(brush);
 	painter.setPen(Qt::NoPen);
 
-	for (int y = 0; y < total_rows; ++y)
+	const int tiles_to_do = tile_manager.total_tiles() - m_scroll;
+	const int rows_to_do = qMin(total_rows, DivideCeiling(tiles_to_do, tiles_per_row));
+
+	for (int y = 0; y < rows_to_do; ++y)
 	{
-		const int length_of_row = qMin(tiles_per_row, tile_manager.total_tiles() - y * tiles_per_row);
+		const int length_of_row = qMin(tiles_per_row, tiles_to_do - y * tiles_per_row);
 
 		// Draw background colour for this row.
 		painter.drawRect(0, y * size_of_tile, length_of_row * size_of_tile, size_of_tile);
