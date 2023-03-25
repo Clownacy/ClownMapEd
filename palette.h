@@ -1,6 +1,8 @@
 #ifndef PALETTE_H
 #define PALETTE_H
 
+#include <array>
+
 #include <QColor>
 #include <QObject>
 #include <QString>
@@ -36,7 +38,7 @@ private:
 	static QColor MDToQColor(unsigned int md_colour);
 	static unsigned int QColorToMD(const QColor &colour);
 
-	QColor colours[TOTAL_LINES][COLOURS_PER_LINE];
+	std::array<std::array<QColor, COLOURS_PER_LINE>, TOTAL_LINES> colours;
 };
 
 #endif // PALETTE_H

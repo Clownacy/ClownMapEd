@@ -1,6 +1,8 @@
 #ifndef PALETTE_EDITOR_H
 #define PALETTE_EDITOR_H
 
+#include <array>
+
 #include <QColor>
 #include <QGridLayout>
 #include <QWidget>
@@ -17,7 +19,7 @@ public:
 
 private:
 	QGridLayout grid_layout;
-	ColourButton buttons[Palette::TOTAL_LINES][Palette::COLOURS_PER_LINE];
+	std::array<std::array<ColourButton, Palette::COLOURS_PER_LINE>, Palette::TOTAL_LINES> buttons;
 	Palette &palette;
 
 private slots:
