@@ -6,9 +6,9 @@
 
 Palette::Palette()
 {
-	for (unsigned int line = 0; line < 4; ++line)
+	for (unsigned int line = 0; line < TOTAL_LINES; ++line)
 	{
-		for (unsigned int index = 0; index < 16; ++index)
+		for (unsigned int index = 0; index < COLOURS_PER_LINE; ++index)
 		{
 			const unsigned int intensity_1 = index >= 8 ? ~index & 7 : index;
 			// Fun fact: those three bizarre colours at the bottom of SonMapEd's default
@@ -57,8 +57,8 @@ void Palette::loadFromFile(const QString &file_path)
 
 	const std::size_t total_colours = file.size() / 2;
 
-	for (std::size_t i = 0; i < std::min(static_cast<std::size_t>(4), total_colours / 16); ++i)
-		for (std::size_t j = 0; j < std::min(static_cast<std::size_t>(16), total_colours - i * 16); ++j)
+	for (std::size_t i = 0; i < std::min(static_cast<std::size_t>(TOTAL_LINES), total_colours / COLOURS_PER_LINE); ++i)
+		for (std::size_t j = 0; j < std::min(static_cast<std::size_t>(COLOURS_PER_LINE), total_colours - i * COLOURS_PER_LINE); ++j)
 			colours[i][j] = MDToQColor(stream.read<quint16>());
 
 	emit changed();
@@ -66,7 +66,7 @@ void Palette::loadFromFile(const QString &file_path)
 
 void Palette::setColour(const unsigned int palette_line, const unsigned int palette_index, const QColor &colour)
 {
-	if (palette_line >= 4 || palette_index >= 16)
+	if (palette_line >= TOTAL_LINES || palette_index >= COLOURS_PER_LINE)
 		return;
 
 	colours[palette_line][palette_index] = MDToQColor(QColorToMD(colour));

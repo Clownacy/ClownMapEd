@@ -17,6 +17,9 @@ public:
 		unsigned char blue;
 	};
 
+	static constexpr int TOTAL_LINES = 4;
+	static constexpr int COLOURS_PER_LINE = 16;
+
 	Palette();
 
 	void loadFromFile(const QString &file_path);
@@ -33,7 +36,7 @@ private:
 	static QColor MDToQColor(unsigned int md_colour);
 	static unsigned int QColorToMD(const QColor &colour);
 
-	QColor colours[4][16];
+	QColor colours[TOTAL_LINES][COLOURS_PER_LINE];
 };
 
 #endif // PALETTE_H

@@ -11,9 +11,9 @@ PaletteEditor::PaletteEditor(Palette &palette)
 	grid_layout.setSpacing(0);
 	grid_layout.setContentsMargins(0, 0, 0, 0);
 
-	for (unsigned int line = 0; line < 4; ++line)
+	for (unsigned int line = 0; line < Palette::TOTAL_LINES; ++line)
 	{
-		for (unsigned int index = 0; index < 16; ++index)
+		for (unsigned int index = 0; index < Palette::COLOURS_PER_LINE; ++index)
 		{
 			ColourButton &button = buttons[line][index];
 
@@ -29,7 +29,7 @@ PaletteEditor::PaletteEditor(Palette &palette)
 						button.setColour(selected_colour);
 
 						const unsigned int distance = &button - &buttons[0][0];
-						this->palette.setColour(distance / 16, distance % 16, selected_colour);
+						this->palette.setColour(distance / Palette::COLOURS_PER_LINE, distance % Palette::COLOURS_PER_LINE, selected_colour);
 					}
 				}
 			);
@@ -45,8 +45,8 @@ PaletteEditor::PaletteEditor(Palette &palette)
 	connect(&palette, &Palette::changed, this,
 		[this]()
 		{
-			for (unsigned int line = 0; line < 4; ++line)
-				for (unsigned int index = 0; index < 16; ++index)
+			for (unsigned int line = 0; line < Palette::TOTAL_LINES; ++line)
+				for (unsigned int index = 0; index < Palette::COLOURS_PER_LINE; ++index)
 					buttons[line][index].setColour(this->palette.colour(line, index));
 		}
 	);

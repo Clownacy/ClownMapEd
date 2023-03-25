@@ -17,7 +17,7 @@ public:
 
 private:
 	QGridLayout grid_layout;
-	ColourButton buttons[4][16];
+	ColourButton buttons[Palette::TOTAL_LINES][Palette::COLOURS_PER_LINE];
 	Palette &palette;
 
 private slots:
