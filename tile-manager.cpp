@@ -8,7 +8,7 @@ TileManager::TileManager(const uchar* const tile_bytes, const int total_bytes, c
 	if (tile_bytes != nullptr)
 		setTilesInternal(tile_bytes, total_bytes);
 
-	qint16 invalid_pixmap_raw_data[Tile::HEIGHT][Tile::WIDTH];
+	std::array<std::array<quint16, Tile::WIDTH>, Tile::HEIGHT> invalid_pixmap_raw_data;
 
 	for (int y = 0; y < Tile::HEIGHT; ++y)
 		for (int x = 0; x < Tile::WIDTH; ++x)
@@ -45,7 +45,7 @@ TileManager::TileManager(const uchar* const tile_bytes, const int total_bytes, c
 		}
 	}
 
-	invalid_pixmap = QPixmap::fromImage(QImage(reinterpret_cast<uchar*>(invalid_pixmap_raw_data), Tile::WIDTH, Tile::HEIGHT, QImage::Format::Format_ARGB4444_Premultiplied));
+	invalid_pixmap = QPixmap::fromImage(QImage(reinterpret_cast<uchar*>(&invalid_pixmap_raw_data[0][0]), Tile::WIDTH, Tile::HEIGHT, QImage::Format::Format_ARGB4444_Premultiplied));
 
 	connect(&palette, &Palette::changed, this, &TileManager::regenerate);
 
