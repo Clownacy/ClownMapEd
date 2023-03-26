@@ -44,7 +44,7 @@ void SpritePiece::draw(QPainter &painter, const TileManager &tile_manager, const
 				Tile::HEIGHT
 			);
 
-			painter.drawPixmap(rect, tile_manager.pixmaps(current_tile_index++, (starting_palette_line + palette_line) % 4).transformed(flip_transform), QRectF(0, 0, Tile::WIDTH, Tile::HEIGHT));
+			painter.drawPixmap(rect, tile_manager.pixmaps(current_tile_index++, (starting_palette_line + palette_line) % Palette::TOTAL_LINES).transformed(flip_transform), QRectF(0, 0, Tile::WIDTH, Tile::HEIGHT));
 		}
 	}
 }

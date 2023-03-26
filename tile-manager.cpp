@@ -14,7 +14,7 @@ TileManager::TileManager(const uchar* const tile_bytes, const int total_bytes, c
 		for (int x = 0; x < Tile::WIDTH; ++x)
 			invalid_pixmap_raw_data[y][x] = 0;
 
-	const qint16 colour = 0xFF00;
+	const quint16 colour = 0xFF00;
 
 	for (int x = 0; x < Tile::WIDTH; ++x)
 	{
