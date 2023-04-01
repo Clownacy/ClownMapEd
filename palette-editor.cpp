@@ -11,14 +11,14 @@ PaletteEditor::PaletteEditor(Palette &palette)
 	grid_layout.setSpacing(0);
 	grid_layout.setContentsMargins(0, 0, 0, 0);
 
-	for (unsigned int line = 0; line < Palette::TOTAL_LINES; ++line)
+	for (int line = 0; line < Palette::TOTAL_LINES; ++line)
 	{
-		for (unsigned int index = 0; index < Palette::COLOURS_PER_LINE; ++index)
+		for (int index = 0; index < Palette::COLOURS_PER_LINE; ++index)
 		{
 			ColourButton &button = buttons[line][index];
 
 			connect(&button, &ColourButton::clicked, this,
-				[this]()
+				[this, line, index]()
 				{
 					ColourButton &button = *static_cast<ColourButton*>(sender());
 
@@ -28,8 +28,7 @@ PaletteEditor::PaletteEditor(Palette &palette)
 					{
 						button.setColour(selected_colour);
 
-						const unsigned int distance = &button - &buttons[0][0];
-						this->palette.setColour(distance / Palette::COLOURS_PER_LINE, distance % Palette::COLOURS_PER_LINE, selected_colour);
+						this->palette.setColour(line, index, selected_colour);
 					}
 				}
 			);
@@ -45,14 +44,14 @@ PaletteEditor::PaletteEditor(Palette &palette)
 	connect(&palette, &Palette::changed, this,
 		[this]()
 		{
-			for (unsigned int line = 0; line < Palette::TOTAL_LINES; ++line)
-				for (unsigned int index = 0; index < Palette::COLOURS_PER_LINE; ++index)
+			for (int line = 0; line < Palette::TOTAL_LINES; ++line)
+				for (int index = 0; index < Palette::COLOURS_PER_LINE; ++index)
 					buttons[line][index].setColour(this->palette.colour(line, index));
 		}
 	);
 }
 
-void PaletteEditor::setButtonColour(unsigned int palette_line, unsigned int palette_index, const QColor &colour)
+void PaletteEditor::setButtonColour(const int palette_line, const int palette_index, const QColor &colour)
 {
 	buttons[palette_line][palette_index].setColour(colour);
 }

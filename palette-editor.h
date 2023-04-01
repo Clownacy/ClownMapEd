@@ -23,7 +23,7 @@ private:
 	Palette &palette;
 
 private slots:
-	void setButtonColour(unsigned int palette_line, unsigned int palette_index, const QColor &colour);
+	void setButtonColour(int palette_line, int palette_index, const QColor &colour);
 };
 
 #endif // PALETTE_EDITOR_H

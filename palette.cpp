@@ -55,16 +55,16 @@ void Palette::loadFromFile(const QString &file_path)
 	DataStream stream(&file);
 	stream.setByteOrder(DataStream::BigEndian);
 
-	const std::size_t total_colours = file.size() / 2;
+	const qint64 total_colours = file.size() / 2;
 
-	for (std::size_t i = 0; i < std::min(static_cast<std::size_t>(TOTAL_LINES), total_colours / COLOURS_PER_LINE); ++i)
-		for (std::size_t j = 0; j < std::min(static_cast<std::size_t>(COLOURS_PER_LINE), total_colours - i * COLOURS_PER_LINE); ++j)
-			colours[i][j] = MDToQColor(stream.read<quint16>());
+	for (qint64 line = 0; line < qMin(static_cast<qint64>(TOTAL_LINES), total_colours / COLOURS_PER_LINE); ++line)
+		for (qint64 colour = 0; colour < qMin(static_cast<qint64>(COLOURS_PER_LINE), total_colours - line * COLOURS_PER_LINE); ++colour)
+			colours[line][colour] = MDToQColor(stream.read<quint16>());
 
 	emit changed();
 }
 
-void Palette::setColour(const unsigned int palette_line, const unsigned int palette_index, const QColor &colour)
+void Palette::setColour(const int palette_line, const int palette_index, const QColor &colour)
 {
 	if (palette_line >= TOTAL_LINES || palette_index >= COLOURS_PER_LINE)
 		return;
@@ -74,7 +74,7 @@ void Palette::setColour(const unsigned int palette_line, const unsigned int pale
 	emit changed();
 }
 
-QColor Palette::MDToQColor(unsigned int md_colour)
+QColor Palette::MDToQColor(const unsigned int md_colour)
 {
 	// This isn't exactly what SonMapEd does:
 	// For some reason, SonMapEd treats the colours as 4-bit-per-channel,
@@ -88,9 +88,9 @@ QColor Palette::MDToQColor(unsigned int md_colour)
 
 unsigned int Palette::QColorToMD(const QColor &colour)
 {
-	unsigned int red = (colour.red() >> 5) & 7;
-	unsigned int green = (colour.green() >> 5) & 7;
-	unsigned int blue = (colour.blue() >> 5) & 7;
+	unsigned int red = (static_cast<unsigned int>(colour.red()) >> 5) & 7;
+	unsigned int green = (static_cast<unsigned int>(colour.green()) >> 5) & 7;
+	unsigned int blue = (static_cast<unsigned int>(colour.blue()) >> 5) & 7;
 
 	return (blue << 9) | (green << 5) | (red << 1);
 }
