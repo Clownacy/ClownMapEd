@@ -21,7 +21,13 @@ TileViewer::TileViewer(const TileManager &tile_manager)
 {
 	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-	connect(&tile_manager, &TileManager::regenerated, this, qOverload<>(&TileViewer::update));
+	connect(&tile_manager, &TileManager::regenerated, this,
+		[this]()
+		{
+			selected.resize(this->tile_manager.total_tiles());
+			update();
+		}
+	);
 
 	connect(&timer, &QTimer::timeout, this,
 		[this]()
@@ -35,13 +41,17 @@ TileViewer::TileViewer(const TileManager &tile_manager)
 	timer.start(1000 * 2);
 }
 
-void TileViewer::setSelection(const int start, const int end)
+void TileViewer::setSelection(const std::function<void(QVector<bool> &selection)> &callback)
 {
-	selection_start = start;
-	selection_end = end;
-	update();
+	selected.fill(false);
 
-	emit tileSelected(selection_start);
+	callback(selected);
+
+	earliest_tile_selected = selected.indexOf(true);
+
+	emit tileSelected(earliest_tile_selected);
+
+	update();
 }
 
 void TileViewer::getGridDimensions(int &columns, int &rows)
@@ -89,8 +99,9 @@ void TileViewer::paintEvent(QPaintEvent* const event)
 		painter.setBrush(brush);
 		painter.setCompositionMode(QPainter::RasterOp_SourceXorDestination);
 
-		for (int i = selection_start; i < selection_end; ++i)
-			painter.drawRect((i % tiles_per_row) * TILE_WIDTH_SCALED, (i / tiles_per_row) * TILE_HEIGHT_SCALED, TILE_WIDTH_SCALED, TILE_HEIGHT_SCALED);
+		for (int i = 0; i < selected.length(); ++i)
+			if (selected[i])
+				painter.drawRect((i % tiles_per_row) * TILE_WIDTH_SCALED, (i / tiles_per_row) * TILE_HEIGHT_SCALED, TILE_WIDTH_SCALED, TILE_HEIGHT_SCALED);
 	}
 }
 
@@ -105,5 +116,14 @@ void TileViewer::mousePressEvent(QMouseEvent* const event)
 	const int tile_y = event->y() / TILE_HEIGHT_SCALED;
 
 	if (tile_x < tiles_per_row && tile_y < total_rows)
-		setSelection(tile_y * tiles_per_row + tile_x, selection_start + 1);
+	{
+		const int tile_index = tile_y * tiles_per_row + tile_x;
+
+		setSelection(
+			[tile_index](QVector<bool> &selection)
+			{
+				selection[tile_index];
+			}
+		);
+	}
 }

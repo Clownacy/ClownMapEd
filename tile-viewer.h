@@ -1,6 +1,8 @@
 #ifndef TILE_VIEWER_H
 #define TILE_VIEWER_H
 
+#include <functional>
+
 #include <QColor>
 #include <QObject>
 #include <QTimer>
@@ -27,7 +29,7 @@ public:
 		update();
 	}
 
-	void setSelection(int start, int end);
+	void setSelection(const std::function<void(QVector<bool> &selection)> &callback);
 
 	int scroll() const
 	{
@@ -53,9 +55,9 @@ private:
 	const TileManager &tile_manager;
 	QColor background_colour;
 	QTimer timer;
+	QVector<bool> selected;
+	int earliest_tile_selected = 0;
 	bool selection_flip_flop = false;
-	int selection_start = 0;
-	int selection_end = 0;
 	int palette_line = 0;
 	int m_scroll = 0;
 };

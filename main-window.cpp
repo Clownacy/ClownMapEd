@@ -66,31 +66,42 @@ MainWindow::MainWindow(QWidget* const parent)
 		{
 			int earliest_tile_index = INT_MAX;
 
-			const int frame_index = sprite_viewer.selected_sprite_index();
-
-			if (frame_index != -1)
-			{
-				const auto &frames = sprite_mappings_manager.sprite_mappings().frames;
-				const int piece_index = sprite_viewer.selected_piece_index();
-
-				if (piece_index == -1)
+			tile_viewer.setSelection(
+				[this, &earliest_tile_index](QVector<bool> &selection)
 				{
-					for (auto &piece : frames[frame_index].pieces)
-						if (earliest_tile_index > piece.tile_index)
+					const int frame_index = sprite_viewer.selected_sprite_index();
+
+					if (frame_index != -1)
+					{
+						const auto &frames = sprite_mappings_manager.sprite_mappings().frames;
+						const int piece_index = sprite_viewer.selected_piece_index();
+
+						if (piece_index == -1)
+						{
+							for (auto &piece : frames[frame_index].pieces)
+							{
+								for (int i = 0; i < piece.width * piece.height; ++i)
+									selection[piece.tile_index + i] = true;
+
+								if (earliest_tile_index > piece.tile_index)
+									earliest_tile_index = piece.tile_index;
+							}
+						}
+						else
+						{
+							const auto &piece = frames[frame_index].pieces[piece_index];
+
+							for (int i = 0; i < piece.width * piece.height; ++i)
+								selection[piece.tile_index + i] = true;
+
 							earliest_tile_index = piece.tile_index;
+						}
+					}
 				}
-				else
-				{
-					earliest_tile_index = frames[frame_index].pieces[piece_index].tile_index;
-				}
-			}
+			);
 
 			if (earliest_tile_index != INT_MAX)
-			{
 				sprite_piece_picker.setSelectedTile(earliest_tile_index);
-				// TODO: Multiple selection spans.
-				tile_viewer.setSelection(earliest_tile_index, earliest_tile_index + 1);
-			}
 		}
 	);
 
