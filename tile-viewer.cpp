@@ -41,35 +41,38 @@ TileViewer::TileViewer(const TileManager &tile_manager)
 	timer.start(1000 * 2);
 }
 
-void TileViewer::setSelection(const std::function<void(QVector<bool> &selection)> &callback)
+void TileViewer::setSelection(const bool scroll_to_selection, const std::function<void(QVector<bool> &selection)> &callback)
 {
 	callback(selected);
 
-	int width, height;
-	getGridDimensions(width, height);
-
-	const int row_offset = scroll() % width;
-
-	const auto to_row = [&width, &row_offset](const int tile_index)
+	if (scroll_to_selection)
 	{
-		return (tile_index - row_offset) / width;
-	};
+		int width, height;
+		getGridDimensions(width, height);
 
-	const int scroll_row = to_row(scroll());
+		const int row_offset = scroll() % width;
 
-	const int first_tile_row = to_row(selected.indexOf(true));
-	const int last_tile_row = to_row(selected.lastIndexOf(true));
+		const auto to_row = [&width, &row_offset](const int tile_index)
+		{
+			return (tile_index - row_offset) / width;
+		};
 
-	if (first_tile_row < scroll_row + 2 || last_tile_row > scroll_row + height - 1 - 2)
-	{
-		int y;
+		const int scroll_row = to_row(scroll());
 
-		if (first_tile_row < scroll_row + 2)
-			y = first_tile_row - 2;
-		else //if (last_tile_row > scroll_row + height - 1 - 2)
-			y = last_tile_row - height + 1 + 2;
+		const int first_tile_row = to_row(selected.indexOf(true));
+		const int last_tile_row = to_row(selected.lastIndexOf(true));
 
-		setScroll(row_offset + y * width);
+		if (first_tile_row < scroll_row + 2 || last_tile_row > scroll_row + height - 1 - 2)
+		{
+			int y;
+
+			if (first_tile_row < scroll_row + 2)
+				y = first_tile_row - 2;
+			else //if (last_tile_row > scroll_row + height - 1 - 2)
+				y = last_tile_row - height + 1 + 2;
+
+			setScroll(row_offset + y * width);
+		}
 	}
 
 	update();
@@ -191,7 +194,7 @@ void TileViewer::mousePressEvent(QMouseEvent* const event)
 	{
 		const int tile_index = tile_y * tiles_per_row + tile_x;
 
-		setSelection(
+		setSelection(false,
 			[tile_index](QVector<bool> &selection)
 			{
 				selection[tile_index];

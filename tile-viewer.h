@@ -34,7 +34,7 @@ public:
 		selected.fill(false);
 	}
 
-	void setSelection(const std::function<void(QVector<bool> &selection)> &callback);
+	void setSelection(bool scroll_to_selection, const std::function<void(QVector<bool> &selection)> &callback);
 
 	int scroll() const
 	{

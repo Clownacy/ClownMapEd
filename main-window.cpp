@@ -65,7 +65,7 @@ MainWindow::MainWindow(QWidget* const parent)
 		[this]()
 		{
 			tile_viewer.clearSelection();
-			tile_viewer.setSelection(
+			tile_viewer.setSelection(true,
 				[this](QVector<bool> &selection)
 				{
 					const int frame_index = sprite_viewer.selected_sprite_index();
@@ -609,7 +609,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionInvert_Selection, &QAction::triggered, this,
 		[this]()
 		{
-			tile_viewer.setSelection(
+			tile_viewer.setSelection(false,
 				[](QVector<bool> &selected)
 				{
 					for (auto &tile_selected : selected)
