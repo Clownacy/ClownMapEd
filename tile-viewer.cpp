@@ -194,10 +194,11 @@ void TileViewer::mousePressEvent(QMouseEvent* const event)
 	{
 		const int tile_index = tile_y * tiles_per_row + tile_x;
 
+		clearSelection();
 		setSelection(false,
 			[tile_index](QVector<bool> &selection)
 			{
-				selection[tile_index];
+				selection[tile_index] = true;
 			}
 		);
 
