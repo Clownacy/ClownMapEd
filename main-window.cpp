@@ -121,10 +121,8 @@ MainWindow::MainWindow(QWidget* const parent)
 	// Menubar: File //
 	///////////////////
 
-	auto load_tile_file = [this](bool (* const decompression_function)(std::istream &src, std::iostream &dst))
+	const auto load_tile_file = [this](const QString &file_path, bool (* const decompression_function)(std::istream &src, std::iostream &dst))
 	{
-		const QString file_path = QFileDialog::getOpenFileName(this, "Open Tile Graphics File");
-
 		if (!file_path.isNull())
 		{
 			std::ifstream file_stream(file_path.toStdString(), std::ifstream::in | std::ifstream::binary);
@@ -144,129 +142,173 @@ MainWindow::MainWindow(QWidget* const parent)
 		}
 	};
 
-	connect(ui->actionLoad_Tiles_Uncompressed, &QAction::triggered, this,
-		[load_tile_file]()
+	const auto load_uncompressed_tile_file = [load_tile_file](const QString &file_path)
+	{
+		load_tile_file(file_path, [](std::istream &src, std::iostream &dst)
+			{
+				dst << src.rdbuf();
+				return true;
+			}
+		);
+	};
+
+	const auto load_nemesis_tile_file = [load_tile_file](const QString &file_path)
+	{
+		load_tile_file(file_path, [](std::istream &src, std::iostream &dst){return nemesis::decode(src, dst);});
+	};
+
+	const auto load_kosinski_tile_file = [load_tile_file](const QString &file_path)
+	{
+		load_tile_file(file_path, kosinski::decode);
+	};
+
+	const auto load_moduled_kosinski_tile_file = [load_tile_file](const QString &file_path)
+	{
+		load_tile_file(file_path, [](std::istream &src, std::iostream &dst){return kosinski::moduled_decode(src, dst);});
+	};
+
+	const auto load_kosinski_plus_tile_file = [load_tile_file](const QString &file_path)
+	{
+		load_tile_file(file_path, kosplus::decode);
+	};
+
+	const auto load_moduled_kosinski_plus_tile_file = [load_tile_file](const QString &file_path)
+	{
+		load_tile_file(file_path, [](std::istream &src, std::iostream &dst){return kosplus::moduled_decode(src, dst);});
+	};
+
+	const auto load_comper_tile_file = [load_tile_file](const QString &file_path)
+	{
+		load_tile_file(file_path, comper::decode);
+	};
+
+	const auto load_primary_palette_file = [this](const QString &file_path)
+	{
+		if (!file_path.isNull())
 		{
-			load_tile_file([](std::istream &src, std::iostream &dst)
+			palette.loadFromFile(file_path);
+			tile_manager.setPalette(palette);
+			palette_editor.update();
+		}
+	};
+
+	const auto load_sprite_mappings_file = [this](const QString &file_path)
+	{
+		if (!file_path.isNull())
+		{
+			QFile file(file_path);
+			if (!file.open(QFile::ReadOnly))
+				return;
+
+			sprite_mappings_manager.lock()(SpriteMappings::fromFile(file));
+			sprite_viewer.setSelectedSprite(0);
+		}
+	};
+
+	const auto load_dynamic_pattern_load_cue_file = [this](const QString &file_path)
+	{
+		if (!file_path.isNull())
+		{
+			QFile file(file_path);
+			if (!file.open(QFile::ReadOnly))
+				return;
+
+			const DynamicPatternLoadCues dplcs = DynamicPatternLoadCues::fromFile(file);
+
+			auto mappings = sprite_mappings_manager.lock();
+
+			if (mappings->frames.size() == dplcs.frames.size())
+			{
+				for (int frame_index = 0; frame_index < mappings->frames.size(); ++frame_index)
 				{
-					dst << src.rdbuf();
-					return true;
+					auto &dplc_frame = dplcs.frames[frame_index];
+
+					for (auto &piece : mappings->frames[frame_index].pieces)
+					{
+						const int base_mapped_tile = dplc_frame.getMappedTile(piece.tile_index);
+
+						for (int i = 0; i < piece.width * piece.height; ++i)
+						{
+							const int mapped_tile = dplc_frame.getMappedTile(piece.tile_index + i);
+
+							if (mapped_tile == -1 || mapped_tile != base_mapped_tile + i)
+								return;
+						}
+
+						piece.tile_index = base_mapped_tile;
+					}
 				}
-			);
+			}
+		}
+	};
+
+	connect(ui->actionLoad_Tiles_Uncompressed, &QAction::triggered, this,
+		[this, load_uncompressed_tile_file]()
+		{
+			load_uncompressed_tile_file(QFileDialog::getOpenFileName(this, "Open Tile Graphics File"));
 		}
 	);
 
 	connect(ui->actionLoad_Tiles_Nemesis, &QAction::triggered, this,
-		[load_tile_file]()
+		[this, load_nemesis_tile_file]()
 		{
-			load_tile_file([](std::istream &src, std::iostream &dst){return nemesis::decode(src, dst);});
+			load_nemesis_tile_file(QFileDialog::getOpenFileName(this, "Open Tile Graphics File"));
 		}
 	);
 
 	connect(ui->actionLoad_Tiles_Kosinski, &QAction::triggered, this,
-		[load_tile_file]()
+		[this, load_kosinski_tile_file]()
 		{
-			load_tile_file(kosinski::decode);
+			load_kosinski_tile_file(QFileDialog::getOpenFileName(this, "Open Tile Graphics File"));
 		}
 	);
 
 	connect(ui->actionLoad_Tiles_Moduled_Kosinski, &QAction::triggered, this,
-		[load_tile_file]()
+		[this, load_moduled_kosinski_tile_file]()
 		{
-			load_tile_file([](std::istream &src, std::iostream &dst){return kosinski::moduled_decode(src, dst);});
+			load_moduled_kosinski_tile_file(QFileDialog::getOpenFileName(this, "Open Tile Graphics File"));
 		}
 	);
 
 	connect(ui->actionLoad_Tiles_Kosinski_Plus, &QAction::triggered, this,
-		[load_tile_file]()
+		[this, load_kosinski_plus_tile_file]()
 		{
-			load_tile_file(kosplus::decode);
+			load_kosinski_plus_tile_file(QFileDialog::getOpenFileName(this, "Open Tile Graphics File"));
 		}
 	);
 
 	connect(ui->actionLoad_Tiles_Moduled_Kosinski_Plus, &QAction::triggered, this,
-		[load_tile_file]()
+		[this, load_moduled_kosinski_plus_tile_file]()
 		{
-			load_tile_file([](std::istream &src, std::iostream &dst){return kosplus::moduled_decode(src, dst);});
+			load_moduled_kosinski_plus_tile_file(QFileDialog::getOpenFileName(this, "Open Tile Graphics File"));
 		}
 	);
 
 	connect(ui->actionLoad_Tiles_Comper, &QAction::triggered, this,
-		[load_tile_file]()
+		[this, load_comper_tile_file]()
 		{
-			load_tile_file(comper::decode);
+			load_comper_tile_file(QFileDialog::getOpenFileName(this, "Open Tile Graphics File"));
 		}
 	);
 
 	connect(ui->actionLoad_Primary_Palette, &QAction::triggered, this,
-		[this]()
+		[this, load_primary_palette_file]()
 		{
-			const QString file_path = QFileDialog::getOpenFileName(this, "Open Palette File");
-
-			if (!file_path.isNull())
-			{
-				palette.loadFromFile(file_path);
-				tile_manager.setPalette(palette);
-				palette_editor.update();
-			}
+			load_primary_palette_file(QFileDialog::getOpenFileName(this, "Open Palette File"));
 		}
 	);
 
 	connect(ui->actionLoad_Mappings, &QAction::triggered, this,
-		[this]()
+		[this, load_sprite_mappings_file]()
 		{
-			const QString file_path = QFileDialog::getOpenFileName(this, "Open Sprite Mappings File");
-
-			if (!file_path.isNull())
-			{
-				QFile file(file_path);
-				if (!file.open(QFile::ReadOnly))
-					return;
-
-				sprite_mappings_manager.lock()(SpriteMappings::fromFile(file));
-				sprite_viewer.setSelectedSprite(0);
-			}
+			load_sprite_mappings_file(QFileDialog::getOpenFileName(this, "Open Sprite Mappings File"));
 		}
 	);
 
 	connect(ui->actionLoad_Sprite_Pattern_Cues, &QAction::triggered, this,
-		[this]()
+		[this, load_dynamic_pattern_load_cue_file]()
 		{
-			const QString file_path = QFileDialog::getOpenFileName(this, "Open Dynamic Pattern Loading Cue File");
-
-			if (!file_path.isNull())
-			{
-				QFile file(file_path);
-				if (!file.open(QFile::ReadOnly))
-					return;
-
-				const DynamicPatternLoadCues dplcs = DynamicPatternLoadCues::fromFile(file);
-
-				auto mappings = sprite_mappings_manager.lock();
-
-				if (mappings->frames.size() == dplcs.frames.size())
-				{
-					for (int frame_index = 0; frame_index < mappings->frames.size(); ++frame_index)
-					{
-						auto &dplc_frame = dplcs.frames[frame_index];
-
-						for (auto &piece : mappings->frames[frame_index].pieces)
-						{
-							const int base_mapped_tile = dplc_frame.getMappedTile(piece.tile_index);
-
-							for (int i = 0; i < piece.width * piece.height; ++i)
-							{
-								const int mapped_tile = dplc_frame.getMappedTile(piece.tile_index + i);
-
-								if (mapped_tile == -1 || mapped_tile != base_mapped_tile + i)
-									return;
-							}
-
-							piece.tile_index = base_mapped_tile;
-						}
-					}
-				}
-			}
+			load_dynamic_pattern_load_cue_file(QFileDialog::getOpenFileName(this, "Open Dynamic Pattern Loading Cue File"));
 		}
 	);
 
