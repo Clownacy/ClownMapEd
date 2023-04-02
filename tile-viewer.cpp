@@ -114,23 +114,20 @@ void TileViewer::paintEvent(QPaintEvent* const event)
 		}
 	};
 
-	const auto do_visible_tiles = [do_visible_rows](const std::function<void(int, int, int)> &callback)
+	const auto do_visible_tiles = [do_visible_rows](const std::function<void(int, const QRect&)> &callback)
 	{
 		do_visible_rows([callback](const int tile_index, const int y, const int length_of_row)
 			{
 				for (int x = 0; x < length_of_row; ++x)
-					callback(tile_index + x, x, y);
+					callback(tile_index + x, QRect(x * TILE_WIDTH_SCALED, y * TILE_HEIGHT_SCALED, TILE_WIDTH_SCALED, TILE_HEIGHT_SCALED));
 			}
 		);
 	};
 
-//	painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
-
-//	painter.fillRect()
-
 	brush.setColor(Qt::black);
 	painter.setBrush(brush);
 
+	// Initialise colour values to 0.
 	do_visible_rows(
 		[&painter](const int tile_index, const int y, const int length_of_row)
 		{
@@ -143,38 +140,26 @@ void TileViewer::paintEvent(QPaintEvent* const event)
 	brush.setColor(Qt::white);
 	painter.setBrush(brush);
 
+	// Set all bits of the pixels in the selection to 1.
+	// This alternates, creating a flashing effect.
 	do_visible_tiles(
-		[this, &painter](const int tile_index, const int x, const int y)
+		[this, &painter](const int tile_index, const QRect &rect)
 		{
 			if (selected[tile_index] && selection_flip_flop)
-			{
-				const QRect rect(x * TILE_WIDTH_SCALED, y * TILE_HEIGHT_SCALED, TILE_WIDTH_SCALED, TILE_HEIGHT_SCALED);
-
 				painter.drawRect(rect.marginsAdded(QMargins(4, 4, 4, 4)));
-			}
 		}
 	);
 
 	painter.setCompositionMode(QPainter::RasterOp_SourceXorDestination);
 
 	do_visible_tiles(
-		[this, &painter](const int tile_index, const int x, const int y)
+		[this, &painter](const int tile_index, const QRect &rect)
 		{
+			// XOR the selection.
 			if (selected[tile_index])
-			{
-				const QRect rect(x * TILE_WIDTH_SCALED, y * TILE_HEIGHT_SCALED, TILE_WIDTH_SCALED, TILE_HEIGHT_SCALED);
-
 				painter.drawRect(rect);
-			}
-		}
-	);
 
-	do_visible_tiles(
-		[this, &painter](const int tile_index, const int x, const int y)
-		{
-			const QRect rect(x * TILE_WIDTH_SCALED, y * TILE_HEIGHT_SCALED, TILE_WIDTH_SCALED, TILE_HEIGHT_SCALED);
-
-			// Draw the tile.
+			// XOR the selection with the tile's pixmap.
 			painter.drawPixmap(rect, tile_manager.pixmaps(tile_index, palette_line, false));
 		}
 	);
