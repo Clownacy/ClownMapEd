@@ -192,7 +192,7 @@ void TileViewer::mousePressEvent(QMouseEvent* const event)
 
 	if (tile_x < tiles_per_row && tile_y < total_rows)
 	{
-		const int tile_index = tile_y * tiles_per_row + tile_x;
+		const int tile_index = m_scroll + tile_y * tiles_per_row + tile_x;
 
 		clearSelection();
 		setSelection(false,
