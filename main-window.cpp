@@ -64,10 +64,8 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(&sprite_viewer, &SpriteViewer::selectedSpriteChanged, this,
 		[this]()
 		{
-			int earliest_tile_index = INT_MAX;
-
 			tile_viewer.setSelection(
-				[this, &earliest_tile_index](QVector<bool> &selection)
+				[this](QVector<bool> &selection)
 				{
 					const int frame_index = sprite_viewer.selected_sprite_index();
 
@@ -78,30 +76,25 @@ MainWindow::MainWindow(QWidget* const parent)
 
 						if (piece_index == -1)
 						{
+							if (frames[frame_index].pieces.size() != 0)
+								sprite_piece_picker.setSelectedTile(frames[frame_index].pieces[0].tile_index);
+
 							for (auto &piece : frames[frame_index].pieces)
-							{
 								for (int i = 0; i < piece.width * piece.height; ++i)
 									selection[piece.tile_index + i] = true;
-
-								if (earliest_tile_index > piece.tile_index)
-									earliest_tile_index = piece.tile_index;
-							}
 						}
 						else
 						{
 							const auto &piece = frames[frame_index].pieces[piece_index];
 
+							sprite_piece_picker.setSelectedTile(piece.tile_index);
+
 							for (int i = 0; i < piece.width * piece.height; ++i)
 								selection[piece.tile_index + i] = true;
-
-							earliest_tile_index = piece.tile_index;
 						}
 					}
 				}
 			);
-
-			if (earliest_tile_index != INT_MAX)
-				sprite_piece_picker.setSelectedTile(earliest_tile_index);
 		}
 	);
 

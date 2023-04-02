@@ -44,13 +44,7 @@ TileViewer::TileViewer(const TileManager &tile_manager)
 void TileViewer::setSelection(const std::function<void(QVector<bool> &selection)> &callback)
 {
 	selected.fill(false);
-
 	callback(selected);
-
-	earliest_tile_selected = selected.indexOf(true);
-
-	emit tileSelected(earliest_tile_selected);
-
 	update();
 }
 
@@ -125,5 +119,7 @@ void TileViewer::mousePressEvent(QMouseEvent* const event)
 				selection[tile_index];
 			}
 		);
+
+		emit tileSelected(tile_index);
 	}
 }

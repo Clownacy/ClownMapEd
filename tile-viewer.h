@@ -56,7 +56,6 @@ private:
 	QColor background_colour;
 	QTimer timer;
 	QVector<bool> selected;
-	int earliest_tile_selected = 0;
 	bool selection_flip_flop = false;
 	int palette_line = 0;
 	int m_scroll = 0;
