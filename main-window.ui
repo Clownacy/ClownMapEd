@@ -100,9 +100,17 @@
      <addaction name="actionMove_Piece_Behind_Others"/>
      <addaction name="actionMove_Piece_in_Front_of_Others"/>
     </widget>
+    <widget class="QMenu" name="menu_Tiles">
+     <property name="title">
+      <string>&amp;Tiles</string>
+     </property>
+     <addaction name="actionInvert_Selection"/>
+    </widget>
     <addaction name="menu_Sprite"/>
     <addaction name="menu_Piece"/>
     <addaction name="menuTransformation"/>
+    <addaction name="separator"/>
+    <addaction name="menu_Tiles"/>
    </widget>
    <widget class="QMenu" name="menu_Settings">
     <property name="title">
@@ -543,6 +551,11 @@
    </property>
    <property name="shortcut">
     <string>F</string>
+   </property>
+  </action>
+  <action name="actionInvert_Selection">
+   <property name="text">
+    <string>Invert Selection</string>
    </property>
   </action>
  </widget>

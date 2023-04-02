@@ -64,6 +64,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(&sprite_viewer, &SpriteViewer::selectedSpriteChanged, this,
 		[this]()
 		{
+			tile_viewer.clearSelection();
 			tile_viewer.setSelection(
 				[this](QVector<bool> &selection)
 				{
@@ -600,6 +601,23 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionMove_Right_1_Pixel, &QAction::triggered, this, [move_frame_or_piece](){move_frame_or_piece(1, 0);});
 	connect(ui->actionMove_Up_1_Pixel, &QAction::triggered, this, [move_frame_or_piece](){move_frame_or_piece(0, -1);});
 	connect(ui->actionMove_Down_1_Pixel, &QAction::triggered, this, [move_frame_or_piece](){move_frame_or_piece(0, 1);});
+
+	////////////////
+	// Edit/Tiles //
+	////////////////
+
+	connect(ui->actionInvert_Selection, &QAction::triggered, this,
+		[this]()
+		{
+			tile_viewer.setSelection(
+				[](QVector<bool> &selected)
+				{
+					for (auto &tile_selected : selected)
+						tile_selected = !tile_selected;
+				}
+			);
+		}
+	);
 
 	/////////////////
 	// View/Scroll //

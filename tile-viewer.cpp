@@ -43,7 +43,6 @@ TileViewer::TileViewer(const TileManager &tile_manager)
 
 void TileViewer::setSelection(const std::function<void(QVector<bool> &selection)> &callback)
 {
-	selected.fill(false);
 	callback(selected);
 
 	int width, height;

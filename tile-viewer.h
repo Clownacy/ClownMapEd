@@ -29,6 +29,11 @@ public:
 		update();
 	}
 
+	void clearSelection()
+	{
+		selected.fill(false);
+	}
+
 	void setSelection(const std::function<void(QVector<bool> &selection)> &callback);
 
 	int scroll() const
