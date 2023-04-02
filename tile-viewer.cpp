@@ -45,6 +45,34 @@ void TileViewer::setSelection(const std::function<void(QVector<bool> &selection)
 {
 	selected.fill(false);
 	callback(selected);
+
+	int width, height;
+	getGridDimensions(width, height);
+
+	const int row_offset = scroll() % width;
+
+	const auto to_row = [&width, &row_offset](const int tile_index)
+	{
+		return (tile_index - row_offset) / width;
+	};
+
+	const int scroll_row = to_row(scroll());
+
+	const int first_tile_row = to_row(selected.indexOf(true));
+	const int last_tile_row = to_row(selected.lastIndexOf(true));
+
+	if (first_tile_row < scroll_row + 2 || last_tile_row > scroll_row + height - 1 - 2)
+	{
+		int y;
+
+		if (first_tile_row < scroll_row + 2)
+			y = first_tile_row - 2;
+		else //if (last_tile_row > scroll_row + height - 1 - 2)
+			y = last_tile_row - height + 1 + 2;
+
+		setScroll(row_offset + y * width);
+	}
+
 	update();
 }
 
@@ -63,12 +91,10 @@ void TileViewer::paintEvent(QPaintEvent* const event)
 
 	int current_tile = m_scroll;
 
-	QPainter painter(this);
-
 	QBrush brush;
-	brush.setColor(background_colour);
 	brush.setStyle(Qt::SolidPattern);
-	painter.setBrush(brush);
+
+	QPainter painter(this);
 	painter.setPen(Qt::NoPen);
 
 	const int tiles_to_do = tile_manager.total_tiles() - m_scroll;
@@ -79,23 +105,28 @@ void TileViewer::paintEvent(QPaintEvent* const event)
 		const int length_of_row = qMin(tiles_per_row, tiles_to_do - y * tiles_per_row);
 
 		// Draw background colour for this row.
+		brush.setColor(background_colour);
+		painter.setBrush(brush);
 		painter.drawRect(0, y * TILE_HEIGHT_SCALED, length_of_row * TILE_WIDTH_SCALED, TILE_HEIGHT_SCALED);
 
 		// Draw tiles in this row.
-		for (int x = 0; x < length_of_row; ++x)
-			painter.drawPixmap(x * TILE_WIDTH_SCALED, y * TILE_HEIGHT_SCALED, TILE_WIDTH_SCALED, TILE_HEIGHT_SCALED, tile_manager.pixmaps(current_tile++, palette_line));
-	}
-
-	// Draw the selection.
-	if (selection_flip_flop)
-	{
 		brush.setColor(Qt::white);
 		painter.setBrush(brush);
-		painter.setCompositionMode(QPainter::RasterOp_SourceXorDestination);
+		for (int x = 0; x < length_of_row; ++x)
+		{
+			const QRect rect(x * TILE_WIDTH_SCALED, y * TILE_HEIGHT_SCALED, TILE_WIDTH_SCALED, TILE_HEIGHT_SCALED);
 
-		for (int i = 0; i < selected.length(); ++i)
-			if (selected[i])
-				painter.drawRect((i % tiles_per_row) * TILE_WIDTH_SCALED, (i / tiles_per_row) * TILE_HEIGHT_SCALED, TILE_WIDTH_SCALED, TILE_HEIGHT_SCALED);
+			// Draw the tile.
+			painter.drawPixmap(rect, tile_manager.pixmaps(current_tile++, palette_line));
+
+			if (selection_flip_flop && selected[current_tile])
+			{
+				// Invert the tile if selected.
+				painter.setCompositionMode(QPainter::RasterOp_SourceXorDestination);
+				painter.drawRect(rect);
+				painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+			}
+		}
 	}
 }
 
