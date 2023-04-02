@@ -20,16 +20,16 @@ public:
 
 	void changePalette(const Palette &palette);
 
-	const std::array<QPixmap, 4>& pixmaps() const
+	const QPixmap& pixmap(const int palette_line, const bool alpha) const
 	{
-		return m_pixmaps;
+		return m_pixmaps[alpha][palette_line];
 	}
 
 private:
 	void regeneratePixmaps(const Palette &palette);
 
 	std::array<uchar, TOTAL_BYTES> m_bytes;
-	std::array<QPixmap, 4> m_pixmaps;
+	std::array<std::array<QPixmap, 4>, 2> m_pixmaps;
 };
 
 #endif // TILE_H

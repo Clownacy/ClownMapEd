@@ -33,10 +33,10 @@ public:
 		regenerate();
 	}
 
-	const QPixmap& pixmaps(const int tile_index, const int palette_line) const
+	const QPixmap& pixmaps(const int tile_index, const int palette_line, const bool alpha) const
 	{
 		if (tile_index < tiles.size())
-			return tiles[tile_index].pixmaps()[palette_line];
+			return tiles[tile_index].pixmap(palette_line, alpha);
 		else
 			return invalid_pixmap;
 	}
