@@ -37,12 +37,11 @@ public:
 	static Tile Invalid(const Palette &palette);
 
 private:
-	Tile(const std::array<std::array<quint16, Tile::WIDTH>, Tile::HEIGHT> &pixels, const Palette &palette);
+	Tile(const std::array<std::array<QColor, Tile::WIDTH>, Tile::HEIGHT> &pixels, const Palette &palette);
 
-	quint16 QColorToARGB4444(const QColor &colour);
 	void regeneratePixmaps(const Palette &palette);
 
-	std::array<std::array<quint16, Tile::WIDTH * Tile::HEIGHT>, Palette::TOTAL_LINES> rgb_pixels;
+	std::array<std::array<QColor, Tile::WIDTH * Tile::HEIGHT>, Palette::TOTAL_LINES> rgb_pixels;
 	std::array<std::array<QPixmap, static_cast<int>(PixmapType::MAX)>, Palette::TOTAL_LINES> m_pixmaps;
 };
 
