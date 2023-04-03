@@ -17,13 +17,13 @@ SpriteFrame SpriteFrame::fromDataStream(DataStream &stream)
 	return frame;
 }
 
-void SpriteFrame::draw(QPainter &painter, const TileManager &tile_manager, const int starting_palette_line, const int x_offset, const int y_offset) const
+void SpriteFrame::draw(QPainter &painter, const TileManager &tile_manager, const Tile::PixmapType effect, const int starting_palette_line, const int x_offset, const int y_offset) const
 {
 	// Must draw in reverse order.
 	for (unsigned int i = 0; i < 2; ++i)
 		for (auto piece = pieces.crbegin(); piece != pieces.crend(); ++piece)
 			if (piece->priority == (i != 0))
-				piece->draw(painter, tile_manager, starting_palette_line, x_offset, y_offset);
+				piece->draw(painter, tile_manager, effect, starting_palette_line, x_offset, y_offset);
 }
 
 QRect SpriteFrame::rect() const

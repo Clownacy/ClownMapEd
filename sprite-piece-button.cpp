@@ -26,13 +26,6 @@ void SpritePieceButton::paintEvent(QPaintEvent* const event)
 
 	QPainter painter(this);
 
-	QBrush brush;
-	brush.setColor(background_colour);
-	brush.setStyle(Qt::BrushStyle::SolidPattern);
-	painter.setBrush(brush);
-	painter.setPen(Qt::NoPen);
-	painter.drawRect(QRect(QPoint(0, 0), size()));
-
 	painter.scale(width() / (m_sprite_piece.width * Tile::WIDTH), height() / (m_sprite_piece.height * Tile::HEIGHT));
-	m_sprite_piece.draw(painter, tile_manager);
+	m_sprite_piece.draw(painter, tile_manager, Tile::PixmapType::WITH_BACKGROUND);
 }
