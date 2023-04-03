@@ -4,48 +4,10 @@
 
 TileManager::TileManager(const uchar* const tile_bytes, const int total_bytes, const Palette &palette)
     : palette(&palette)
+	, invalid_pixmap(Tile::Invalid(palette))
 {
 	if (tile_bytes != nullptr)
 		setTilesInternal(tile_bytes, total_bytes);
-
-	std::array<std::array<quint16, Tile::WIDTH>, Tile::HEIGHT> invalid_pixmap_raw_data;
-
-	for (int y = 0; y < Tile::HEIGHT; ++y)
-		for (int x = 0; x < Tile::WIDTH; ++x)
-			invalid_pixmap_raw_data[y][x] = 0;
-
-	const quint16 colour = 0xFF00;
-
-	for (int x = 0; x < Tile::WIDTH; ++x)
-	{
-		invalid_pixmap_raw_data[0][x] = colour;
-		invalid_pixmap_raw_data[Tile::HEIGHT - 1][x] = colour;
-	}
-
-	for (int y = 0; y < Tile::HEIGHT; ++y)
-	{
-		invalid_pixmap_raw_data[y][0] = colour;
-		invalid_pixmap_raw_data[y][Tile::WIDTH - 1] = colour;
-	}
-
-	if (Tile::WIDTH >= Tile::HEIGHT)
-	{
-		for (int x = 0; x < Tile::WIDTH; ++x)
-		{
-			invalid_pixmap_raw_data[x * Tile::HEIGHT / Tile::WIDTH][x] = colour;
-			invalid_pixmap_raw_data[(Tile::WIDTH - x - 1) * Tile::HEIGHT / Tile::WIDTH][x] = colour;
-		}
-	}
-	else
-	{
-		for (int y = 0; y < Tile::HEIGHT; ++y)
-		{
-			invalid_pixmap_raw_data[y][y * Tile::WIDTH / Tile::HEIGHT] = colour;
-			invalid_pixmap_raw_data[y][(Tile::HEIGHT - y - 1) * Tile::WIDTH / Tile::HEIGHT] = colour;
-		}
-	}
-
-	invalid_pixmap = QPixmap::fromImage(QImage(reinterpret_cast<uchar*>(&invalid_pixmap_raw_data[0][0]), Tile::WIDTH, Tile::HEIGHT, QImage::Format::Format_ARGB4444_Premultiplied));
 
 	connect(&palette, &Palette::changed, this, &TileManager::regenerate);
 

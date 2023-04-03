@@ -160,7 +160,7 @@ void TileViewer::paintEvent(QPaintEvent* const event)
 				painter.drawRect(rect);
 
 			// XOR the selection with the tile's pixmap.
-			painter.drawPixmap(rect, tile_manager.pixmaps(tile_index, palette_line, false));
+			painter.drawPixmap(rect, tile_manager.pixmaps(tile_index, palette_line).with_background);
 		}
 	);
 }

@@ -33,12 +33,13 @@ public:
 		regenerate();
 	}
 
-	const QPixmap& pixmaps(const int tile_index, const int palette_line, const bool alpha) const
+	const Tile::Pixmaps& pixmaps(const int tile_index, const int palette_line) const
 	{
+		// TODO: This should be simplfied.
 		if (tile_index < tiles.size())
-			return tiles[tile_index].pixmap(palette_line, alpha);
+			return tiles[tile_index].pixmaps()[palette_line];
 		else
-			return invalid_pixmap;
+			return invalid_pixmap.pixmaps()[palette_line];
 	}
 
 	const int total_tiles() const
@@ -58,7 +59,7 @@ private:
 	QVector<std::array<uchar, Tile::TOTAL_BYTES>> tile_bytes;
 	const Palette *palette;
 
-	QPixmap invalid_pixmap;
+	Tile invalid_pixmap;
 	QVector<Tile> tiles;
 };
 
