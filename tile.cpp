@@ -4,22 +4,27 @@ Tile::Tile(std::array<uchar, TOTAL_BYTES> &bytes, const Palette &palette)
 {
 	for (unsigned int line = 0; line < Palette::TOTAL_LINES; ++line)
 	{
-		for (unsigned int i = 0; i < WIDTH * HEIGHT; ++i)
+		for (unsigned int y = 0; y < HEIGHT; ++y)
 		{
-			const unsigned int palette_index = (bytes[i >> 1] >> (~(i << 2) & 4)) & 0xF;
+			for (unsigned int x = 0; x < WIDTH; ++x)
+			{
+				const unsigned int pixel_index = x + y * WIDTH;
+				const unsigned int palette_index = (bytes[pixel_index >> 1] >> (~(pixel_index << 2) & 4)) & 0xF;
 
-			rgb_pixels[line][i] = palette_index == 0 ? QColor(0, 0, 0, 0) : palette.colour(line, palette_index);
+				rgb_pixels[line][y][x] = palette_index == 0 ? QColor(0, 0, 0, 0) : palette.colour(line, palette_index);
+			}
 		}
 	}
 
 	regeneratePixmaps(palette);
 }
 
-Tile::Tile(const std::array<std::array<QColor, Tile::WIDTH>, Tile::HEIGHT> &pixels, const Palette &palette)
+Tile::Tile(const std::array<std::array<QColor, WIDTH>, HEIGHT> &pixels, const Palette &palette)
 {
 	for (int line = 0; line < Palette::TOTAL_LINES; ++line)
-		for (std::size_t i = 0; i < rgb_pixels[line].size(); ++i)
-			rgb_pixels[line][i] = pixels[i / Tile::WIDTH][i % Tile::WIDTH];
+		for (int y = 0; y < HEIGHT; ++y)
+			for (int x = 0; x < WIDTH; ++x)
+				rgb_pixels[line][y][x] = pixels[y][x];
 
 	regeneratePixmaps(palette);
 }
@@ -33,19 +38,22 @@ void Tile::regeneratePixmaps(const Palette &palette)
 {
 	const QColor background_colour = palette.colour(0, 0);
 
-	const auto colour_tile = [](const std::array<QColor, Tile::WIDTH * Tile::HEIGHT> &bitmap, const std::function<QColor(QColor)> callback)
+	const auto colour_tile = [](const std::array<std::array<QColor, WIDTH>, HEIGHT> &bitmap, const std::function<QColor(QColor)> callback)
 	{
-		std::array<std::array<uchar, 4>, Tile::WIDTH * Tile::HEIGHT> working_bitmap;
+		std::array<std::array<std::array<uchar, 4>, WIDTH>, HEIGHT> working_bitmap;
 
-		for (unsigned int i = 0; i < WIDTH * HEIGHT; ++i)
+		for (int y = 0; y < HEIGHT; ++y)
 		{
-			working_bitmap[i][0] = callback(bitmap[i]).red();
-			working_bitmap[i][1] = callback(bitmap[i]).green();
-			working_bitmap[i][2] = callback(bitmap[i]).blue();
-			working_bitmap[i][3] = callback(bitmap[i]).alpha();
+			for (int x = 0; x < WIDTH; ++x)
+			{
+				working_bitmap[y][x][0] = callback(bitmap[y][x]).red();
+				working_bitmap[y][x][1] = callback(bitmap[y][x]).green();
+				working_bitmap[y][x][2] = callback(bitmap[y][x]).blue();
+				working_bitmap[y][x][3] = callback(bitmap[y][x]).alpha();
+			}
 		}
 
-		return QPixmap::fromImage(QImage(&working_bitmap[0][0], WIDTH, HEIGHT, QImage::Format::Format_RGBA8888_Premultiplied));
+		return QPixmap::fromImage(QImage(&working_bitmap[0][0][0], WIDTH, HEIGHT, QImage::Format::Format_RGBA8888_Premultiplied));
 	};
 
 	for (unsigned int line = 0; line < Palette::TOTAL_LINES; ++line)
@@ -78,40 +86,40 @@ void Tile::regeneratePixmaps(const Palette &palette)
 
 Tile Tile::Invalid(const Palette &palette)
 {
-	std::array<std::array<QColor, Tile::WIDTH>, Tile::HEIGHT> invalid_pixmap_raw_data;
+	std::array<std::array<QColor, WIDTH>, HEIGHT> invalid_pixmap_raw_data;
 
-	for (int y = 0; y < Tile::HEIGHT; ++y)
-		for (int x = 0; x < Tile::WIDTH; ++x)
+	for (int y = 0; y < HEIGHT; ++y)
+		for (int x = 0; x < WIDTH; ++x)
 			invalid_pixmap_raw_data[y][x] = QColor(0, 0, 0, 0);
 
 	const QColor colour = Qt::red;
 
-	for (int x = 0; x < Tile::WIDTH; ++x)
+	for (int x = 0; x < WIDTH; ++x)
 	{
 		invalid_pixmap_raw_data[0][x] = colour;
-		invalid_pixmap_raw_data[Tile::HEIGHT - 1][x] = colour;
+		invalid_pixmap_raw_data[HEIGHT - 1][x] = colour;
 	}
 
-	for (int y = 0; y < Tile::HEIGHT; ++y)
+	for (int y = 0; y < HEIGHT; ++y)
 	{
 		invalid_pixmap_raw_data[y][0] = colour;
-		invalid_pixmap_raw_data[y][Tile::WIDTH - 1] = colour;
+		invalid_pixmap_raw_data[y][WIDTH - 1] = colour;
 	}
 
-	if (Tile::WIDTH >= Tile::HEIGHT)
+	if (WIDTH >= HEIGHT)
 	{
-		for (int x = 0; x < Tile::WIDTH; ++x)
+		for (int x = 0; x < WIDTH; ++x)
 		{
-			invalid_pixmap_raw_data[x * Tile::HEIGHT / Tile::WIDTH][x] = colour;
-			invalid_pixmap_raw_data[(Tile::WIDTH - x - 1) * Tile::HEIGHT / Tile::WIDTH][x] = colour;
+			invalid_pixmap_raw_data[x * HEIGHT / WIDTH][x] = colour;
+			invalid_pixmap_raw_data[(WIDTH - x - 1) * HEIGHT / WIDTH][x] = colour;
 		}
 	}
 	else
 	{
-		for (int y = 0; y < Tile::HEIGHT; ++y)
+		for (int y = 0; y < HEIGHT; ++y)
 		{
-			invalid_pixmap_raw_data[y][y * Tile::WIDTH / Tile::HEIGHT] = colour;
-			invalid_pixmap_raw_data[y][(Tile::HEIGHT - y - 1) * Tile::WIDTH / Tile::HEIGHT] = colour;
+			invalid_pixmap_raw_data[y][y * WIDTH / HEIGHT] = colour;
+			invalid_pixmap_raw_data[y][(HEIGHT - y - 1) * WIDTH / HEIGHT] = colour;
 		}
 	}
 
