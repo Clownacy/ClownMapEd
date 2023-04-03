@@ -33,13 +33,13 @@ public:
 		regenerate();
 	}
 
-	const Tile::Pixmaps& pixmaps(const int tile_index, const int palette_line) const
+	const QPixmap& pixmaps(const int tile_index, const int palette_line, const Tile::PixmapType type) const
 	{
 		// TODO: This should be simplfied.
 		if (tile_index < tiles.size())
-			return tiles[tile_index].pixmaps()[palette_line];
+			return tiles[tile_index].pixmaps()[palette_line][static_cast<int>(type)];
 		else
-			return invalid_pixmap.pixmaps()[palette_line];
+			return invalid_pixmap.pixmaps()[palette_line][static_cast<int>(type)];
 	}
 
 	const int total_tiles() const

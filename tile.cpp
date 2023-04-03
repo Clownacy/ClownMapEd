@@ -49,21 +49,21 @@ void Tile::regeneratePixmaps(const Palette &palette)
 
 	for (unsigned int line = 0; line < Palette::TOTAL_LINES; ++line)
 	{
-		m_pixmaps[line].no_background = colour_tile(rgb_pixels[line],
+		m_pixmaps[line][static_cast<int>(PixmapType::NO_BACKGROUND)] = colour_tile(rgb_pixels[line],
 			[](const quint16 colour)
 			{
 				return colour;
 			}
 		);
 
-		m_pixmaps[line].with_background = colour_tile(rgb_pixels[line],
+		m_pixmaps[line][static_cast<int>(PixmapType::WITH_BACKGROUND)] = colour_tile(rgb_pixels[line],
 			[background_colour_argb4444](const quint16 colour)
 			{
 				return colour == 0 ? background_colour_argb4444 : colour;
 			}
 		);
 
-		m_pixmaps[line].transparent = colour_tile(rgb_pixels[line],
+		m_pixmaps[line][static_cast<int>(PixmapType::TRANSPARENT)] = colour_tile(rgb_pixels[line],
 			[background_colour_argb4444](const quint16 colour) -> quint16
 			{
 				if (colour == 0)

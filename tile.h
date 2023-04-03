@@ -12,11 +12,13 @@
 class Tile
 {
 public:
-	struct Pixmaps
+	enum class PixmapType
 	{
-		QPixmap no_background;
-		QPixmap with_background;
-		QPixmap transparent;
+		NO_BACKGROUND,
+		WITH_BACKGROUND,
+		TRANSPARENT,
+
+		MAX
 	};
 
 	static constexpr int WIDTH = 8;
@@ -27,7 +29,7 @@ public:
 
 	void changePalette(const Palette &palette);
 
-	const std::array<Pixmaps, Palette::TOTAL_LINES>& pixmaps() const
+	const std::array<std::array<QPixmap, static_cast<int>(PixmapType::MAX)>, Palette::TOTAL_LINES>& pixmaps() const
 	{
 		return m_pixmaps;
 	}
@@ -41,7 +43,7 @@ private:
 	void regeneratePixmaps(const Palette &palette);
 
 	std::array<std::array<quint16, Tile::WIDTH * Tile::HEIGHT>, Palette::TOTAL_LINES> rgb_pixels;
-	std::array<Pixmaps, Palette::TOTAL_LINES> m_pixmaps;
+	std::array<std::array<QPixmap, static_cast<int>(PixmapType::MAX)>, Palette::TOTAL_LINES> m_pixmaps;
 };
 
 #endif // TILE_H
