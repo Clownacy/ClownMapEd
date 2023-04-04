@@ -122,9 +122,11 @@ void SpriteViewer::paintEvent(QPaintEvent* const event)
 
 	// At this point, we have our desired sprite outline, however
 	// it is 2 pixels thick instead of 1, so we must correct this.
-	process_tiles_in_selected_pieces(
-		[&combined_outline_path](const QRect &rect)
+	process_selected_pieces(
+		[&combined_outline_path](const SpritePiece &piece)
 		{
+			const QRect rect = piece.rect();
+
 			// To reduce the thickness of the outline, we create another series of tile borders,
 			// but this time they are only 1 pixel thick, and reside exclusively outside of the tile's bounds.
 			QPainterPath inner_path;
