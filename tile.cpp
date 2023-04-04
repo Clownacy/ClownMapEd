@@ -11,7 +11,7 @@ Tile::Tile(std::array<uchar, TOTAL_BYTES> &bytes, const Palette &palette)
 				const unsigned int pixel_index = x + y * WIDTH;
 				const unsigned int palette_index = (bytes[pixel_index >> 1] >> (~(pixel_index << 2) & 4)) & 0xF;
 
-				rgb_pixels[line][y][x] = palette_index == 0 ? QColor(0, 0, 0, 0) : palette.colour(line, palette_index);
+				rgb_pixels[line][y][x] = palette_index == 0 ? QColor(0, 0, 0, 0) : palette.colour256(line, palette_index);
 			}
 		}
 	}
@@ -36,7 +36,7 @@ void Tile::changePalette(const Palette &palette)
 
 void Tile::regeneratePixmaps(const Palette &palette)
 {
-	const QColor background_colour = palette.colour(0, 0);
+	const QColor background_colour = palette.colour256(0, 0);
 
 	const auto colour_tile = [](const std::array<std::array<QColor, WIDTH>, HEIGHT> &bitmap, const std::function<QColor(QColor)> callback)
 	{

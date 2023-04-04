@@ -125,10 +125,10 @@ void SpriteViewer::paintEvent(QPaintEvent* const event)
 	process_selected_pieces(
 		[&combined_outline_path](const SpritePiece &piece)
 		{
+			// To reduce the thickness of the outline, we create a series of piece borders,
+			// which are only 1 pixel thick and reside exclusively outside of the piece's bounds.
 			const QRect rect = piece.rect();
 
-			// To reduce the thickness of the outline, we create another series of tile borders,
-			// but this time they are only 1 pixel thick, and reside exclusively outside of the tile's bounds.
 			QPainterPath inner_path;
 			inner_path.addRect(rect.marginsAdded(QMargins(1, 1, 1, 1)));
 
@@ -137,7 +137,7 @@ void SpriteViewer::paintEvent(QPaintEvent* const event)
 
 			const QPainterPath tile_outline_path(inner_path - outer_path);
 
-			// We then subtract the intersection of these tiles with the sprite outline.
+			// We then subtract the intersection of these borders with the sprite outline.
 			// This erases the outer part of the outline, leaving it only a single pixel thick.
 			combined_outline_path -= combined_outline_path & tile_outline_path;
 		}

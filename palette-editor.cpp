@@ -33,7 +33,7 @@ PaletteEditor::PaletteEditor(Palette &palette)
 				}
 			);
 
-			button.setColour(palette.colour(line, index));
+			button.setColour(palette.colour224(line, index));
 
 			button.setFixedSize(20, 20);
 
@@ -46,7 +46,7 @@ PaletteEditor::PaletteEditor(Palette &palette)
 		{
 			for (int line = 0; line < Palette::TOTAL_LINES; ++line)
 				for (int index = 0; index < Palette::COLOURS_PER_LINE; ++index)
-					buttons[line][index].setColour(this->palette.colour(line, index));
+					buttons[line][index].setColour(this->palette.colour224(line, index));
 		}
 	);
 }

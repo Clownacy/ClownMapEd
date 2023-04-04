@@ -2,6 +2,7 @@
 #define PALETTE_H
 
 #include <array>
+#include <functional>
 
 #include <QColor>
 #include <QObject>
@@ -18,9 +19,13 @@ public:
 	Palette();
 
 	void loadFromFile(const QString &file_path);
-	QColor colour(const int palette_line, const int palette_index) const
+	QColor colour224(const int palette_line, const int palette_index) const
 	{
-		return colours[palette_line][palette_index];
+		return MDToQColor224(colours[palette_line][palette_index]);
+	}
+	QColor colour256(const int palette_line, const int palette_index) const
+	{
+		return MDToQColor256(colours[palette_line][palette_index]);
 	}
 	void setColour(int palette_line, int palette_index, const QColor &colour);
 
@@ -28,10 +33,12 @@ signals:
 	void changed();
 
 private:
-	static QColor MDToQColor(unsigned int md_colour);
+	static QColor MDToQColour(unsigned int md_colour, const std::function<unsigned int(unsigned int)> callback);
+	static QColor MDToQColor224(unsigned int md_colour);
+	static QColor MDToQColor256(unsigned int md_colour);
 	static unsigned int QColorToMD(const QColor &colour);
 
-	std::array<std::array<QColor, COLOURS_PER_LINE>, TOTAL_LINES> colours;
+	std::array<std::array<quint16, COLOURS_PER_LINE>, TOTAL_LINES> colours;
 };
 
 #endif // PALETTE_H

@@ -41,7 +41,7 @@ Palette::Palette()
 					break;
 			}
 
-			colours[line][index] = MDToQColor(colour);
+			colours[line][index] = colour;
 		}
 	}
 }
@@ -59,7 +59,7 @@ void Palette::loadFromFile(const QString &file_path)
 
 	for (qint64 line = 0; line < qMin(static_cast<qint64>(TOTAL_LINES), total_colours / COLOURS_PER_LINE); ++line)
 		for (qint64 colour = 0; colour < qMin(static_cast<qint64>(COLOURS_PER_LINE), total_colours - line * COLOURS_PER_LINE); ++colour)
-			colours[line][colour] = MDToQColor(stream.read<quint16>());
+			colours[line][colour] = stream.read<quint16>();
 
 	emit changed();
 }
@@ -69,21 +69,31 @@ void Palette::setColour(const int palette_line, const int palette_index, const Q
 	if (palette_line >= TOTAL_LINES || palette_index >= COLOURS_PER_LINE)
 		return;
 
-	colours[palette_line][palette_index] = MDToQColor(QColorToMD(colour));
+	colours[palette_line][palette_index] = QColorToMD(colour);
 
 	emit changed();
 }
 
-QColor Palette::MDToQColor(const unsigned int md_colour)
+QColor Palette::MDToQColour(const unsigned int md_colour, const std::function<unsigned int(unsigned int)> callback)
 {
 	// This isn't exactly what SonMapEd does:
 	// For some reason, SonMapEd treats the colours as 4-bit-per-channel,
 	// when they're really only 3-bit-per-channel.
-	unsigned int red = (md_colour >> 1) & 7;
-	unsigned int green = (md_colour >> 5) & 7;
-	unsigned int blue = (md_colour >> 9) & 7;
+	const unsigned int red = (md_colour >> 1) & 7;
+	const unsigned int green = (md_colour >> 5) & 7;
+	const unsigned int blue = (md_colour >> 9) & 7;
 
-	return QColor(red << 5, green << 5, blue << 5);
+	return QColor(callback(red), callback(green), callback(blue));
+}
+
+QColor Palette::MDToQColor224(const unsigned int md_colour)
+{
+	return MDToQColour(md_colour, [](const unsigned int colour_channel){return colour_channel << 5;});
+}
+
+QColor Palette::MDToQColor256(const unsigned int md_colour)
+{
+	return MDToQColour(md_colour, [](const unsigned int colour_channel){return colour_channel << 5 | colour_channel << 2 | colour_channel >> 1;});
 }
 
 unsigned int Palette::QColorToMD(const QColor &colour)
