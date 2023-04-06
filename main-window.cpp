@@ -68,34 +68,42 @@ MainWindow::MainWindow(QWidget* const parent)
 			tile_viewer.setSelection(true,
 				[this](QVector<bool> &selection)
 				{
-					const int frame_index = sprite_viewer.selected_sprite_index();
-
-					if (frame_index != -1)
+					const auto do_frame_or_piece = [this](const std::function<void(const SpritePiece &piece)> &callback)
 					{
-						const auto &frames = sprite_mappings_manager.sprite_mappings().frames;
-						const int piece_index = sprite_viewer.selected_piece_index();
+						const int frame_index = sprite_viewer.selected_sprite_index();
 
-						if (piece_index == -1)
+						if (frame_index != -1)
 						{
-							if (frames[frame_index].pieces.size() != 0)
-								sprite_piece_picker.setSelectedTile(frames[frame_index].pieces[0].tile_index);
+							const auto &frames = sprite_mappings_manager.sprite_mappings().frames;
+							const int piece_index = sprite_viewer.selected_piece_index();
 
-							for (auto &piece : frames[frame_index].pieces)
-								for (int i = 0; i < piece.width * piece.height; ++i)
-									if (piece.tile_index + i < selection.size())
-										selection[piece.tile_index + i] = true;
+							if (piece_index == -1)
+							{
+								if (frames[frame_index].pieces.size() != 0)
+									sprite_piece_picker.setSelectedTile(frames[frame_index].pieces[0].tile_index);
+
+								for (auto &piece : frames[frame_index].pieces)
+									callback(piece);
+							}
+							else
+							{
+								const auto &piece = frames[frame_index].pieces[piece_index];
+
+								sprite_piece_picker.setSelectedTile(piece.tile_index);
+
+								callback(piece);
+							}
 						}
-						else
+					};
+
+					do_frame_or_piece(
+						[&selection](const SpritePiece &piece)
 						{
-							const auto &piece = frames[frame_index].pieces[piece_index];
-
-							sprite_piece_picker.setSelectedTile(piece.tile_index);
-
 							for (int i = 0; i < piece.width * piece.height; ++i)
 								if (piece.tile_index + i < selection.size())
 									selection[piece.tile_index + i] = true;
 						}
-					}
+					);
 				}
 			);
 		}
