@@ -104,6 +104,7 @@
      <property name="title">
       <string>&amp;Tiles</string>
      </property>
+     <addaction name="actionSelect_All_Unmapped_Tiles"/>
      <addaction name="actionInvert_Selection"/>
     </widget>
     <addaction name="menu_Sprite"/>
@@ -556,6 +557,14 @@
   <action name="actionInvert_Selection">
    <property name="text">
     <string>Invert Selection</string>
+   </property>
+  </action>
+  <action name="actionSelect_All_Unmapped_Tiles">
+   <property name="text">
+    <string>Select All Unmapped Tiles</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+U</string>
    </property>
   </action>
  </widget>

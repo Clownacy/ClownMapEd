@@ -613,6 +613,24 @@ MainWindow::MainWindow(QWidget* const parent)
 	// Edit/Tiles //
 	////////////////
 
+	connect(ui->actionSelect_All_Unmapped_Tiles, &QAction::triggered, this,
+		[this]()
+		{
+			tile_viewer.setSelection(true,
+				[this](QVector<bool> &selected)
+				{
+					for (auto &tile_selected : selected)
+						tile_selected = true;
+
+					for (const auto &frame : sprite_mappings_manager.sprite_mappings().frames)
+						for (const auto &piece : frame.pieces)
+							for (int i = 0; i < piece.width * piece.height; ++i)
+								selected[piece.tile_index + i] = false;
+				}
+			);
+		}
+	);
+
 	connect(ui->actionInvert_Selection, &QAction::triggered, this,
 		[this]()
 		{
