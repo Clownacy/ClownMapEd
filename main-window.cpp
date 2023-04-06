@@ -187,10 +187,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	const auto load_primary_palette_file = [this](const QString &file_path)
 	{
 		if (!file_path.isNull())
-		{
 			palette.loadFromFile(file_path);
-			palette_editor.update();
-		}
 	};
 
 	const auto load_sprite_mappings_file = [this](const QString &file_path)

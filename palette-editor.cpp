@@ -47,6 +47,8 @@ PaletteEditor::PaletteEditor(Palette &palette)
 			for (int line = 0; line < Palette::TOTAL_LINES; ++line)
 				for (int index = 0; index < Palette::COLOURS_PER_LINE; ++index)
 					buttons[line][index].setColour(this->palette.colour224(line, index));
+
+			update();
 		}
 	);
 }
