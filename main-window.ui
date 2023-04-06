@@ -107,6 +107,7 @@
      <addaction name="actionSelect_All_Unmapped_Tiles"/>
      <addaction name="actionDelete_Selected_Tiles"/>
      <addaction name="actionFind_Sprite_that_Uses_Focused_Tile"/>
+     <addaction name="actionDuplicate_Selected_Tiles"/>
      <addaction name="actionInvert_Selection"/>
     </widget>
     <addaction name="menu_Sprite"/>
@@ -583,6 +584,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+F</string>
+   </property>
+  </action>
+  <action name="actionDuplicate_Selected_Tiles">
+   <property name="text">
+    <string>Duplicate Selected Tile(s)</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+Shift+D</string>
    </property>
   </action>
  </widget>

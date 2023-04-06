@@ -68,6 +68,7 @@ public:
 	}
 
 	void deleteTile(const int tile_index);
+	void duplicateTile(const int tile_index, const int insert_index);
 
 signals:
 	void pixmapsChanged();

@@ -701,6 +701,34 @@ MainWindow::MainWindow(QWidget* const parent)
 		}
 	);
 
+	connect(ui->actionDuplicate_Selected_Tiles, &QAction::triggered, this,
+		[this]()
+		{
+			tile_viewer.setSelection(false,
+				[this](QVector<bool> &selected)
+				{
+					int selected_tile = -1;
+					while (selected_tile != 0 && (selected_tile = selected.lastIndexOf(true, selected_tile - 1)) != -1)
+					{
+						// Duplicate the tile.
+						const int insertion_index = selected.indexOf(false, selected_tile);
+						tile_manager.duplicateTile(selected_tile, insertion_index == -1 ? selected.size() : insertion_index);
+
+						// Correct sprite piece tile indices to account for the inserted tile.
+						auto lock = sprite_mappings_manager.lock();
+
+						for (auto &frame : lock->frames)
+							for (auto &piece : frame.pieces)
+								if (piece.tile_index >= insertion_index)
+									++piece.tile_index;
+					}
+				}
+			);
+
+			tile_viewer.clearSelection();
+		}
+	);
+
 	connect(ui->actionInvert_Selection, &QAction::triggered, this,
 		[this]()
 		{

@@ -17,6 +17,14 @@ void TileManager::deleteTile(const int tile_index)
 	emit pixmapsChanged();
 }
 
+void TileManager::duplicateTile(const int tile_index, const int insert_index)
+{
+	tiles_bytes.insert(insert_index, tiles_bytes[tile_index]);
+	tile_pixmaps.insert(insert_index, tile_pixmaps[tile_index]);
+
+	emit pixmapsChanged();
+}
+
 void TileManager::regeneratePixmaps()
 {
 	invalid_tile_pixmaps = createPixmaps(createInvalidTilePixmap());
