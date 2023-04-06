@@ -82,7 +82,8 @@ MainWindow::MainWindow(QWidget* const parent)
 
 							for (auto &piece : frames[frame_index].pieces)
 								for (int i = 0; i < piece.width * piece.height; ++i)
-									selection[piece.tile_index + i] = true;
+									if (piece.tile_index + i < selection.size())
+										selection[piece.tile_index + i] = true;
 						}
 						else
 						{
@@ -91,7 +92,8 @@ MainWindow::MainWindow(QWidget* const parent)
 							sprite_piece_picker.setSelectedTile(piece.tile_index);
 
 							for (int i = 0; i < piece.width * piece.height; ++i)
-								selection[piece.tile_index + i] = true;
+								if (piece.tile_index + i < selection.size())
+									selection[piece.tile_index + i] = true;
 						}
 					}
 				}
