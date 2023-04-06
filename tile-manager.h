@@ -57,7 +57,7 @@ public:
 	const QPixmap& pixmaps(const int tile_index, const int palette_line, const PixmapType type) const
 	{
 		if (tile_index >= tile_pixmaps.size())
-			return type == PixmapType::TRANSPARENT ? invalid_pixmap_transparent : invalid_pixmap_normal;
+			return invalid_tile_pixmaps[static_cast<std::size_t>(type)];
 		else
 			return tile_pixmaps[tile_index][palette_line][static_cast<std::size_t>(type)];
 	}
@@ -74,16 +74,12 @@ private slots:
 	void regeneratePixmaps();
 
 private:
-	static QPixmap createPixmap(const std::array<std::array<QColor, TILE_WIDTH>, TILE_HEIGHT> &bitmap, const std::function<QColor(QColor)> &callback);
-	static QPixmap createPixmapNoBackground(const std::array<std::array<QColor, TILE_WIDTH>, TILE_HEIGHT> &bitmap);
-	static QPixmap createPixmapWithBackground(const std::array<std::array<QColor, TILE_WIDTH>, TILE_HEIGHT> &bitmap, const QColor &background_colour);
-	static QPixmap createPixmapTransparent(const std::array<std::array<QColor, TILE_WIDTH>, TILE_HEIGHT> &bitmap, const QColor &background_colour);
+	std::array<QPixmap, static_cast<std::size_t>(PixmapType::MAX)> createPixmaps(const std::array<std::array<QColor, TILE_WIDTH>, TILE_HEIGHT> rgb_pixels);
 	static std::array<std::array<QColor, TILE_WIDTH>, TILE_HEIGHT> createInvalidTilePixmap();
 
 	const Palette &palette;
 
-	QPixmap invalid_pixmap_normal;
-	QPixmap invalid_pixmap_transparent;
+	std::array<QPixmap, static_cast<std::size_t>(PixmapType::MAX)> invalid_tile_pixmaps;
 	QVector<std::array<uchar, TILE_SIZE_IN_BYTES>> tiles_bytes;
 	QVector<std::array<std::array<QPixmap, static_cast<std::size_t>(PixmapType::MAX)>, Palette::TOTAL_LINES>> tile_pixmaps;
 };
