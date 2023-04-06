@@ -659,6 +659,48 @@ MainWindow::MainWindow(QWidget* const parent)
 		}
 	);
 
+	connect(ui->actionFind_Sprite_that_Uses_Focused_Tile, &QAction::triggered, this,
+		[this]()
+		{
+			const int selected_tile_index = tile_viewer.selection().indexOf(true);
+
+			const auto &frames = sprite_mappings_manager.sprite_mappings().frames;
+			for (int frame_index = 0; frame_index < frames.size(); ++frame_index)
+			{
+				// TODO: Improve this.
+				// This algorithm sucks, but it's exactly what SonMapEd does.
+				// The problem with this is that it only toggles between the first
+				// two sprites to use the selected tile, when it would be better if
+				// it cycled between every sprite that uses the tile instead.
+				if (frame_index != sprite_viewer.selected_sprite_index())
+				{
+					for (const auto &piece : frames[frame_index].pieces)
+					{
+						if (selected_tile_index >= piece.tile_index && selected_tile_index < piece.tile_index + piece.width * piece.height)
+						{
+							// TODO: Don't do this.
+							// This is a gross hack: back up the selection so that we can
+							// restore it after changing the selected sprite.
+							const auto selection = tile_viewer.selection();
+
+							sprite_viewer.setSelectedSprite(frame_index);
+
+							// Restore the selection.
+							tile_viewer.setSelection(false,
+								[&selection](QVector<bool> &selected)
+								{
+									selected = selection;
+								}
+							);
+
+							return;
+						}
+					}
+				}
+			}
+		}
+	);
+
 	connect(ui->actionInvert_Selection, &QAction::triggered, this,
 		[this]()
 		{

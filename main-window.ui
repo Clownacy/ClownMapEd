@@ -106,6 +106,7 @@
      </property>
      <addaction name="actionSelect_All_Unmapped_Tiles"/>
      <addaction name="actionDelete_Selected_Tiles"/>
+     <addaction name="actionFind_Sprite_that_Uses_Focused_Tile"/>
      <addaction name="actionInvert_Selection"/>
     </widget>
     <addaction name="menu_Sprite"/>
@@ -574,6 +575,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+Del</string>
+   </property>
+  </action>
+  <action name="actionFind_Sprite_that_Uses_Focused_Tile">
+   <property name="text">
+    <string>Find Sprite that Uses Focused Tile</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+F</string>
    </property>
   </action>
  </widget>
