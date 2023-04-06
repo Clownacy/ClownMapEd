@@ -67,6 +67,8 @@ public:
 		return tile_pixmaps.size();
 	}
 
+	void deleteTile(const int tile_index);
+
 signals:
 	void pixmapsChanged();
 

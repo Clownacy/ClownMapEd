@@ -631,6 +631,34 @@ MainWindow::MainWindow(QWidget* const parent)
 		}
 	);
 
+	connect(ui->actionDelete_Selected_Tiles, &QAction::triggered, this,
+		[this]()
+		{
+			tile_viewer.setSelection(false,
+				[this](QVector<bool> &selected)
+				{
+					int selected_tile;
+					while ((selected_tile = selected.lastIndexOf(true)) != -1)
+					{
+						// Un-select the tile, to prevent an infinite loop.
+						selected[selected_tile] = false;
+
+						// Remove the tile.
+						tile_manager.deleteTile(selected_tile);
+
+						// Correct sprite piece tile indices to account for the removed tile.
+						auto lock = sprite_mappings_manager.lock();
+
+						for (auto &frame : lock->frames)
+							for (auto &piece : frame.pieces)
+								if (piece.tile_index > selected_tile)
+									--piece.tile_index;
+					}
+				}
+			);
+		}
+	);
+
 	connect(ui->actionInvert_Selection, &QAction::triggered, this,
 		[this]()
 		{

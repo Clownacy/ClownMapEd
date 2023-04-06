@@ -9,6 +9,14 @@ TileManager::TileManager(const Palette &palette)
 	connect(&palette, &Palette::changed, this, &TileManager::regeneratePixmaps);
 }
 
+void TileManager::deleteTile(const int tile_index)
+{
+	tiles_bytes.remove(tile_index);
+	tile_pixmaps.remove(tile_index);
+
+	emit pixmapsChanged();
+}
+
 void TileManager::regeneratePixmaps()
 {
 	invalid_tile_pixmaps = createPixmaps(createInvalidTilePixmap());

@@ -105,6 +105,7 @@
       <string>&amp;Tiles</string>
      </property>
      <addaction name="actionSelect_All_Unmapped_Tiles"/>
+     <addaction name="actionDelete_Selected_Tiles"/>
      <addaction name="actionInvert_Selection"/>
     </widget>
     <addaction name="menu_Sprite"/>
@@ -565,6 +566,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+U</string>
+   </property>
+  </action>
+  <action name="actionDelete_Selected_Tiles">
+   <property name="text">
+    <string>Delete Selected Tile(s)</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+Del</string>
    </property>
   </action>
  </widget>
