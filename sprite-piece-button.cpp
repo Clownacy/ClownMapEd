@@ -9,14 +9,14 @@
 SpritePieceButton::SpritePieceButton(const TileManager &tile_manager)
 	: tile_manager(tile_manager)
 {
-	connect(&tile_manager, &TileManager::regenerated, this, qOverload<>(&SpritePieceButton::update));
+	connect(&tile_manager, &TileManager::pixmapsChanged, this, qOverload<>(&SpritePieceButton::update));
 }
 
 void SpritePieceButton::setSpritePiece(const SpritePiece &sprite_piece)
 {
 	const QSizeF dpi_scale = Utilities::GetDPIScale(this);
 	m_sprite_piece = sprite_piece;
-	setFixedSize(sprite_piece.width * Tile::WIDTH * 1.5 * dpi_scale.width(), sprite_piece.height * Tile::HEIGHT * 1.5 * dpi_scale.height());
+	setFixedSize(sprite_piece.width * TileManager::TILE_WIDTH * 1.5 * dpi_scale.width(), sprite_piece.height * TileManager::TILE_HEIGHT * 1.5 * dpi_scale.height());
 	update();
 }
 
@@ -26,6 +26,6 @@ void SpritePieceButton::paintEvent(QPaintEvent* const event)
 
 	QPainter painter(this);
 
-	painter.scale(width() / (m_sprite_piece.width * Tile::WIDTH), height() / (m_sprite_piece.height * Tile::HEIGHT));
-	m_sprite_piece.draw(painter, tile_manager, Tile::PixmapType::WITH_BACKGROUND);
+	painter.scale(width() / (m_sprite_piece.width * TileManager::TILE_WIDTH), height() / (m_sprite_piece.height * TileManager::TILE_HEIGHT));
+	m_sprite_piece.draw(painter, tile_manager, TileManager::PixmapType::WITH_BACKGROUND);
 }

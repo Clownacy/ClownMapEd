@@ -20,7 +20,7 @@
 MainWindow::MainWindow(QWidget* const parent)
 	: QMainWindow(parent)
 	, ui(new Ui::MainWindow)
-    , tile_manager(nullptr, 0, palette)
+    , tile_manager(palette)
 	, sprite_viewer(tile_manager, sprite_mappings_manager)
     , palette_editor(palette)
 	, sprite_piece_picker(tile_manager)
@@ -136,7 +136,8 @@ MainWindow::MainWindow(QWidget* const parent)
 			if (!decompression_function(file_stream, string_stream))
 				return;
 
-			if (!tile_manager.setTiles(reinterpret_cast<const uchar*>(string_stream.str().c_str()), static_cast<int>(string_stream.str().length())))
+			const std::string string = string_stream.str();
+			if (!tile_manager.setTiles(string.begin(), string.end()))
 			{
 				// TODO: Should probably show an error message or something.
 			}
@@ -188,7 +189,6 @@ MainWindow::MainWindow(QWidget* const parent)
 		if (!file_path.isNull())
 		{
 			palette.loadFromFile(file_path);
-			tile_manager.setPalette(palette);
 			palette_editor.update();
 		}
 	};

@@ -11,7 +11,7 @@ SpriteViewer::SpriteViewer(const TileManager &tile_manager, const SpriteMappings
 {
 	setAutoFillBackground(true);
 
-	connect(&tile_manager, &TileManager::regenerated, this, qOverload<>(&SpriteViewer::update));
+	connect(&tile_manager, &TileManager::pixmapsChanged, this, qOverload<>(&SpriteViewer::update));
 
 	connect(&sprite_mappings_manager, &SpriteMappingsManager::mappingsModified, this,
 		[this]()
@@ -85,7 +85,7 @@ void SpriteViewer::paintEvent(QPaintEvent* const event)
 				{
 					for (int x = 0; x < piece.width; ++x)
 					{
-						const QRect rect(piece.x + x * Tile::WIDTH, piece.y + y * Tile::HEIGHT, Tile::WIDTH, Tile::HEIGHT);
+						const QRect rect(piece.x + x * TileManager::TILE_WIDTH, piece.y + y * TileManager::TILE_HEIGHT, TileManager::TILE_WIDTH, TileManager::TILE_HEIGHT);
 
 						callback(rect);
 					}
@@ -152,9 +152,9 @@ void SpriteViewer::paintEvent(QPaintEvent* const event)
 
 	// Draw selected sprite.
 	if (m_selected_piece_index == -1)
-		selected_sprite.draw(painter, tile_manager, Tile::PixmapType::NO_BACKGROUND, 0, Tile::PixmapType::NO_BACKGROUND, starting_palette_line);
+		selected_sprite.draw(painter, tile_manager, TileManager::PixmapType::NO_BACKGROUND, 0, TileManager::PixmapType::NO_BACKGROUND, starting_palette_line);
 	else
-		selected_sprite.draw(painter, tile_manager, Tile::PixmapType::TRANSPARENT, m_selected_piece_index, Tile::PixmapType::NO_BACKGROUND, starting_palette_line);
+		selected_sprite.draw(painter, tile_manager, TileManager::PixmapType::TRANSPARENT, m_selected_piece_index, TileManager::PixmapType::NO_BACKGROUND, starting_palette_line);
 
 	int x_offset;
 
@@ -165,7 +165,7 @@ void SpriteViewer::paintEvent(QPaintEvent* const event)
 	{
 		x_offset += qMin(-16, frames[i + 1].left());
 		x_offset -= frames[i].right();
-		frames[i].draw(painter, tile_manager, Tile::PixmapType::TRANSPARENT, 0, Tile::PixmapType::TRANSPARENT, starting_palette_line, x_offset, 0);
+		frames[i].draw(painter, tile_manager, TileManager::PixmapType::TRANSPARENT, 0, TileManager::PixmapType::TRANSPARENT, starting_palette_line, x_offset, 0);
 	}
 
 	// Draw sprites to the right of the selected sprite.
@@ -175,7 +175,7 @@ void SpriteViewer::paintEvent(QPaintEvent* const event)
 	{
 		x_offset += qMax(16, frames[i - 1].right());
 		x_offset -= frames[i].left();
-		frames[i].draw(painter, tile_manager, Tile::PixmapType::TRANSPARENT, 0, Tile::PixmapType::TRANSPARENT, starting_palette_line, x_offset, 0);
+		frames[i].draw(painter, tile_manager, TileManager::PixmapType::TRANSPARENT, 0, TileManager::PixmapType::TRANSPARENT, starting_palette_line, x_offset, 0);
 	}
 
 	// TODO: Remove.

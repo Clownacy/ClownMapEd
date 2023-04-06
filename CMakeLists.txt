@@ -43,8 +43,6 @@ set(PROJECT_SOURCES
 	"sprite-piece-button.h"
 	"sprite-piece-picker.cpp"
 	"sprite-piece-picker.h"
-	"tile.cpp"
-	"tile.h"
 	"tile-manager.cpp"
 	"tile-manager.h"
 	"tile-viewer.cpp"

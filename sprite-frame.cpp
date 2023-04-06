@@ -17,7 +17,7 @@ SpriteFrame SpriteFrame::fromDataStream(DataStream &stream)
 	return frame;
 }
 
-void SpriteFrame::draw(QPainter &painter, const TileManager &tile_manager, const Tile::PixmapType unselected_effect, const int selected_piece_index, const Tile::PixmapType selected_effect, const int starting_palette_line, const int x_offset, const int y_offset) const
+void SpriteFrame::draw(QPainter &painter, const TileManager &tile_manager, const TileManager::PixmapType unselected_effect, const int selected_piece_index, const TileManager::PixmapType selected_effect, const int starting_palette_line, const int x_offset, const int y_offset) const
 {
 	// Must draw in reverse order.
 	for (unsigned int i = 0; i < 2; ++i)

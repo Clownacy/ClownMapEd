@@ -11,11 +11,11 @@ struct SpritePiece
 {
 	static SpritePiece fromDataStream(DataStream &stream);
 
-	void draw(QPainter &painter, const TileManager &tile_manager, Tile::PixmapType effect, int starting_palette_line = 0, int x_offset = 0, int y_offset = 0) const;
+	void draw(QPainter &painter, const TileManager &tile_manager, TileManager::PixmapType effect, int starting_palette_line = 0, int x_offset = 0, int y_offset = 0) const;
 
 	QRect rect() const
 	{
-		return QRect(x, y, width * Tile::WIDTH, height * Tile::HEIGHT);
+		return QRect(x, y, width * TileManager::TILE_WIDTH, height * TileManager::TILE_HEIGHT);
 	}
 
 	int x;

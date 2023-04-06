@@ -2,65 +2,90 @@
 #define TILE_MANAGER_H
 
 #include <array>
+#include <cstddef>
+#include <functional>
 
 #include <QObject>
 #include <QPixmap>
 #include <QVector>
 
 #include "palette.h"
-#include "tile.h"
 
 class TileManager : public QObject
 {
 	Q_OBJECT
 
 public:
-	TileManager(const uchar* const tile_bytes, const int total_bytes, const Palette &palette);
-
-	bool setTiles(const uchar* const tile_bytes, const int total_bytes)
+	enum class PixmapType
 	{
-		if (!setTilesInternal(tile_bytes, total_bytes))
+		NO_BACKGROUND,
+		WITH_BACKGROUND,
+		TRANSPARENT,
+
+		MAX
+	};
+
+	static constexpr int TILE_WIDTH = 8;
+	static constexpr int TILE_HEIGHT = 8;
+	static constexpr int TILE_SIZE_IN_BYTES = TILE_WIDTH * TILE_HEIGHT / 2;
+
+	TileManager(const Palette &palette);
+
+	template<typename It>
+	bool setTiles(const It &tile_bytes_first, const It &tile_bytes_last)
+	{
+		const auto total_bytes = tile_bytes_last - tile_bytes_first;
+
+		// Bail if the file contains a partial tile (it probably isn't tile data).
+		if (total_bytes % TILE_SIZE_IN_BYTES != 0)
 			return false;
 
-		regenerate();
+		const int total_tiles = total_bytes / TILE_SIZE_IN_BYTES;
+
+		tiles_bytes.resize(total_tiles);
+
+		for (int i = 0; i < total_tiles; ++i)
+			std::copy(tile_bytes_first + i * TILE_SIZE_IN_BYTES, tile_bytes_first + (i + 1) * TILE_SIZE_IN_BYTES, tiles_bytes[i].data());
+
+		tile_pixmaps.resize(tiles_bytes.size()); // TODO: Reserve instead?
+
+		regeneratePixmaps();
 
 		return true;
 	}
 
-	void setPalette(const Palette &palette)
+	const QPixmap& pixmaps(const int tile_index, const int palette_line, const PixmapType type) const
 	{
-		this->palette = &palette;
-		regenerate();
-	}
-
-	const QPixmap& pixmaps(const int tile_index, const int palette_line, const Tile::PixmapType type) const
-	{
-		// TODO: This should be simplfied.
-		if (tile_index < tiles.size())
-			return tiles[tile_index].pixmaps()[palette_line][static_cast<int>(type)];
+		if (tile_index >= tile_pixmaps.size())
+			return type == PixmapType::TRANSPARENT ? invalid_pixmap_transparent : invalid_pixmap_normal;
 		else
-			return invalid_pixmap.pixmaps()[palette_line][static_cast<int>(type)];
+			return tile_pixmaps[tile_index][palette_line][static_cast<std::size_t>(type)];
 	}
 
 	const int total_tiles() const
 	{
-		return tiles.size();
+		return tile_pixmaps.size();
 	}
 
-public slots:
-	void regenerate();
-
 signals:
-	void regenerated();
+	void pixmapsChanged();
+
+private slots:
+	void regeneratePixmaps();
 
 private:
-	bool setTilesInternal(const uchar* const tile_bytes, const int total_bytes);
+	static QPixmap createPixmap(const std::array<std::array<QColor, TILE_WIDTH>, TILE_HEIGHT> &bitmap, const std::function<QColor(QColor)> &callback);
+	static QPixmap createPixmapNoBackground(const std::array<std::array<QColor, TILE_WIDTH>, TILE_HEIGHT> &bitmap);
+	static QPixmap createPixmapWithBackground(const std::array<std::array<QColor, TILE_WIDTH>, TILE_HEIGHT> &bitmap, const QColor &background_colour);
+	static QPixmap createPixmapTransparent(const std::array<std::array<QColor, TILE_WIDTH>, TILE_HEIGHT> &bitmap, const QColor &background_colour);
+	static std::array<std::array<QColor, TILE_WIDTH>, TILE_HEIGHT> createInvalidTilePixmap();
 
-	QVector<std::array<uchar, Tile::TOTAL_BYTES>> tile_bytes;
-	const Palette *palette;
+	const Palette &palette;
 
-	Tile invalid_pixmap;
-	QVector<Tile> tiles;
+	QPixmap invalid_pixmap_normal;
+	QPixmap invalid_pixmap_transparent;
+	QVector<std::array<uchar, TILE_SIZE_IN_BYTES>> tiles_bytes;
+	QVector<std::array<std::array<QPixmap, static_cast<std::size_t>(PixmapType::MAX)>, Palette::TOTAL_LINES>> tile_pixmaps;
 };
 
 #endif // TILE_MANAGER_H

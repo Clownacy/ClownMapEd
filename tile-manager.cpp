@@ -1,46 +1,138 @@
 #include "tile-manager.h"
 
-#include <cstring>
+#include <algorithm>
 
-TileManager::TileManager(const uchar* const tile_bytes, const int total_bytes, const Palette &palette)
-    : palette(&palette)
-	, invalid_pixmap(Tile::Invalid(palette))
+TileManager::TileManager(const Palette &palette)
+    : palette(palette)
+	, invalid_pixmap_normal(createPixmapNoBackground(createInvalidTilePixmap()))
+	, invalid_pixmap_transparent(createPixmapTransparent(createInvalidTilePixmap(), palette.colour256(0, 0)))
 {
-	if (tile_bytes != nullptr)
-		setTilesInternal(tile_bytes, total_bytes);
-
-	connect(&palette, &Palette::changed, this, &TileManager::regenerate);
-
-	regenerate();
+	connect(&palette, &Palette::changed, this, &TileManager::regeneratePixmaps);
 }
 
-void TileManager::regenerate()
+void TileManager::regeneratePixmaps()
 {
-	tiles.clear();
-	tiles.reserve(tile_bytes.size() / Tile::TOTAL_BYTES);
+	std::array<std::array<std::array<QColor, TILE_WIDTH>, TILE_HEIGHT>, Palette::TOTAL_LINES> rgb_pixels;
 
-	for (auto &single_tile_bytes : tile_bytes)
-		tiles.push_back(Tile(single_tile_bytes, *palette));
-
-	emit regenerated();
-}
-
-bool TileManager::setTilesInternal(const uchar* const tile_bytes, const int total_bytes)
-{
-	// Bail if the file contains a partial tile (it probably isn't tile data).
-	if (total_bytes % Tile::TOTAL_BYTES != 0)
-		return false;
-
-	const int total_tiles = total_bytes / Tile::TOTAL_BYTES;
-
-	this->tile_bytes.resize(total_tiles);
-	this->tile_bytes.squeeze();
-
-	for (int i = 0; i < total_tiles; ++i)
+	for (int tile_index = 0; tile_index < tiles_bytes.size(); ++tile_index)
 	{
-		const uchar* const single_tile_bytes = tile_bytes + i * Tile::TOTAL_BYTES;
-		std::copy(single_tile_bytes, single_tile_bytes + Tile::TOTAL_BYTES, this->tile_bytes[i].begin());
+		for (unsigned int line = 0; line < Palette::TOTAL_LINES; ++line)
+		{
+			for (unsigned int y = 0; y < TILE_HEIGHT; ++y)
+			{
+				for (unsigned int x = 0; x < TILE_WIDTH; ++x)
+				{
+					const unsigned int pixel_index = x + y * TILE_WIDTH;
+					const unsigned int palette_index = (tiles_bytes[tile_index][pixel_index >> 1] >> (~(pixel_index << 2) & 4)) & 0xF;
+
+					rgb_pixels[line][y][x] = palette_index == 0 ? QColor(0, 0, 0, 0) : palette.colour256(line, palette_index);
+				}
+			}
+		}
+
+		const QColor background_colour = palette.colour256(0, 0);
+
+		for (unsigned int line = 0; line < Palette::TOTAL_LINES; ++line)
+		{
+			tile_pixmaps[tile_index][line][static_cast<std::size_t>(PixmapType::NO_BACKGROUND)] = createPixmapNoBackground(rgb_pixels[line]);
+			tile_pixmaps[tile_index][line][static_cast<std::size_t>(PixmapType::WITH_BACKGROUND)] = createPixmapWithBackground(rgb_pixels[line], background_colour);
+			tile_pixmaps[tile_index][line][static_cast<std::size_t>(PixmapType::TRANSPARENT)] = createPixmapTransparent(rgb_pixels[line], background_colour);
+		}
 	}
 
-	return true;
+	emit pixmapsChanged();
+}
+
+QPixmap TileManager::createPixmap(const std::array<std::array<QColor, TILE_WIDTH>, TILE_HEIGHT> &bitmap, const std::function<QColor(QColor)> &callback)
+{
+	std::array<std::array<std::array<uchar, 4>, TILE_WIDTH>, TILE_HEIGHT> working_bitmap;
+
+	for (int y = 0; y < TILE_HEIGHT; ++y)
+	{
+		for (int x = 0; x < TILE_WIDTH; ++x)
+		{
+			const QColor colour = callback(bitmap[y][x]);
+			working_bitmap[y][x][0] = colour.red();
+			working_bitmap[y][x][1] = colour.green();
+			working_bitmap[y][x][2] = colour.blue();
+			working_bitmap[y][x][3] = colour.alpha();
+		}
+	}
+
+	return QPixmap::fromImage(QImage(&working_bitmap[0][0][0], TILE_WIDTH, TILE_HEIGHT, QImage::Format::Format_RGBA8888_Premultiplied));
+}
+
+QPixmap TileManager::createPixmapNoBackground(const std::array<std::array<QColor, TILE_WIDTH>, TILE_HEIGHT> &bitmap)
+{
+	return createPixmap(bitmap,
+		[](const QColor colour)
+		{
+			return colour;
+		}
+	);
+}
+
+QPixmap TileManager::createPixmapWithBackground(const std::array<std::array<QColor, TILE_WIDTH>, TILE_HEIGHT> &bitmap, const QColor &background_colour)
+{
+	return createPixmap(bitmap,
+		[&background_colour](const QColor colour)
+		{
+			return colour == QColor(0, 0, 0, 0) ? background_colour : colour;
+		}
+	);
+}
+
+QPixmap TileManager::createPixmapTransparent(const std::array<std::array<QColor, TILE_WIDTH>, TILE_HEIGHT> &bitmap, const QColor &background_colour)
+{
+	return createPixmap(bitmap,
+		[&background_colour](const QColor colour)
+		{
+			if (colour.alpha() == 0)
+				return colour;
+
+			return QColor(colour.red() / 4 + background_colour.red() * 3 / 4, colour.green() / 4 + background_colour.green() * 3 / 4, colour.blue() / 4 + background_colour.blue() * 3 / 4);
+		}
+	);
+}
+
+std::array<std::array<QColor, TileManager::TILE_WIDTH>, TileManager::TILE_HEIGHT> TileManager::createInvalidTilePixmap()
+{
+	std::array<std::array<QColor, TILE_WIDTH>, TILE_HEIGHT> invalid_pixmap_raw_data;
+
+	for (int y = 0; y < TILE_HEIGHT; ++y)
+		for (int x = 0; x < TILE_WIDTH; ++x)
+			invalid_pixmap_raw_data[y][x] = QColor(0, 0, 0, 0);
+
+	const QColor colour = Qt::red;
+
+	for (int x = 0; x < TILE_WIDTH; ++x)
+	{
+		invalid_pixmap_raw_data[0][x] = colour;
+		invalid_pixmap_raw_data[TILE_HEIGHT - 1][x] = colour;
+	}
+
+	for (int y = 0; y < TILE_HEIGHT; ++y)
+	{
+		invalid_pixmap_raw_data[y][0] = colour;
+		invalid_pixmap_raw_data[y][TILE_WIDTH - 1] = colour;
+	}
+
+	if (TILE_WIDTH >= TILE_HEIGHT)
+	{
+		for (int x = 0; x < TILE_WIDTH; ++x)
+		{
+			invalid_pixmap_raw_data[x * TILE_HEIGHT / TILE_WIDTH][x] = colour;
+			invalid_pixmap_raw_data[(TILE_WIDTH - x - 1) * TILE_HEIGHT / TILE_WIDTH][x] = colour;
+		}
+	}
+	else
+	{
+		for (int y = 0; y < TILE_HEIGHT; ++y)
+		{
+			invalid_pixmap_raw_data[y][y * TILE_WIDTH / TILE_HEIGHT] = colour;
+			invalid_pixmap_raw_data[y][(TILE_HEIGHT - y - 1) * TILE_WIDTH / TILE_HEIGHT] = colour;
+		}
+	}
+
+	return invalid_pixmap_raw_data;
 }

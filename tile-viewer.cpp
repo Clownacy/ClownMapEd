@@ -6,8 +6,8 @@
 #include <QMouseEvent>
 #include <QPainter>
 
-static constexpr int TILE_WIDTH_SCALED = Tile::WIDTH * 3;
-static constexpr int TILE_HEIGHT_SCALED = Tile::HEIGHT * 3;
+static constexpr int TILE_WIDTH_SCALED = TileManager::TILE_WIDTH * 3;
+static constexpr int TILE_HEIGHT_SCALED = TileManager::TILE_HEIGHT * 3;
 
 template <typename T>
 static inline T DivideCeiling(T a, T b)
@@ -21,7 +21,7 @@ TileViewer::TileViewer(const TileManager &tile_manager)
 {
 	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-	connect(&tile_manager, &TileManager::regenerated, this,
+	connect(&tile_manager, &TileManager::pixmapsChanged, this,
 		[this]()
 		{
 			selected.resize(this->tile_manager.total_tiles());
@@ -160,7 +160,7 @@ void TileViewer::paintEvent(QPaintEvent* const event)
 				painter.drawRect(rect);
 
 			// XOR the selection with the tile's pixmap.
-			painter.drawPixmap(rect, tile_manager.pixmaps(tile_index, palette_line, Tile::PixmapType::WITH_BACKGROUND));
+			painter.drawPixmap(rect, tile_manager.pixmaps(tile_index, palette_line, TileManager::PixmapType::WITH_BACKGROUND));
 		}
 	);
 }
