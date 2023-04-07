@@ -112,19 +112,22 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(&sprite_piece_picker, &SpritePiecePicker::pieceSelected, this,
 		[this](const int width, const int height)
 		{
-			auto mappings = this->sprite_mappings_manager.lock();
+			sprite_mappings_manager.modifySpriteMappings(
+				[this, width, height](SpriteMappings &mappings)
+				{
+					if (sprite_viewer.selected_sprite_index() == -1)
+					{
+						mappings.frames.append(SpriteFrame());
+						sprite_viewer.setSelectedSprite(0);
+					}
 
-			if (sprite_viewer.selected_sprite_index() == -1)
-			{
-				mappings->frames.append(SpriteFrame());
-				sprite_viewer.setSelectedSprite(0);
-			}
+					auto &pieces = mappings.frames[sprite_viewer.selected_sprite_index()].pieces;
+					pieces.append(SpritePiece{0, 0, width, height, false, 0, false, false, sprite_piece_picker.selected_tile()});
+					sprite_viewer.setSelectedPiece(pieces.size() - 1);
 
-			auto &pieces = mappings->frames[sprite_viewer.selected_sprite_index()].pieces;
-			pieces.append(SpritePiece{0, 0, width, height, false, 0, false, false, sprite_piece_picker.selected_tile()});
-			sprite_viewer.setSelectedPiece(pieces.size() - 1);
-
-			sprite_piece_picker.setSelectedTile(sprite_piece_picker.selected_tile() + width * height);
+					sprite_piece_picker.setSelectedTile(sprite_piece_picker.selected_tile() + width * height);
+				}
+			);
 		}
 	);
 
@@ -208,7 +211,13 @@ MainWindow::MainWindow(QWidget* const parent)
 			if (!file.open(QFile::ReadOnly))
 				return;
 
-			sprite_mappings_manager.lock()(SpriteMappings::fromFile(file));
+			sprite_mappings_manager.modifySpriteMappings(
+				[&file](SpriteMappings &mappings)
+				{
+					mappings = SpriteMappings::fromFile(file);
+				}
+			);
+
 			sprite_viewer.setSelectedSprite(0);
 		}
 	};
@@ -221,32 +230,35 @@ MainWindow::MainWindow(QWidget* const parent)
 			if (!file.open(QFile::ReadOnly))
 				return;
 
-			const DynamicPatternLoadCues dplcs = DynamicPatternLoadCues::fromFile(file);
-
-			auto mappings = sprite_mappings_manager.lock();
-
-			if (mappings->frames.size() == dplcs.frames.size())
-			{
-				for (int frame_index = 0; frame_index < mappings->frames.size(); ++frame_index)
+			sprite_mappings_manager.modifySpriteMappings(
+				[&file](SpriteMappings &mappings)
 				{
-					auto &dplc_frame = dplcs.frames[frame_index];
+					const DynamicPatternLoadCues dplcs = DynamicPatternLoadCues::fromFile(file);
 
-					for (auto &piece : mappings->frames[frame_index].pieces)
+					if (mappings.frames.size() == dplcs.frames.size())
 					{
-						const int base_mapped_tile = dplc_frame.getMappedTile(piece.tile_index);
-
-						for (int i = 0; i < piece.width * piece.height; ++i)
+						for (int frame_index = 0; frame_index < mappings.frames.size(); ++frame_index)
 						{
-							const int mapped_tile = dplc_frame.getMappedTile(piece.tile_index + i);
+							auto &dplc_frame = dplcs.frames[frame_index];
 
-							if (mapped_tile == -1 || mapped_tile != base_mapped_tile + i)
-								return;
+							for (auto &piece : mappings.frames[frame_index].pieces)
+							{
+								const int base_mapped_tile = dplc_frame.getMappedTile(piece.tile_index);
+
+								for (int i = 0; i < piece.width * piece.height; ++i)
+								{
+									const int mapped_tile = dplc_frame.getMappedTile(piece.tile_index + i);
+
+									if (mapped_tile == -1 || mapped_tile != base_mapped_tile + i)
+										return;
+								}
+
+								piece.tile_index = base_mapped_tile;
+							}
 						}
-
-						piece.tile_index = base_mapped_tile;
 					}
 				}
-			}
+			);
 		}
 	};
 
@@ -332,24 +344,32 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionSwap_Sprite_with_Next, &QAction::triggered, this,
 		[this]()
 		{
-			auto mappings = sprite_mappings_manager.lock();
-			auto &frames = mappings->frames;
-			const int selected_sprite_index = sprite_viewer.selected_sprite_index();
+			sprite_mappings_manager.modifySpriteMappings(
+				[this](SpriteMappings &mappings)
+				{
+					auto &frames = mappings.frames;
+					const int selected_sprite_index = sprite_viewer.selected_sprite_index();
 
-			frames.move(selected_sprite_index, selected_sprite_index + 1);
-			sprite_viewer.setSelectedSprite(selected_sprite_index + 1);
+					frames.move(selected_sprite_index, selected_sprite_index + 1);
+					sprite_viewer.setSelectedSprite(selected_sprite_index + 1);
+				}
+			);
 		}
 	);
 
 	connect(ui->actionSwap_Sprite_with_Previous, &QAction::triggered, this,
 		[this]()
 		{
-			auto mappings = sprite_mappings_manager.lock();
-			auto &frames = mappings->frames;
-			const int selected_sprite_index = sprite_viewer.selected_sprite_index();
+			sprite_mappings_manager.modifySpriteMappings(
+				[this](SpriteMappings &mappings)
+				{
+					auto &frames = mappings.frames;
+					const int selected_sprite_index = sprite_viewer.selected_sprite_index();
 
-			frames.move(selected_sprite_index, selected_sprite_index - 1);
-			sprite_viewer.setSelectedSprite(selected_sprite_index - 1);
+					frames.move(selected_sprite_index, selected_sprite_index - 1);
+					sprite_viewer.setSelectedSprite(selected_sprite_index - 1);
+				}
+			);
 		}
 	);
 
@@ -370,7 +390,13 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionInsert_New_Sprite, &QAction::triggered, this,
 		[this]()
 		{
-			sprite_mappings_manager.lock()->frames.insert(sprite_viewer.selected_sprite_index() + 1, SpriteFrame());
+			sprite_mappings_manager.modifySpriteMappings(
+				[this](SpriteMappings &mappings)
+				{
+					mappings.frames.insert(sprite_viewer.selected_sprite_index() + 1, SpriteFrame());
+				}
+			);
+
 			sprite_viewer.setSelectedSprite(sprite_viewer.selected_sprite_index() + 1);
 		}
 	);
@@ -378,19 +404,28 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionDuplicate_Sprite, &QAction::triggered, this,
 		[this]()
 		{
-			auto mappings = sprite_mappings_manager.lock();
-			auto &frames = mappings->frames;
-			const int selected_sprite_index = sprite_viewer.selected_sprite_index();
+			sprite_mappings_manager.modifySpriteMappings(
+				[this](SpriteMappings &mappings)
+				{
+					auto &frames = mappings.frames;
+					const int selected_sprite_index = sprite_viewer.selected_sprite_index();
 
-			frames.insert(selected_sprite_index + 1, frames[selected_sprite_index]);
-			sprite_viewer.setSelectedSprite(selected_sprite_index + 1);
+					frames.insert(selected_sprite_index + 1, frames[selected_sprite_index]);
+					sprite_viewer.setSelectedSprite(selected_sprite_index + 1);
+				}
+			);
 		}
 	);
 
 	connect(ui->actionDelete_Sprite, &QAction::triggered, this,
 		[this]()
 		{
-			sprite_mappings_manager.lock()->frames.remove(sprite_viewer.selected_sprite_index());
+			sprite_mappings_manager.modifySpriteMappings(
+				[this](SpriteMappings &mappings)
+				{
+					mappings.frames.remove(sprite_viewer.selected_sprite_index());
+				}
+			);
 		}
 	);
 
@@ -415,7 +450,13 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionDelete_Sprite_Piece, &QAction::triggered, this,
 		[this]()
 		{
-			sprite_mappings_manager.lock()->frames[sprite_viewer.selected_sprite_index()].pieces.remove(sprite_viewer.selected_piece_index());
+			sprite_mappings_manager.modifySpriteMappings(
+				[this](SpriteMappings &mappings)
+				{
+					mappings.frames[sprite_viewer.selected_sprite_index()].pieces.remove(sprite_viewer.selected_piece_index());
+				}
+			);
+
 			sprite_viewer.setSelectedPiece(sprite_viewer.selected_piece_index() - 1);
 		}
 	);
@@ -423,123 +464,155 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionDuplicate_Sprite_Piece, &QAction::triggered, this,
 		[this]()
 		{
-			auto mappings = sprite_mappings_manager.lock();
-			auto &pieces = mappings->frames[sprite_viewer.selected_sprite_index()].pieces;
-			const int selected_piece_index = sprite_viewer.selected_piece_index();
+			sprite_mappings_manager.modifySpriteMappings(
+				[this](SpriteMappings &mappings)
+				{
+					auto &pieces = mappings.frames[sprite_viewer.selected_sprite_index()].pieces;
+					const int selected_piece_index = sprite_viewer.selected_piece_index();
 
-			pieces.insert(selected_piece_index + 1, pieces[selected_piece_index]);
-			sprite_viewer.setSelectedPiece(selected_piece_index + 1);
+					pieces.insert(selected_piece_index + 1, pieces[selected_piece_index]);
+					sprite_viewer.setSelectedPiece(selected_piece_index + 1);
+				}
+			);
 		}
 	);
 
 	connect(ui->actionMove_Piece_into_Next_Sprite, &QAction::triggered, this,
 		[this]()
 		{
-			const int selected_sprite_index = sprite_viewer.selected_sprite_index();
-			const int next_sprite_index = selected_sprite_index + 1;
-			const int selected_piece_index = sprite_viewer.selected_piece_index();
-			auto mappings = sprite_mappings_manager.lock();
-			auto &frames = mappings->frames;
-			auto &pieces = frames[selected_sprite_index].pieces;
+			sprite_mappings_manager.modifySpriteMappings(
+				[this](SpriteMappings &mappings)
+				{
+					const int selected_sprite_index = sprite_viewer.selected_sprite_index();
+					const int next_sprite_index = selected_sprite_index + 1;
+					const int selected_piece_index = sprite_viewer.selected_piece_index();
+					auto &frames = mappings.frames;
+					auto &pieces = frames[selected_sprite_index].pieces;
 
-			frames[next_sprite_index].pieces.append(pieces[selected_piece_index]);
-			pieces.remove(selected_piece_index);
+					frames[next_sprite_index].pieces.append(pieces[selected_piece_index]);
+					pieces.remove(selected_piece_index);
 
-			sprite_viewer.setSelectedSprite(next_sprite_index);
-			sprite_viewer.setSelectedPiece(frames[next_sprite_index].pieces.size() - 1);
+					sprite_viewer.setSelectedSprite(next_sprite_index);
+					sprite_viewer.setSelectedPiece(frames[next_sprite_index].pieces.size() - 1);
+				}
+			);
 		}
 	);
 
 	connect(ui->actionMove_Piece_into_Previous_Sprite, &QAction::triggered, this,
 		[this]()
 		{
-			const int selected_sprite_index = sprite_viewer.selected_sprite_index();
-			const int previous_sprite_index = selected_sprite_index - 1;
-			const int selected_piece_index = sprite_viewer.selected_piece_index();
-			auto mappings = sprite_mappings_manager.lock();
-			auto &frames = mappings->frames;
-			auto &pieces = frames[selected_sprite_index].pieces;
+			sprite_mappings_manager.modifySpriteMappings(
+				[this](SpriteMappings &mappings)
+				{
+					const int selected_sprite_index = sprite_viewer.selected_sprite_index();
+					const int previous_sprite_index = selected_sprite_index - 1;
+					const int selected_piece_index = sprite_viewer.selected_piece_index();
+					auto &frames = mappings.frames;
+					auto &pieces = frames[selected_sprite_index].pieces;
 
-			frames[previous_sprite_index].pieces.append(pieces[selected_piece_index]);
-			pieces.remove(selected_piece_index);
+					frames[previous_sprite_index].pieces.append(pieces[selected_piece_index]);
+					pieces.remove(selected_piece_index);
 
-			sprite_viewer.setSelectedSprite(previous_sprite_index);
-			sprite_viewer.setSelectedPiece(frames[previous_sprite_index].pieces.size() - 1);
+					sprite_viewer.setSelectedSprite(previous_sprite_index);
+					sprite_viewer.setSelectedPiece(frames[previous_sprite_index].pieces.size() - 1);
+				}
+			);
 		}
 	);
 
 	connect(ui->actionMove_Piece_into_New_Sprite, &QAction::triggered, this,
 		[this]()
 		{
-			const int selected_sprite_index = sprite_viewer.selected_sprite_index();
-			const int next_sprite_index = selected_sprite_index + 1;
-			const int selected_piece_index = sprite_viewer.selected_piece_index();
-			auto mappings = sprite_mappings_manager.lock();
-			auto &frames = mappings->frames;
-			auto &pieces = frames[selected_sprite_index].pieces;
+			sprite_mappings_manager.modifySpriteMappings(
+				[this](SpriteMappings &mappings)
+				{
+					const int selected_sprite_index = sprite_viewer.selected_sprite_index();
+					const int next_sprite_index = selected_sprite_index + 1;
+					const int selected_piece_index = sprite_viewer.selected_piece_index();
+					auto &frames = mappings.frames;
+					auto &pieces = frames[selected_sprite_index].pieces;
 
-			frames.insert(next_sprite_index, SpriteFrame());
-			frames[next_sprite_index].pieces.append(pieces[selected_piece_index]);
-			pieces.remove(selected_piece_index);
+					frames.insert(next_sprite_index, SpriteFrame());
+					frames[next_sprite_index].pieces.append(pieces[selected_piece_index]);
+					pieces.remove(selected_piece_index);
 
-			sprite_viewer.setSelectedSprite(next_sprite_index);
-			sprite_viewer.setSelectedPiece(frames[next_sprite_index].pieces.size() - 1);
+					sprite_viewer.setSelectedSprite(next_sprite_index);
+					sprite_viewer.setSelectedPiece(frames[next_sprite_index].pieces.size() - 1);
+				}
+			);
 		}
 	);
 
 	connect(ui->actionMove_Piece_toward_Back, &QAction::triggered, this,
 		[this]()
 		{
-			auto mappings = sprite_mappings_manager.lock();
-			auto &pieces = mappings->frames[sprite_viewer.selected_sprite_index()].pieces;
-			const int selected_piece_index = sprite_viewer.selected_piece_index();
-			const int next_piece_index = selected_piece_index + 1;
+			sprite_mappings_manager.modifySpriteMappings(
+				[this](SpriteMappings &mappings)
+				{
+					auto &pieces = mappings.frames[sprite_viewer.selected_sprite_index()].pieces;
+					const int selected_piece_index = sprite_viewer.selected_piece_index();
+					const int next_piece_index = selected_piece_index + 1;
 
-			pieces.move(selected_piece_index, next_piece_index);
+					pieces.move(selected_piece_index, next_piece_index);
 
-			sprite_viewer.setSelectedPiece(next_piece_index);
+					sprite_viewer.setSelectedPiece(next_piece_index);
+				}
+			);
 		}
 	);
 
 	connect(ui->actionMove_Piece_toward_Front, &QAction::triggered, this,
 		[this]()
 		{
-			auto mappings = sprite_mappings_manager.lock();
-			auto &pieces = mappings->frames[sprite_viewer.selected_sprite_index()].pieces;
-			const int selected_piece_index = sprite_viewer.selected_piece_index();
-			const int previous_piece_index = selected_piece_index - 1;
+			sprite_mappings_manager.modifySpriteMappings(
+				[this](SpriteMappings &mappings)
+				{
+					auto &pieces = mappings.frames[sprite_viewer.selected_sprite_index()].pieces;
+					const int selected_piece_index = sprite_viewer.selected_piece_index();
+					const int previous_piece_index = selected_piece_index - 1;
 
-			pieces.move(selected_piece_index, previous_piece_index);
+					pieces.move(selected_piece_index, previous_piece_index);
 
-			sprite_viewer.setSelectedPiece(previous_piece_index);
+					sprite_viewer.setSelectedPiece(previous_piece_index);
+				}
+			);
 		}
 	);
 
 	connect(ui->actionMove_Piece_Behind_Others, &QAction::triggered, this,
 		[this]()
 		{
-			auto mappings = sprite_mappings_manager.lock();
-			auto &pieces = mappings->frames[sprite_viewer.selected_sprite_index()].pieces;
-			const int selected_piece_index = sprite_viewer.selected_piece_index();
-			const int last_piece_index = pieces.size() - 1;
+			sprite_mappings_manager.modifySpriteMappings(
+				[this](SpriteMappings &mappings)
+				{
+					auto &pieces = mappings.frames[sprite_viewer.selected_sprite_index()].pieces;
+					const int selected_piece_index = sprite_viewer.selected_piece_index();
+					const int last_piece_index = pieces.size() - 1;
 
-			pieces.move(selected_piece_index, last_piece_index);
+					pieces.move(selected_piece_index, last_piece_index);
 
-			sprite_viewer.setSelectedPiece(last_piece_index);
+					sprite_viewer.setSelectedPiece(last_piece_index);
+				}
+			);
 		}
 	);
 
 	connect(ui->actionMove_Piece_in_Front_of_Others, &QAction::triggered, this,
 		[this]()
 		{
-			auto mappings = sprite_mappings_manager.lock();
-			auto &pieces = mappings->frames[sprite_viewer.selected_sprite_index()].pieces;
-			const int selected_piece_index = sprite_viewer.selected_piece_index();
-			const int first_piece_index = 0;
+			sprite_mappings_manager.modifySpriteMappings(
+				[this](SpriteMappings &mappings)
+				{
+					auto &pieces = mappings.frames[sprite_viewer.selected_sprite_index()].pieces;
+					const int selected_piece_index = sprite_viewer.selected_piece_index();
+					const int first_piece_index = 0;
 
-			pieces.move(selected_piece_index, first_piece_index);
+					pieces.move(selected_piece_index, first_piece_index);
 
-			sprite_viewer.setSelectedPiece(first_piece_index);
+					sprite_viewer.setSelectedPiece(first_piece_index);
+				}
+			);
 		}
 	);
 
@@ -549,20 +622,24 @@ MainWindow::MainWindow(QWidget* const parent)
 
 	auto transform_frame_or_piece = [this](std::function<void(SpritePiece &piece)> callback)
 	{
-		auto mappings = sprite_mappings_manager.lock();
-		auto &frame = mappings->frames[sprite_viewer.selected_sprite_index()];
-		const int piece_index = sprite_viewer.selected_piece_index();
+		sprite_mappings_manager.modifySpriteMappings(
+			[this, &callback](SpriteMappings &mappings)
+			{
+				auto &frame = mappings.frames[sprite_viewer.selected_sprite_index()];
+				const int piece_index = sprite_viewer.selected_piece_index();
 
-		if (piece_index != -1)
-		{
-			auto &piece = frame.pieces[piece_index];
-			callback(piece);
-		}
-		else
-		{
-			for (auto &piece : frame.pieces)
-				callback(piece);
-		}
+				if (piece_index != -1)
+				{
+					auto &piece = frame.pieces[piece_index];
+					callback(piece);
+				}
+				else
+				{
+					for (auto &piece : frame.pieces)
+						callback(piece);
+				}
+			}
+		);
 	};
 
 	connect(ui->actionCycle_Palette, &QAction::triggered, this,
@@ -637,23 +714,26 @@ MainWindow::MainWindow(QWidget* const parent)
 			tile_viewer.setSelection(false,
 				[this](QVector<bool> &selected)
 				{
-					int selected_tile;
-					while ((selected_tile = selected.lastIndexOf(true)) != -1)
-					{
-						// Un-select the tile, to prevent an infinite loop.
-						selected[selected_tile] = false;
+				sprite_mappings_manager.modifySpriteMappings(
+						[this, &selected](SpriteMappings &mappings)
+						{
+							int selected_tile;
+							while ((selected_tile = selected.lastIndexOf(true)) != -1)
+							{
+								// Un-select the tile, to prevent an infinite loop.
+								selected[selected_tile] = false;
 
-						// Remove the tile.
-						tile_manager.deleteTile(selected_tile);
+								// Remove the tile.
+								tile_manager.deleteTile(selected_tile);
 
-						// Correct sprite piece tile indices to account for the removed tile.
-						auto lock = sprite_mappings_manager.lock();
-
-						for (auto &frame : lock->frames)
-							for (auto &piece : frame.pieces)
-								if (piece.tile_index > selected_tile)
-									--piece.tile_index;
-					}
+								// Correct sprite piece tile indices to account for the removed tile.
+								for (auto &frame : mappings.frames)
+									for (auto &piece : frame.pieces)
+										if (piece.tile_index > selected_tile)
+											--piece.tile_index;
+							}
+						}
+					);
 				}
 			);
 		}
@@ -707,21 +787,24 @@ MainWindow::MainWindow(QWidget* const parent)
 			tile_viewer.setSelection(false,
 				[this](QVector<bool> &selected)
 				{
-					int selected_tile = -1;
-					while (selected_tile != 0 && (selected_tile = selected.lastIndexOf(true, selected_tile - 1)) != -1)
-					{
-						// Duplicate the tile.
-						const int insertion_index = selected.indexOf(false, selected_tile);
-						tile_manager.duplicateTile(selected_tile, insertion_index == -1 ? selected.size() : insertion_index);
+				sprite_mappings_manager.modifySpriteMappings(
+						[this, &selected](SpriteMappings &mappings)
+						{
+							int selected_tile = -1;
+							while (selected_tile != 0 && (selected_tile = selected.lastIndexOf(true, selected_tile - 1)) != -1)
+							{
+								// Duplicate the tile.
+								const int insertion_index = selected.indexOf(false, selected_tile);
+								tile_manager.duplicateTile(selected_tile, insertion_index == -1 ? selected.size() : insertion_index);
 
-						// Correct sprite piece tile indices to account for the inserted tile.
-						auto lock = sprite_mappings_manager.lock();
-
-						for (auto &frame : lock->frames)
-							for (auto &piece : frame.pieces)
-								if (piece.tile_index >= insertion_index)
-									++piece.tile_index;
-					}
+								// Correct sprite piece tile indices to account for the inserted tile.
+								for (auto &frame : mappings.frames)
+									for (auto &piece : frame.pieces)
+										if (piece.tile_index >= insertion_index)
+											++piece.tile_index;
+							}
+						}
+					);
 				}
 			);
 
