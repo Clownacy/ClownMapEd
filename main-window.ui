@@ -110,6 +110,7 @@
      <addaction name="actionDuplicate_Selected_Tiles"/>
      <addaction name="actionClear_Pixels_of_Selected_Tiles"/>
      <addaction name="actionInvert_Selection"/>
+     <addaction name="actionSelect_Tiles_of_Active_Pieces"/>
     </widget>
     <addaction name="menu_Sprite"/>
     <addaction name="menu_Piece"/>
@@ -598,6 +599,14 @@
   <action name="actionClear_Pixels_of_Selected_Tiles">
    <property name="text">
     <string>Clear Pixels of Selected Tile(s)</string>
+   </property>
+  </action>
+  <action name="actionSelect_Tiles_of_Active_Pieces">
+   <property name="text">
+    <string>Select Tiles of Active Piece(s)</string>
+   </property>
+   <property name="shortcut">
+    <string>Space</string>
    </property>
   </action>
  </widget>

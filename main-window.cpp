@@ -690,10 +690,20 @@ MainWindow::MainWindow(QWidget* const parent)
 	// Edit/Tiles //
 	////////////////
 
+	const auto set_tile_selection_and_update_piece_picker = [this](const std::function<void(QVector<bool> &selected)> &callback)
+	{
+		tile_viewer.setSelection(true, callback);
+
+		const int first_selected_tile = tile_viewer.selection().indexOf(true);
+
+		if (first_selected_tile != -1)
+			sprite_piece_picker.setSelectedTile(first_selected_tile);
+	};
+
 	connect(ui->actionSelect_All_Unmapped_Tiles, &QAction::triggered, this,
-		[this]()
+		[this, set_tile_selection_and_update_piece_picker]()
 		{
-			tile_viewer.setSelection(true,
+			set_tile_selection_and_update_piece_picker(
 				[this](QVector<bool> &selected)
 				{
 					for (auto &tile_selected : selected)
@@ -714,7 +724,7 @@ MainWindow::MainWindow(QWidget* const parent)
 			tile_viewer.setSelection(false,
 				[this](QVector<bool> &selected)
 				{
-				sprite_mappings_manager.modifySpriteMappings(
+					sprite_mappings_manager.modifySpriteMappings(
 						[this, &selected](SpriteMappings &mappings)
 						{
 							int selected_tile;
@@ -762,6 +772,7 @@ MainWindow::MainWindow(QWidget* const parent)
 							// This is a gross hack: back up the selection so that we can
 							// restore it after changing the selected sprite.
 							const auto selection = tile_viewer.selection();
+							const int piece_picker_tile =  sprite_piece_picker.selected_tile();
 
 							sprite_viewer.setSelectedSprite(frame_index);
 
@@ -772,6 +783,8 @@ MainWindow::MainWindow(QWidget* const parent)
 									selected = selection;
 								}
 							);
+
+							sprite_piece_picker.setSelectedTile(piece_picker_tile);
 
 							return;
 						}
@@ -831,6 +844,21 @@ MainWindow::MainWindow(QWidget* const parent)
 				{
 					for (auto &tile_selected : selected)
 						tile_selected = !tile_selected;
+				}
+			);
+		}
+	);
+
+	connect(ui->actionSelect_Tiles_of_Active_Pieces, &QAction::triggered, this,
+		[this, set_tile_selection_and_update_piece_picker]()
+		{
+			tile_viewer.clearSelection();
+			set_tile_selection_and_update_piece_picker(
+				[this](QVector<bool> &selected)
+				{
+					for (const auto &piece : sprite_mappings_manager.sprite_mappings().frames[sprite_viewer.selected_sprite_index()].pieces)
+						for (int i = 0; i < piece.width * piece.height; ++i)
+							selected[piece.tile_index + i] = true;
 				}
 			);
 		}
