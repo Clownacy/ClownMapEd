@@ -1055,6 +1055,30 @@ MainWindow::MainWindow(QWidget* const parent)
 
 	// Manually update the menubar upon startup so that the various options are properly enabled.
 	update_menubar();
+
+	//////////////////
+	// Window Title //
+	//////////////////
+
+	const auto update_title = [this]()
+	{
+		const auto do_string_thingy = [](const QString &string, const int index, const int total)
+		{
+			return " | " + string + (index == -1 ? "s: " : (" " + QString::number(index, 0x10).toUpper() + "/")) + QString::number(total, 0x10).toUpper();
+		};
+
+		const QString frame_string = do_string_thingy("Frame", sprite_viewer.selected_sprite_index(), sprite_mappings_manager.sprite_mappings().frames.size());
+		const QString piece_string = sprite_viewer.selected_sprite_index() == -1 ? "" : do_string_thingy("Piece", sprite_viewer.selected_piece_index(), sprite_mappings_manager.sprite_mappings().frames[sprite_viewer.selected_sprite_index()].pieces.size());
+		const QString tile_string = do_string_thingy("Tile", tile_viewer.selection().indexOf(true), tile_manager.total_tiles());
+
+		setWindowTitle("ClownMapEd" + frame_string + piece_string + tile_string);
+	};
+
+	connect(&sprite_viewer, &SpriteViewer::selectedSpriteChanged, this, update_title);
+	connect(&sprite_mappings_manager, &SpriteMappingsManager::mappingsModified, this, update_title);
+	connect(&tile_viewer, &TileViewer::tileSelected, this, update_title);
+
+	update_title();
 }
 
 MainWindow::~MainWindow()
