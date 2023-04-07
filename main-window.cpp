@@ -351,6 +351,15 @@ MainWindow::MainWindow(QWidget* const parent)
 			);
 		}
 	);
+	connect(ui->actionUnload_All, &QAction::triggered, this,
+		[this]()
+		{
+			ui->actionUnload_Tile_Graphics->trigger();
+			ui->actionUnload_Palette->trigger();
+			ui->actionUnload_Mappings->trigger();
+			ui->actionUnload_Pattern_Cues->trigger();
+		}
+	);
 
 	//////////////////////////
 	// Menubar: Edit/Sprite //
