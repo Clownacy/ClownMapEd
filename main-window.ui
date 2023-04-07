@@ -69,6 +69,8 @@
      <property name="title">
       <string>Transformation</string>
      </property>
+     <addaction name="actionFlip_Horizontally"/>
+     <addaction name="actionFlip_Vertically"/>
      <addaction name="actionCycle_Palette"/>
      <addaction name="actionToggle_Foreground_Flag"/>
      <addaction name="separator"/>
@@ -607,6 +609,22 @@
    </property>
    <property name="shortcut">
     <string>Space</string>
+   </property>
+  </action>
+  <action name="actionFlip_Horizontally">
+   <property name="text">
+    <string>Flip Horizontally</string>
+   </property>
+   <property name="shortcut">
+    <string>H</string>
+   </property>
+  </action>
+  <action name="actionFlip_Vertically">
+   <property name="text">
+    <string>Flip Vertically</string>
+   </property>
+   <property name="shortcut">
+    <string>V</string>
    </property>
   </action>
  </widget>

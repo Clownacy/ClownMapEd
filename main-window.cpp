@@ -642,6 +642,38 @@ MainWindow::MainWindow(QWidget* const parent)
 		);
 	};
 
+	connect(ui->actionFlip_Horizontally, &QAction::triggered, this,
+		[this, transform_frame_or_piece]()
+		{
+			const auto &frame = sprite_mappings_manager.sprite_mappings().frames[sprite_viewer.selected_sprite_index()];
+			const QRect &rect = sprite_viewer.selected_piece_index() == -1 ? frame.rect() : frame.pieces[sprite_viewer.selected_piece_index()].rect();
+
+			transform_frame_or_piece(
+				[&rect](SpritePiece &piece)
+				{
+					piece.x = rect.left() + (rect.width() - (piece.x - rect.left()) - piece.width * TileManager::TILE_WIDTH);
+					piece.x_flip = !piece.x_flip;
+				}
+			);
+		}
+	);
+
+	connect(ui->actionFlip_Vertically, &QAction::triggered, this,
+		[this, transform_frame_or_piece]()
+		{
+			const auto &frame = sprite_mappings_manager.sprite_mappings().frames[sprite_viewer.selected_sprite_index()];
+			const QRect &rect = sprite_viewer.selected_piece_index() == -1 ? frame.rect() : frame.pieces[sprite_viewer.selected_piece_index()].rect();
+
+			transform_frame_or_piece(
+				[&rect](SpritePiece &piece)
+				{
+					piece.y = rect.top() + (rect.height() - (piece.y - rect.top()) - piece.height * TileManager::TILE_HEIGHT);
+					piece.y_flip = !piece.y_flip;
+				}
+			);
+		}
+	);
+
 	connect(ui->actionCycle_Palette, &QAction::triggered, this,
 		[transform_frame_or_piece]()
 		{
@@ -1003,6 +1035,8 @@ MainWindow::MainWindow(QWidget* const parent)
 
 		const bool nothing_selected = no_sprite_selected;
 
+		ui->actionFlip_Horizontally->setDisabled(nothing_selected);
+		ui->actionFlip_Vertically->setDisabled(nothing_selected);
 		ui->actionCycle_Palette->setDisabled(nothing_selected);
 		ui->actionToggle_Foreground_Flag->setDisabled(nothing_selected);
 		ui->actionMove_Left_8_Pixels->setDisabled(nothing_selected);
@@ -1013,6 +1047,7 @@ MainWindow::MainWindow(QWidget* const parent)
 		ui->actionMove_Right_1_Pixel->setDisabled(nothing_selected);
 		ui->actionMove_Up_1_Pixel->setDisabled(nothing_selected);
 		ui->actionMove_Down_1_Pixel->setDisabled(nothing_selected);
+		ui->actionSelect_Tiles_of_Active_Pieces->setDisabled(nothing_selected);
 	};
 
 	connect(&sprite_viewer, &SpriteViewer::selectedSpriteChanged, this, update_menubar);
