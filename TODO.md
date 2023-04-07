@@ -1,9 +1,5 @@
 - Popup when you try to load mappings after loading DPLCs.
 - Popups on errors such as unable to open file.
 - Sprite spacing (figure out what algorithm SonMapEd uses).
-- Correct colour display format (0-255 instead of 0-240).
 - Add scrollbar to tile viewer.
-- Rename?
-  - ClownMapEd (eww capitalisation)
-  - SonMapEd2 (might confuse users)
 - Don't bother drawing sprites that are off-screen.
