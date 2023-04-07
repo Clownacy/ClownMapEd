@@ -44,7 +44,9 @@
       <addaction name="actionLoad_Tiles_Comper"/>
      </widget>
      <addaction name="menuLoad_Tile_Graphics"/>
+     <addaction name="separator"/>
      <addaction name="actionLoad_Primary_Palette"/>
+     <addaction name="separator"/>
      <addaction name="actionLoad_Mappings"/>
      <addaction name="actionLoad_Sprite_Pattern_Cues"/>
     </widget>
