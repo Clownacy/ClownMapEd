@@ -812,6 +812,17 @@ MainWindow::MainWindow(QWidget* const parent)
 		}
 	);
 
+	connect(ui->actionClear_Pixels_of_Selected_Tiles, &QAction::triggered, this,
+		[this]()
+		{
+			const auto &selection = tile_viewer.selection();
+
+			for (int tile_index = 0; tile_index < selection.size(); ++tile_index)
+				if (selection[tile_index])
+					tile_manager.clearTile(tile_index);
+		}
+	);
+
 	connect(ui->actionInvert_Selection, &QAction::triggered, this,
 		[this]()
 		{

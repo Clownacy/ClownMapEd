@@ -67,8 +67,9 @@ public:
 		return tile_pixmaps.size();
 	}
 
-	void deleteTile(const int tile_index);
-	void duplicateTile(const int tile_index, const int insert_index);
+	void deleteTile(int tile_index);
+	void duplicateTile(int tile_index, int insert_index);
+	void clearTile(int tile_index);
 
 signals:
 	void pixmapsChanged();
@@ -77,6 +78,8 @@ private slots:
 	void regeneratePixmaps();
 
 private:
+	void regeneratePixmap(int tile_index);
+
 	std::array<QPixmap, static_cast<std::size_t>(PixmapType::MAX)> createPixmaps(const std::array<std::array<QColor, TILE_WIDTH>, TILE_HEIGHT> rgb_pixels);
 	static std::array<std::array<QColor, TILE_WIDTH>, TILE_HEIGHT> createInvalidTilePixmap();
 

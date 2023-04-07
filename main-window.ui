@@ -108,6 +108,7 @@
      <addaction name="actionDelete_Selected_Tiles"/>
      <addaction name="actionFind_Sprite_that_Uses_Focused_Tile"/>
      <addaction name="actionDuplicate_Selected_Tiles"/>
+     <addaction name="actionClear_Pixels_of_Selected_Tiles"/>
      <addaction name="actionInvert_Selection"/>
     </widget>
     <addaction name="menu_Sprite"/>
@@ -592,6 +593,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Alt+Shift+D</string>
+   </property>
+  </action>
+  <action name="actionClear_Pixels_of_Selected_Tiles">
+   <property name="text">
+    <string>Clear Pixels of Selected Tile(s)</string>
    </property>
   </action>
  </widget>
