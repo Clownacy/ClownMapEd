@@ -60,36 +60,26 @@ void SpriteViewer::paintEvent(QPaintEvent* const event)
 	painter.setBrush(brush);
 
 	// Helper to perform an operation using each selected sprite piece.
-	const auto process_selected_pieces = [this](std::function<void(const SpritePiece &piece)> callback)
+	const auto process_selected_pieces = [this](const std::function<void(const SpritePiece &piece)> &callback)
 	{
 		auto &frame = sprite_mappings.frames[selected_sprite_index()];
 
 		if (m_selected_piece_index != -1)
-		{
 			callback(frame.pieces[m_selected_piece_index]);
-		}
 		else
-		{
 			for (auto &piece : frame.pieces)
 				callback(piece);
-		}
 	};
 
 	// Helper to perform an operation using each tile of each selected sprite piece.
-	const auto process_tiles_in_selected_pieces = [&process_selected_pieces](std::function<void(const QRect &rect)> callback)
+	const auto process_tiles_in_selected_pieces = [&process_selected_pieces](const std::function<void(const QRect &rect)> &callback)
 	{
 		process_selected_pieces(
 			[&callback](const SpritePiece &piece)
 			{
 				for (int y = 0; y < piece.height; ++y)
-				{
 					for (int x = 0; x < piece.width; ++x)
-					{
-						const QRect rect(piece.x + x * TileManager::TILE_WIDTH, piece.y + y * TileManager::TILE_HEIGHT, TileManager::TILE_WIDTH, TileManager::TILE_HEIGHT);
-
-						callback(rect);
-					}
-				}
+						callback(QRect(piece.x + x * TileManager::TILE_WIDTH, piece.y + y * TileManager::TILE_HEIGHT, TileManager::TILE_WIDTH, TileManager::TILE_HEIGHT));
 			}
 		);
 	};
@@ -177,11 +167,6 @@ void SpriteViewer::paintEvent(QPaintEvent* const event)
 		x_offset -= frames[i].left();
 		frames[i].draw(painter, tile_manager, TileManager::PixmapType::TRANSPARENT, 0, TileManager::PixmapType::TRANSPARENT, starting_palette_line, x_offset, 0);
 	}
-
-	// TODO: Remove.
-	//painter.setPen(Qt::blue);
-	//painter.setFont(QFont("Arial", 30));
-	//painter.drawText(rect(), Qt::AlignCenter, QString(std::to_string(0).c_str()));
 }
 
 void SpriteViewer::setSelectedSprite(const int sprite_index)

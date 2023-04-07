@@ -647,7 +647,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	// Menubar: Edit/Transformation //
 	//////////////////////////////////
 
-	auto transform_frame_or_piece = [this](std::function<void(SpritePiece &piece)> callback)
+	const auto transform_frame_or_piece = [this](const std::function<void(SpritePiece &piece)> &callback)
 	{
 		sprite_mappings_manager.modifySpriteMappings(
 			[this, &callback](SpriteMappings &mappings)
@@ -725,7 +725,7 @@ MainWindow::MainWindow(QWidget* const parent)
 		}
 	);
 
-	auto move_frame_or_piece = [transform_frame_or_piece](const int x, const int y)
+	const auto move_frame_or_piece = [transform_frame_or_piece](const int x, const int y)
 	{
 		transform_frame_or_piece(
 			[x, y](SpritePiece &piece)
@@ -864,7 +864,7 @@ MainWindow::MainWindow(QWidget* const parent)
 			tile_viewer.setSelection(false,
 				[this](QVector<bool> &selected)
 				{
-				sprite_mappings_manager.modifySpriteMappings(
+					sprite_mappings_manager.modifySpriteMappings(
 						[this, &selected](SpriteMappings &mappings)
 						{
 							int selected_tile = -1;
@@ -1008,7 +1008,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	// Settings/Tile Rendering //
 	/////////////////////////////
 
-	auto set_starting_palette_line = [this](const int line)
+	const auto set_starting_palette_line = [this](const int line)
 	{
 		sprite_piece_picker.setPaletteLine(line);
 		sprite_viewer.setStartingPaletteLine(line);
@@ -1024,7 +1024,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	// Menubar Activation //
 	////////////////////////
 
-	auto update_menubar = [this]()
+	const auto update_menubar = [this]()
 	{
 		const int selected_sprite_index = sprite_viewer.selected_sprite_index();
 		const bool no_sprites = sprite_mappings_manager.sprite_mappings().frames.size() == 0;

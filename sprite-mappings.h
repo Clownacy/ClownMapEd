@@ -2,7 +2,6 @@
 #define SPRITE_MAPPINGS_H
 
 #include <QFile>
-#include <QString>
 #include <QVector>
 
 #include "sprite-frame.h"

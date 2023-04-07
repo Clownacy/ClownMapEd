@@ -8,7 +8,7 @@ SpriteFrame SpriteFrame::fromDataStream(DataStream &stream)
 
 	SpriteFrame frame;
 
-	const unsigned int total_pieces = stream.read<quint16>();
+	const uint total_pieces = stream.read<quint16>();
 	frame.pieces.resize(total_pieces);
 
 	for (auto &piece : frame.pieces)
@@ -20,7 +20,7 @@ SpriteFrame SpriteFrame::fromDataStream(DataStream &stream)
 void SpriteFrame::draw(QPainter &painter, const TileManager &tile_manager, const TileManager::PixmapType unselected_effect, const int selected_piece_index, const TileManager::PixmapType selected_effect, const int starting_palette_line, const int x_offset, const int y_offset) const
 {
 	// Must draw in reverse order.
-	for (unsigned int i = 0; i < 2; ++i)
+	for (uint i = 0; i < 2; ++i)
 		for (auto piece = pieces.crbegin(); piece != pieces.crend(); ++piece)
 			if (piece->priority == (i != 0))
 				piece->draw(painter, tile_manager, &*piece == &pieces[selected_piece_index] ? selected_effect : unselected_effect, starting_palette_line, x_offset, y_offset);

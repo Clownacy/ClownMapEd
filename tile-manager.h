@@ -1,10 +1,11 @@
 #ifndef TILE_MANAGER_H
 #define TILE_MANAGER_H
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
-#include <functional>
 
+#include <QColor>
 #include <QObject>
 #include <QPixmap>
 #include <QVector>

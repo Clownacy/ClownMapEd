@@ -11,17 +11,17 @@ Palette::Palette()
 
 void Palette::reset()
 {
-	for (unsigned int line = 0; line < TOTAL_LINES; ++line)
+	for (uint line = 0; line < TOTAL_LINES; ++line)
 	{
-		for (unsigned int index = 0; index < COLOURS_PER_LINE; ++index)
+		for (uint index = 0; index < COLOURS_PER_LINE; ++index)
 		{
-			const unsigned int intensity_1 = index >= 8 ? ~index & 7 : index;
+			const uint intensity_1 = index >= 8 ? ~index & 7 : index;
 			// Fun fact: those three bizarre colours at the bottom of SonMapEd's default
 			// palette are the result of a bug: one of the colour channels underflow.
 			// This bug has been recreated here.
-			const unsigned int intensity_2 = index >= 8 ? (~index - 1) & 7 : index;
+			const uint intensity_2 = index >= 8 ? (~index - 1) & 7 : index;
 
-			unsigned int colour = 0xF000;
+			uint colour = 0xF000;
 
 			switch (line)
 			{
@@ -81,33 +81,33 @@ void Palette::setColour(const int palette_line, const int palette_index, const Q
 	emit changed();
 }
 
-QColor Palette::MDToQColour(const unsigned int md_colour, const std::function<unsigned int(unsigned int)> callback)
+QColor Palette::MDToQColour(const uint md_colour, const std::function<uint(uint)> &callback)
 {
 	// This isn't exactly what SonMapEd does:
 	// For some reason, SonMapEd treats the colours as 4-bit-per-channel,
 	// when they're really only 3-bit-per-channel.
-	const unsigned int red = (md_colour >> 1) & 7;
-	const unsigned int green = (md_colour >> 5) & 7;
-	const unsigned int blue = (md_colour >> 9) & 7;
+	const uint red = (md_colour >> 1) & 7;
+	const uint green = (md_colour >> 5) & 7;
+	const uint blue = (md_colour >> 9) & 7;
 
 	return QColor(callback(red), callback(green), callback(blue));
 }
 
-QColor Palette::MDToQColor224(const unsigned int md_colour)
+QColor Palette::MDToQColor224(const uint md_colour)
 {
-	return MDToQColour(md_colour, [](const unsigned int colour_channel){return colour_channel << 5;});
+	return MDToQColour(md_colour, [](const uint colour_channel){return colour_channel << 5;});
 }
 
-QColor Palette::MDToQColor256(const unsigned int md_colour)
+QColor Palette::MDToQColor256(const uint md_colour)
 {
-	return MDToQColour(md_colour, [](const unsigned int colour_channel){return colour_channel << 5 | colour_channel << 2 | colour_channel >> 1;});
+	return MDToQColour(md_colour, [](const uint colour_channel){return colour_channel << 5 | colour_channel << 2 | colour_channel >> 1;});
 }
 
-unsigned int Palette::QColorToMD(const QColor &colour)
+uint Palette::QColorToMD(const QColor &colour)
 {
-	unsigned int red = (static_cast<unsigned int>(colour.red()) >> 5) & 7;
-	unsigned int green = (static_cast<unsigned int>(colour.green()) >> 5) & 7;
-	unsigned int blue = (static_cast<unsigned int>(colour.blue()) >> 5) & 7;
+	const uint red = (static_cast<uint>(colour.red()) >> 5) & 7;
+	const uint green = (static_cast<uint>(colour.green()) >> 5) & 7;
+	const uint blue = (static_cast<uint>(colour.blue()) >> 5) & 7;
 
 	return (blue << 9) | (green << 5) | (red << 1);
 }

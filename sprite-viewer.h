@@ -1,6 +1,7 @@
 #ifndef SPRITE_VIEWER_H
 #define SPRITE_VIEWER_H
 
+#include <QColor>
 #include <QWidget>
 
 #include "sprite-mappings-manager.h"

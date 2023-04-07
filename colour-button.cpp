@@ -1,14 +1,16 @@
 #include "colour-button.h"
 
 #include <QBrush>
-#include <QtGlobal>
 #include <QPainter>
+#include <QPoint>
+#include <QRect>
 
 ColourButton::ColourButton()
 	: m_colour(Qt::green)
 {
 
 }
+
 void ColourButton::paintEvent(QPaintEvent* const event)
 {
 	Q_UNUSED(event);

@@ -6,6 +6,7 @@
 #include <QColor>
 #include <QObject>
 #include <QTimer>
+#include <QVector>
 #include <QWidget>
 
 #include "tile-manager.h"

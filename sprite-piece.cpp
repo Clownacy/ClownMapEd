@@ -8,10 +8,10 @@ SpritePiece SpritePiece::fromDataStream(DataStream &stream)
 
 	// This is specifically Sonic 2's mappings format.
 	piece.y = stream.read<qint8>();
-	const unsigned int size = stream.read<quint8>();
+	const uint size = stream.read<quint8>();
 	piece.width = ((size >> 2) & 3) + 1;
 	piece.height = ((size >> 0) & 3) + 1;
-	const unsigned int art_tile = stream.read<quint16>();
+	const uint art_tile = stream.read<quint16>();
 	piece.priority = (art_tile & (1 << 15)) != 0;
 	piece.palette_line = (art_tile >> 13) & 3;
 	piece.y_flip = (art_tile & (1 << 12)) != 0;
@@ -27,7 +27,7 @@ void SpritePiece::draw(QPainter &painter, const TileManager &tile_manager, const
 {
 	const QTransform flip_transform = QTransform::fromScale(x_flip ? -1 : 1, y_flip ? -1 : 1);
 
-	unsigned int current_tile_index = tile_index;
+	uint current_tile_index = tile_index;
 
 	for (int tile_x = 0; tile_x < width; ++tile_x)
 	{

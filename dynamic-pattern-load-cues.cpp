@@ -7,12 +7,12 @@ DynamicPatternLoadCues DynamicPatternLoadCues::fromFile(QFile &file)
 	DataStream stream(&file);
 	stream.setByteOrder(DataStream::BigEndian);
 
-	unsigned int earliest_frame = stream.read<quint16>();
-	unsigned int total_frames = 1;
+	uint earliest_frame = stream.read<quint16>();
+	uint total_frames = 1;
 
 	while (file.pos() < earliest_frame)
 	{
-		const unsigned int frame_offset = stream.read<quint16>();
+		const uint frame_offset = stream.read<quint16>();
 
 		if ((frame_offset & 1) != 0)
 			break;
@@ -27,20 +27,20 @@ DynamicPatternLoadCues DynamicPatternLoadCues::fromFile(QFile &file)
 
 	dplcs.frames.resize(total_frames);
 
-	for (unsigned int current_frame = 0; current_frame < total_frames; ++current_frame)
+	for (uint current_frame = 0; current_frame < total_frames; ++current_frame)
 	{
 		Frame &frame = dplcs.frames[current_frame];
 
 		file.seek(current_frame * 2);
 		file.seek(stream.read<quint16>());
 
-		const unsigned int total_copies = stream.read<quint16>();
+		const uint total_copies = stream.read<quint16>();
 
 		frame.copies.resize(total_copies);
 
-		for (unsigned int current_copy = 0; current_copy < total_copies; ++current_copy)
+		for (uint current_copy = 0; current_copy < total_copies; ++current_copy)
 		{
-			const unsigned int word = stream.read<quint16>();
+			const uint word = stream.read<quint16>();
 			const int total_tiles = (word >> 4 * 3) + 1;
 			const int tile_index = word & 0xFFF;
 

@@ -34,10 +34,10 @@ signals:
 	void changed();
 
 private:
-	static QColor MDToQColour(unsigned int md_colour, const std::function<unsigned int(unsigned int)> callback);
-	static QColor MDToQColor224(unsigned int md_colour);
-	static QColor MDToQColor256(unsigned int md_colour);
-	static unsigned int QColorToMD(const QColor &colour);
+	static QColor MDToQColour(uint md_colour, const std::function<uint(uint)> &callback);
+	static QColor MDToQColor224(uint md_colour);
+	static QColor MDToQColor256(uint md_colour);
+	static uint QColorToMD(const QColor &colour);
 
 	std::array<std::array<quint16, COLOURS_PER_LINE>, TOTAL_LINES> colours;
 };

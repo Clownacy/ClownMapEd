@@ -5,7 +5,12 @@ namespace Utilities
 
 QSizeF GetDPIScale(const QWidget* const widget)
 {
-	return QSizeF(qRound((qreal)widget->logicalDpiX() / 96), qRound((qreal)widget->logicalDpiY() / 96));
+	const auto dpi_to_scale = [](const int dpi)
+	{
+		return qRound((qreal)dpi / 96);
+	};
+
+	return QSizeF(dpi_to_scale(widget->logicalDpiX()), dpi_to_scale(widget->logicalDpiY()));
 }
 
 }

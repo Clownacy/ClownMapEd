@@ -1,6 +1,7 @@
 #ifndef SPRITE_FRAME_H
 #define SPRITE_FRAME_H
 
+#include <QRect>
 #include <QVector>
 
 #include "data-stream.h"

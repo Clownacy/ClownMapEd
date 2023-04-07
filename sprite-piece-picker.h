@@ -3,6 +3,7 @@
 
 #include <array>
 
+#include <QColor>
 #include <QGridLayout>
 #include <QWidget>
 

@@ -45,16 +45,16 @@ void TileManager::regeneratePixmaps()
 
 void TileManager::regeneratePixmap(const int tile_index)
 {
-	for (unsigned int line = 0; line < Palette::TOTAL_LINES; ++line)
+	for (uint line = 0; line < Palette::TOTAL_LINES; ++line)
 	{
 		std::array<std::array<QColor, TILE_WIDTH>, TILE_HEIGHT> rgb_pixels;
 
-		for (unsigned int y = 0; y < TILE_HEIGHT; ++y)
+		for (uint y = 0; y < TILE_HEIGHT; ++y)
 		{
-			for (unsigned int x = 0; x < TILE_WIDTH; ++x)
+			for (uint x = 0; x < TILE_WIDTH; ++x)
 			{
-				const unsigned int pixel_index = x + y * TILE_WIDTH;
-				const unsigned int palette_index = (tiles_bytes[tile_index][pixel_index >> 1] >> (~(pixel_index << 2) & 4)) & 0xF;
+				const uint pixel_index = x + y * TILE_WIDTH;
+				const uint palette_index = (tiles_bytes[tile_index][pixel_index >> 1] >> (~(pixel_index << 2) & 4)) & 0xF;
 
 				rgb_pixels[y][x] = palette_index == 0 ? QColor(0, 0, 0, 0) : palette.colour256(line, palette_index);
 			}
@@ -90,21 +90,21 @@ std::array<QPixmap, static_cast<std::size_t>(TileManager::PixmapType::MAX)> Tile
 	std::array<QPixmap, static_cast<std::size_t>(PixmapType::MAX)> pixmaps;
 
 	pixmaps[static_cast<std::size_t>(PixmapType::NO_BACKGROUND)] = createPixmap(rgb_pixels,
-		[](const QColor colour)
+		[](const QColor &colour)
 		{
 			return colour;
 		}
 	);
 
 	pixmaps[static_cast<std::size_t>(PixmapType::WITH_BACKGROUND)] = createPixmap(rgb_pixels,
-		[&background_colour](const QColor colour)
+		[&background_colour](const QColor &colour)
 		{
 			return colour == QColor(0, 0, 0, 0) ? background_colour : colour;
 		}
 	);
 
 	pixmaps[static_cast<std::size_t>(PixmapType::TRANSPARENT)] = createPixmap(rgb_pixels,
-		[&background_colour](const QColor colour)
+		[&background_colour](const QColor &colour)
 		{
 			if (colour.alpha() == 0)
 				return colour;
