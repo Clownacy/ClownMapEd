@@ -62,14 +62,19 @@ void TileViewer::setSelection(const bool scroll_to_selection, const std::functio
 		const int first_tile_row = to_row(selected.indexOf(true));
 		const int last_tile_row = to_row(selected.lastIndexOf(true));
 
-		if (first_tile_row < scroll_row + 2 || last_tile_row > scroll_row + height - 1 - 2)
+		const int upper_bound_delta = 2;
+		const int lower_bound_delta = height - 1 - 2;
+		const int upper_bound = scroll_row + upper_bound_delta;
+		const int lower_bound = scroll_row + lower_bound_delta;
+
+		if (first_tile_row < upper_bound || last_tile_row > lower_bound)
 		{
 			int y;
 
-			if (first_tile_row < scroll_row + 2)
-				y = first_tile_row - 2;
-			else //if (last_tile_row > scroll_row + height - 1 - 2)
-				y = last_tile_row - height + 1 + 2;
+			if (last_tile_row > lower_bound)
+				y = qMin(first_tile_row - upper_bound_delta, last_tile_row - lower_bound_delta);
+			else //if (first_tile_row < upper_bound)
+				y = qMax(first_tile_row - upper_bound_delta, last_tile_row - lower_bound_delta);
 
 			setScroll(row_offset + y * width);
 		}
