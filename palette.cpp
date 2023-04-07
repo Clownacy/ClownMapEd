@@ -6,6 +6,11 @@
 
 Palette::Palette()
 {
+	reset();
+}
+
+void Palette::reset()
+{
 	for (unsigned int line = 0; line < TOTAL_LINES; ++line)
 	{
 		for (unsigned int index = 0; index < COLOURS_PER_LINE; ++index)
@@ -44,6 +49,8 @@ Palette::Palette()
 			colours[line][index] = colour;
 		}
 	}
+
+	emit changed();
 }
 
 void Palette::loadFromFile(const QString &file_path)

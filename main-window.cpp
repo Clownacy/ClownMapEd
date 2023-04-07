@@ -131,9 +131,9 @@ MainWindow::MainWindow(QWidget* const parent)
 		}
 	);
 
-	///////////////////
-	// Menubar: File //
-	///////////////////
+	//////////////////////////////////
+	// Menubar: File/Load Data File //
+	//////////////////////////////////
 
 	const auto load_tile_file = [this](const QString &file_path, bool (* const decompression_function)(std::istream &src, std::iostream &dst))
 	{
@@ -333,6 +333,24 @@ MainWindow::MainWindow(QWidget* const parent)
 	);
 
 	connect(ui->actionExit, &QAction::triggered, this, &QMainWindow::close);
+
+	///////////////////////////////
+	// Menubar: File/Unload Data //
+	///////////////////////////////
+
+	connect(ui->actionUnload_Tile_Graphics, &QAction::triggered, &tile_manager, &TileManager::unloadTiles);
+	connect(ui->actionUnload_Palette, &QAction::triggered, &palette, &Palette::reset);
+	connect(ui->actionUnload_Mappings, &QAction::triggered, this,
+		[this]()
+		{
+			sprite_mappings_manager.modifySpriteMappings(
+				[](SpriteMappings &mappings)
+				{
+					mappings.frames.clear();
+				}
+			);
+		}
+	);
 
 	//////////////////////////
 	// Menubar: Edit/Sprite //

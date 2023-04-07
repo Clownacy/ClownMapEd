@@ -50,7 +50,21 @@
      <addaction name="actionLoad_Mappings"/>
      <addaction name="actionLoad_Sprite_Pattern_Cues"/>
     </widget>
+    <widget class="QMenu" name="menuUnload_Data">
+     <property name="title">
+      <string>Unload Data</string>
+     </property>
+     <addaction name="actionUnload_Tile_Graphics"/>
+     <addaction name="separator"/>
+     <addaction name="actionUnload_Palette"/>
+     <addaction name="separator"/>
+     <addaction name="actionUnload_Mappings"/>
+     <addaction name="actionUnload_Pattern_Cues"/>
+     <addaction name="separator"/>
+     <addaction name="actionUnload_All"/>
+    </widget>
     <addaction name="menuLoad_Data_File"/>
+    <addaction name="menuUnload_Data"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
@@ -633,6 +647,31 @@
    </property>
    <property name="shortcut">
     <string>V</string>
+   </property>
+  </action>
+  <action name="actionUnload_Tile_Graphics">
+   <property name="text">
+    <string>Unload Tile &amp;Graphics</string>
+   </property>
+  </action>
+  <action name="actionUnload_Palette">
+   <property name="text">
+    <string>Unload &amp;Palette</string>
+   </property>
+  </action>
+  <action name="actionUnload_Mappings">
+   <property name="text">
+    <string>Unload &amp;Mappings</string>
+   </property>
+  </action>
+  <action name="actionUnload_Pattern_Cues">
+   <property name="text">
+    <string>Unload Pattern C&amp;ues</string>
+   </property>
+  </action>
+  <action name="actionUnload_All">
+   <property name="text">
+    <string>Unload All</string>
    </property>
   </action>
  </widget>

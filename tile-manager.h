@@ -31,6 +31,14 @@ public:
 
 	TileManager(const Palette &palette);
 
+	void unloadTiles()
+	{
+		tiles_bytes.clear();
+		tile_pixmaps.clear();
+
+		emit pixmapsChanged();
+	}
+
 	template<typename It>
 	bool setTiles(const It &tile_bytes_first, const It &tile_bytes_last)
 	{

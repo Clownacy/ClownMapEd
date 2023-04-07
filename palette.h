@@ -18,6 +18,7 @@ public:
 
 	Palette();
 
+	void reset();
 	void loadFromFile(const QString &file_path);
 	QColor colour224(const int palette_line, const int palette_index) const
 	{
