@@ -757,6 +757,8 @@ MainWindow::MainWindow(QWidget* const parent)
 			const auto &frames = sprite_mappings_manager.sprite_mappings().frames;
 			for (int frame_index = 0; frame_index < frames.size(); ++frame_index)
 			{
+				const auto &frame = frames[frame_index];
+
 				// TODO: Improve this.
 				// This algorithm sucks, but it's exactly what SonMapEd does.
 				// The problem with this is that it only toggles between the first
@@ -764,8 +766,10 @@ MainWindow::MainWindow(QWidget* const parent)
 				// it cycled between every sprite that uses the tile instead.
 				if (frame_index != sprite_viewer.selected_sprite_index())
 				{
-					for (const auto &piece : frames[frame_index].pieces)
+					for (int piece_index = 0; piece_index < frame.pieces.size(); ++piece_index)
 					{
+						const auto &piece = frame.pieces[piece_index];
+
 						if (selected_tile_index >= piece.tile_index && selected_tile_index < piece.tile_index + piece.width * piece.height)
 						{
 							// TODO: Don't do this.
@@ -775,6 +779,7 @@ MainWindow::MainWindow(QWidget* const parent)
 							const int piece_picker_tile =  sprite_piece_picker.selected_tile();
 
 							sprite_viewer.setSelectedSprite(frame_index);
+							sprite_viewer.setSelectedPiece(piece_index);
 
 							// Restore the selection.
 							tile_viewer.setSelection(false,
