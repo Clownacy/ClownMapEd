@@ -53,7 +53,7 @@ void Palette::reset()
 	emit changed();
 }
 
-void Palette::loadFromFile(const QString &file_path)
+void Palette::loadFromFile(const QString &file_path, const int starting_palette_line)
 {
 	QFile file(file_path);
 	if (!file.open(QFile::ReadOnly))
@@ -62,9 +62,9 @@ void Palette::loadFromFile(const QString &file_path)
 	DataStream stream(&file);
 	stream.setByteOrder(DataStream::BigEndian);
 
-	const qint64 total_colours = file.size() / 2;
+	const qint64 total_colours = starting_palette_line * COLOURS_PER_LINE + file.size() / sizeof(quint16);
 
-	for (qint64 line = 0; line < qMin(static_cast<qint64>(TOTAL_LINES), total_colours / COLOURS_PER_LINE); ++line)
+	for (qint64 line = starting_palette_line; line < qMin(static_cast<qint64>(TOTAL_LINES), total_colours / COLOURS_PER_LINE); ++line)
 		for (qint64 colour = 0; colour < qMin(static_cast<qint64>(COLOURS_PER_LINE), total_colours - line * COLOURS_PER_LINE); ++colour)
 			colours[line][colour] = stream.read<quint16>();
 

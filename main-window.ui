@@ -46,6 +46,7 @@
      <addaction name="menuLoad_Tile_Graphics"/>
      <addaction name="separator"/>
      <addaction name="actionLoad_Primary_Palette"/>
+     <addaction name="actionLoad_Secondary_Palette_Lines"/>
      <addaction name="separator"/>
      <addaction name="actionLoad_Mappings"/>
      <addaction name="actionLoad_Sprite_Pattern_Cues"/>
@@ -697,6 +698,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+M</string>
+   </property>
+  </action>
+  <action name="actionLoad_Secondary_Palette_Lines">
+   <property name="text">
+    <string>Load &amp;Secondary Palette Lines...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+P</string>
    </property>
   </action>
  </widget>

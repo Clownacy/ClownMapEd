@@ -201,7 +201,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	const auto load_primary_palette_file = [this](const QString &file_path)
 	{
 		if (!file_path.isNull())
-			palette.loadFromFile(file_path);
+			palette.loadFromFile(file_path, 0);
 	};
 
 	const auto load_sprite_mappings_file = [this](const QString &file_path)
@@ -295,6 +295,13 @@ MainWindow::MainWindow(QWidget* const parent)
 		[this, load_primary_palette_file]()
 		{
 			load_primary_palette_file(QFileDialog::getOpenFileName(this, "Open Palette File"));
+		}
+	);
+
+	connect(ui->actionLoad_Secondary_Palette_Lines, &QAction::triggered, this,
+		[this]()
+		{
+			palette.loadFromFile(QFileDialog::getOpenFileName(this, "Open Palette File"), 1);
 		}
 	);
 
