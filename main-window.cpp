@@ -61,53 +61,54 @@ MainWindow::MainWindow(QWidget* const parent)
 
 	connect(&tile_viewer, &TileViewer::tileSelected, &sprite_piece_picker, &SpritePiecePicker::setSelectedTile);
 
-	connect(&sprite_viewer, &SpriteViewer::selectedSpriteChanged, this,
-		[this]()
-		{
-			tile_viewer.clearSelection();
-			tile_viewer.setSelection(true,
-				[this](QVector<bool> &selection)
+	const auto tile_viewer_select_sprite = [this]()
+	{
+		tile_viewer.clearSelection();
+		tile_viewer.setSelection(true,
+			[this](QVector<bool> &selection)
+			{
+				const auto do_frame_or_piece = [this](const std::function<void(const SpritePiece &piece)> &callback)
 				{
-					const auto do_frame_or_piece = [this](const std::function<void(const SpritePiece &piece)> &callback)
+					const int frame_index = sprite_viewer.selected_sprite_index();
+
+					if (frame_index != -1)
 					{
-						const int frame_index = sprite_viewer.selected_sprite_index();
+						const auto &frames = sprite_mappings_manager.sprite_mappings().frames;
+						const int piece_index = sprite_viewer.selected_piece_index();
 
-						if (frame_index != -1)
+						if (piece_index == -1)
 						{
-							const auto &frames = sprite_mappings_manager.sprite_mappings().frames;
-							const int piece_index = sprite_viewer.selected_piece_index();
+							if (frames[frame_index].pieces.size() != 0)
+								sprite_piece_picker.setSelectedTile(frames[frame_index].pieces[0].tile_index);
 
-							if (piece_index == -1)
-							{
-								if (frames[frame_index].pieces.size() != 0)
-									sprite_piece_picker.setSelectedTile(frames[frame_index].pieces[0].tile_index);
-
-								for (auto &piece : frames[frame_index].pieces)
-									callback(piece);
-							}
-							else
-							{
-								const auto &piece = frames[frame_index].pieces[piece_index];
-
-								sprite_piece_picker.setSelectedTile(piece.tile_index);
-
+							for (auto &piece : frames[frame_index].pieces)
 								callback(piece);
-							}
 						}
-					};
-
-					do_frame_or_piece(
-						[&selection](const SpritePiece &piece)
+						else
 						{
-							for (int i = 0; i < piece.width * piece.height; ++i)
-								if (piece.tile_index + i < selection.size())
-									selection[piece.tile_index + i] = true;
+							const auto &piece = frames[frame_index].pieces[piece_index];
+
+							sprite_piece_picker.setSelectedTile(piece.tile_index);
+
+							callback(piece);
 						}
-					);
-				}
-			);
-		}
-	);
+					}
+				};
+
+				do_frame_or_piece(
+					[&selection](const SpritePiece &piece)
+					{
+						for (int i = 0; i < piece.width * piece.height; ++i)
+							if (piece.tile_index + i < selection.size())
+								selection[piece.tile_index + i] = true;
+					}
+				);
+			}
+		);
+	};
+
+	connect(&sprite_viewer, &SpriteViewer::selectedSpriteChanged, this, tile_viewer_select_sprite);
+	connect(&sprite_mappings_manager, &SpriteMappingsManager::mappingsModified, this, tile_viewer_select_sprite);
 
 	connect(&sprite_piece_picker, &SpritePiecePicker::pieceSelected, this,
 		[this](const int width, const int height)
@@ -230,33 +231,12 @@ MainWindow::MainWindow(QWidget* const parent)
 			if (!file.open(QFile::ReadOnly))
 				return;
 
+			const DynamicPatternLoadCues dplcs = DynamicPatternLoadCues::fromFile(file);
+
 			sprite_mappings_manager.modifySpriteMappings(
-				[&file](SpriteMappings &mappings)
+				[&dplcs](SpriteMappings &mappings)
 				{
-					const DynamicPatternLoadCues dplcs = DynamicPatternLoadCues::fromFile(file);
-
-					if (mappings.frames.size() == dplcs.frames.size())
-					{
-						for (int frame_index = 0; frame_index < mappings.frames.size(); ++frame_index)
-						{
-							auto &dplc_frame = dplcs.frames[frame_index];
-
-							for (auto &piece : mappings.frames[frame_index].pieces)
-							{
-								const int base_mapped_tile = dplc_frame.getMappedTile(piece.tile_index);
-
-								for (int i = 0; i < piece.width * piece.height; ++i)
-								{
-									const int mapped_tile = dplc_frame.getMappedTile(piece.tile_index + i);
-
-									if (mapped_tile == -1 || mapped_tile != base_mapped_tile + i)
-										return;
-								}
-
-								piece.tile_index = base_mapped_tile;
-							}
-						}
-					}
+					mappings.applyDPLCs(dplcs);
 				}
 			);
 		}
@@ -347,6 +327,17 @@ MainWindow::MainWindow(QWidget* const parent)
 				[](SpriteMappings &mappings)
 				{
 					mappings.frames.clear();
+				}
+			);
+		}
+	);
+	connect(ui->actionUnload_Pattern_Cues, &QAction::triggered, this,
+		[this]()
+		{
+			sprite_mappings_manager.modifySpriteMappings(
+				[](SpriteMappings &mappings)
+				{
+					mappings.removeDPLCs();
 				}
 			);
 		}
