@@ -4,3 +4,4 @@
 - Add scrollbar to tile viewer.
 - Don't bother drawing sprites that are off-screen.
 - 'Select unmapped tiles' shows that auto-scrolling is still screwy (Sonic 2 Sonic sprites).
+- Tall sprites make the sprite viewer taller.
