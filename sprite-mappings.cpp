@@ -38,6 +38,24 @@ SpriteMappings SpriteMappings::fromFile(QFile &file)
 	return mappings;
 }
 
+void SpriteMappings::toDataStream(DataStream &stream) const
+{
+	const auto original_byte_order = stream.byteOrder();
+	stream.setByteOrder(DataStream::BigEndian);
+
+	int current_offset = frames.size() * sizeof(quint16);
+	for (const auto &frame : frames)
+	{
+		stream.write<quint16>(current_offset);
+		current_offset += frame.size_encoded();
+	}
+
+	for (const auto &frame : frames)
+		frame.toDataStream(stream);
+
+	stream.setByteOrder(original_byte_order);
+}
+
 bool SpriteMappings::applyDPLCs(const DynamicPatternLoadCues &dplcs)
 {
 	if (frames.size() == dplcs.frames.size())

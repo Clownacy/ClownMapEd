@@ -10,6 +10,8 @@
 struct SpritePiece
 {
 	static SpritePiece fromDataStream(DataStream &stream);
+	void toDataStream(DataStream &stream) const;
+	static constexpr int size_encoded = 8;
 
 	void draw(QPainter &painter, const TileManager &tile_manager, TileManager::PixmapType effect, int starting_palette_line = 0, int x_offset = 0, int y_offset = 0) const;
 

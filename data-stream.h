@@ -15,6 +15,12 @@ public:
 		*this >> value;
 		return value;
 	}
+
+	template<typename T>
+	void write(const T &value)
+	{
+		*this << value;
+	}
 };
 
 #endif // DATASTREAM_H

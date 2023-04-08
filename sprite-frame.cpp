@@ -17,6 +17,19 @@ SpriteFrame SpriteFrame::fromDataStream(DataStream &stream)
 	return frame;
 }
 
+void SpriteFrame::toDataStream(DataStream &stream) const
+{
+	const auto original_byte_order = stream.byteOrder();
+	stream.setByteOrder(DataStream::BigEndian);
+
+	stream.write<quint16>(pieces.size());
+
+	for (const auto &piece : pieces)
+		piece.toDataStream(stream);
+
+	stream.setByteOrder(original_byte_order);
+}
+
 void SpriteFrame::draw(QPainter &painter, const TileManager &tile_manager, const TileManager::PixmapType unselected_effect, const int selected_piece_index, const TileManager::PixmapType selected_effect, const int starting_palette_line, const int x_offset, const int y_offset) const
 {
 	// Must draw in reverse order.

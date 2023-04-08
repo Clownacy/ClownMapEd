@@ -6,14 +6,10 @@
 #include <QMouseEvent>
 #include <QPainter>
 
+#include "utilities.h"
+
 static constexpr int TILE_WIDTH_SCALED = TileManager::TILE_WIDTH * 3;
 static constexpr int TILE_HEIGHT_SCALED = TileManager::TILE_HEIGHT * 3;
-
-template <typename T>
-static inline T DivideCeiling(T a, T b)
-{
-	return (a + (b - 1)) / b;
-}
 
 TileViewer::TileViewer(const TileManager &tile_manager)
 	: tile_manager(tile_manager)
@@ -86,7 +82,7 @@ void TileViewer::setSelection(const bool scroll_to_selection, const std::functio
 void TileViewer::getGridDimensions(int &columns, int &rows)
 {
 	columns = width() / TILE_WIDTH_SCALED;
-	rows = qMin(DivideCeiling(height(), TILE_HEIGHT_SCALED), DivideCeiling(tile_manager.total_tiles(), columns));
+	rows = qMin(Utilities::DivideCeiling(height(), TILE_HEIGHT_SCALED), Utilities::DivideCeiling(tile_manager.total_tiles(), columns));
 }
 
 void TileViewer::paintEvent(QPaintEvent* const event)
@@ -103,7 +99,7 @@ void TileViewer::paintEvent(QPaintEvent* const event)
 	painter.setPen(Qt::NoPen);
 
 	const int tiles_to_do = tile_manager.total_tiles() - m_scroll;
-	const int rows_to_do = qMin(total_rows, DivideCeiling(tiles_to_do, tiles_per_row));
+	const int rows_to_do = qMin(total_rows, Utilities::DivideCeiling(tiles_to_do, tiles_per_row));
 
 	const auto do_visible_rows = [this, tiles_per_row, tiles_to_do, rows_to_do](const std::function<void(int, int, int)> &callback)
 	{

@@ -4,12 +4,14 @@
 #include <QFile>
 #include <QVector>
 
+#include "data-stream.h"
 #include "dynamic-pattern-load-cues.h"
 #include "sprite-frame.h"
 
 struct SpriteMappings
 {
 	static SpriteMappings fromFile(QFile &file);
+	void toDataStream(DataStream &stream) const;
 
 	bool applyDPLCs(const DynamicPatternLoadCues &dplcs);
 	DynamicPatternLoadCues removeDPLCs();

@@ -23,6 +23,31 @@ SpritePiece SpritePiece::fromDataStream(DataStream &stream)
 	return piece;
 }
 
+void SpritePiece::toDataStream(DataStream &stream) const
+{
+	const auto original_byte_order = stream.byteOrder();
+	stream.setByteOrder(DataStream::BigEndian);
+
+	stream.write<qint8>(y);
+	stream.write<quint8>((width - 1) << 2 | height - 1);
+
+	stream.write<quint16>(static_cast<uint>(priority) << 15
+						| static_cast<uint>(palette_line) << 13
+						| static_cast<uint>(y_flip) << 12
+						| static_cast<uint>(x_flip) << 11
+						| static_cast<uint>(tile_index));
+
+	stream.write<quint16>(static_cast<uint>(priority) << 15
+						| static_cast<uint>(palette_line) << 13
+						| static_cast<uint>(y_flip) << 12
+						| static_cast<uint>(x_flip) << 11
+						| static_cast<uint>(tile_index) / 2);
+
+	stream.write<qint16>(x);
+
+	stream.setByteOrder(original_byte_order);
+}
+
 void SpritePiece::draw(QPainter &painter, const TileManager &tile_manager, const TileManager::PixmapType effect, const int starting_palette_line, const int x_offset, const int y_offset) const
 {
 	const QTransform flip_transform = QTransform::fromScale(x_flip ? -1 : 1, y_flip ? -1 : 1);

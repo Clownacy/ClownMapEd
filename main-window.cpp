@@ -314,6 +314,45 @@ MainWindow::MainWindow(QWidget* const parent)
 
 	connect(ui->actionExit, &QAction::triggered, this, &QMainWindow::close);
 
+	//////////////////////////////////
+	// Menubar: File/Save Data File //
+	//////////////////////////////////
+
+	connect(ui->actionSave_Mappings, &QAction::triggered, this,
+		[this]()
+		{
+			const QString file_path = QFileDialog::getSaveFileName(this, "Save Sprite Mappings File");
+
+			if (file_path.isNull())
+				return;
+
+			QFile file(file_path);
+			file.open(QFile::OpenModeFlag::WriteOnly);
+			DataStream stream(&file);
+
+			auto sprite_mappings_copy = sprite_mappings_manager.sprite_mappings();
+			sprite_mappings_copy.removeDPLCs();
+			sprite_mappings_copy.toDataStream(stream);
+		}
+	);
+
+	connect(ui->actionSave_Pattern_Cues, &QAction::triggered, this,
+		[this]()
+		{
+			const QString file_path = QFileDialog::getSaveFileName(this, "Save Dynamic Pattern Loading Cue File");
+
+			if (file_path.isNull())
+				return;
+
+			QFile file(file_path);
+			file.open(QFile::OpenModeFlag::WriteOnly);
+			DataStream stream(&file);
+
+			auto sprite_mappings_copy = sprite_mappings_manager.sprite_mappings();
+			sprite_mappings_copy.removeDPLCs().toDataStream(stream);
+		}
+	);
+
 	///////////////////////////////
 	// Menubar: File/Unload Data //
 	///////////////////////////////
