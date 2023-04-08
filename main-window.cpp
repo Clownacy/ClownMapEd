@@ -514,14 +514,14 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionDelete_Sprite_Piece, &QAction::triggered, this,
 		[this]()
 		{
+			sprite_viewer.setSelectedPiece(sprite_viewer.selected_piece_index() - 1);
+
 			sprite_mappings_manager.modifySpriteMappings(
 				[this](SpriteMappings &mappings)
 				{
-					mappings.frames[sprite_viewer.selected_sprite_index()].pieces.remove(sprite_viewer.selected_piece_index());
+					mappings.frames[sprite_viewer.selected_sprite_index()].pieces.remove(sprite_viewer.selected_piece_index() + 1);
 				}
 			);
-
-			sprite_viewer.setSelectedPiece(sprite_viewer.selected_piece_index() - 1);
 		}
 	);
 
