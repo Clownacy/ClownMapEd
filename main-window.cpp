@@ -272,42 +272,42 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionLoad_Tiles_Nemesis, &QAction::triggered, this,
 		[this, load_nemesis_tile_file]()
 		{
-			load_nemesis_tile_file(QFileDialog::getOpenFileName(this, "Open Tile Graphics File"));
+			load_nemesis_tile_file(QFileDialog::getOpenFileName(this, "Open Nemesis-Compressed Tile Graphics File"));
 		}
 	);
 
 	connect(ui->actionLoad_Tiles_Kosinski, &QAction::triggered, this,
 		[this, load_kosinski_tile_file]()
 		{
-			load_kosinski_tile_file(QFileDialog::getOpenFileName(this, "Open Tile Graphics File"));
+			load_kosinski_tile_file(QFileDialog::getOpenFileName(this, "Open Kosinski-Compressed Tile Graphics File"));
 		}
 	);
 
 	connect(ui->actionLoad_Tiles_Moduled_Kosinski, &QAction::triggered, this,
 		[this, load_moduled_kosinski_tile_file]()
 		{
-			load_moduled_kosinski_tile_file(QFileDialog::getOpenFileName(this, "Open Tile Graphics File"));
+			load_moduled_kosinski_tile_file(QFileDialog::getOpenFileName(this, "Open Moduled Kosinski-Compressed Tile Graphics File"));
 		}
 	);
 
 	connect(ui->actionLoad_Tiles_Kosinski_Plus, &QAction::triggered, this,
 		[this, load_kosinski_plus_tile_file]()
 		{
-			load_kosinski_plus_tile_file(QFileDialog::getOpenFileName(this, "Open Tile Graphics File"));
+			load_kosinski_plus_tile_file(QFileDialog::getOpenFileName(this, "Open Kosinski+-Compressed Tile Graphics File"));
 		}
 	);
 
 	connect(ui->actionLoad_Tiles_Moduled_Kosinski_Plus, &QAction::triggered, this,
 		[this, load_moduled_kosinski_plus_tile_file]()
 		{
-			load_moduled_kosinski_plus_tile_file(QFileDialog::getOpenFileName(this, "Open Tile Graphics File"));
+			load_moduled_kosinski_plus_tile_file(QFileDialog::getOpenFileName(this, "Open Moduled Kosinski+-Compressed Tile Graphics File"));
 		}
 	);
 
 	connect(ui->actionLoad_Tiles_Comper, &QAction::triggered, this,
 		[this, load_comper_tile_file]()
 		{
-			load_comper_tile_file(QFileDialog::getOpenFileName(this, "Open Tile Graphics File"));
+			load_comper_tile_file(QFileDialog::getOpenFileName(this, "Open Comper-Compressed Tile Graphics File"));
 		}
 	);
 
