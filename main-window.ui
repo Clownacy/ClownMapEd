@@ -53,7 +53,7 @@
     </widget>
     <widget class="QMenu" name="menuUnload_Data">
      <property name="title">
-      <string>Unload Data</string>
+      <string>&amp;Unload Data</string>
      </property>
      <addaction name="actionUnload_Tile_Graphics"/>
      <addaction name="separator"/>
@@ -70,7 +70,7 @@
      </property>
      <widget class="QMenu" name="menuSave_Tile_Graphics">
       <property name="title">
-       <string>Save Tile Graphics</string>
+       <string>Save Tile &amp;Graphics</string>
       </property>
       <addaction name="actionUncompressed"/>
       <addaction name="actionNemesis"/>
@@ -630,7 +630,7 @@
   </action>
   <action name="actionLoad_Sprite_Pattern_Cues">
    <property name="text">
-    <string>Load Sprite Pattern &amp;Cues...</string>
+    <string>Load Pattern &amp;Cues...</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+C</string>
@@ -727,17 +727,17 @@
   </action>
   <action name="actionUnload_Pattern_Cues">
    <property name="text">
-    <string>Unload Pattern C&amp;ues</string>
+    <string>Unload Pattern &amp;Cues</string>
    </property>
   </action>
   <action name="actionUnload_All">
    <property name="text">
-    <string>Unload All</string>
+    <string>Unload &amp;All</string>
    </property>
   </action>
   <action name="actionSave_Pattern_Cues">
    <property name="text">
-    <string>Save Pattern Cues...</string>
+    <string>Save Pattern &amp;Cues...</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+C</string>
@@ -745,7 +745,7 @@
   </action>
   <action name="actionSave_Mappings">
    <property name="text">
-    <string>Save Mappings...</string>
+    <string>Save &amp;Mappings...</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+M</string>
@@ -761,7 +761,7 @@
   </action>
   <action name="actionSave_Primary_Palette_Line">
    <property name="text">
-    <string>Save Primary Palette Line...</string>
+    <string>Save &amp;Primary Palette Line...</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+P</string>
