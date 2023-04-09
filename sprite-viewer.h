@@ -4,7 +4,8 @@
 #include <QColor>
 #include <QWidget>
 
-#include "sprite-mappings-manager.h"
+#include "signal-wrapper.h"
+#include "sprite-mappings.h"
 #include "tile-manager.h"
 
 class SpriteViewer : public QWidget
@@ -12,7 +13,7 @@ class SpriteViewer : public QWidget
 	Q_OBJECT
 
 public:
-	SpriteViewer(const TileManager &tile_manager, const SpriteMappingsManager &sprite_mappings_manager);
+    SpriteViewer(const TileManager &tile_manager, const SignalWrapper<SpriteMappings> &sprite_mappings);
 
 	int selected_sprite_index() const
 	{

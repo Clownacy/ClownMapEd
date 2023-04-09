@@ -7,7 +7,8 @@
 
 #include "palette.h"
 #include "palette-editor.h"
-#include "sprite-mappings-manager.h"
+#include "signal-wrapper.h"
+#include "sprite-mappings.h"
 #include "sprite-piece-picker.h"
 #include "sprite-viewer.h"
 #include "tile-manager.h"
@@ -27,8 +28,8 @@ public:
 
 private:
 	Ui::MainWindow *ui;
-	PaletteManager palette_manager;
-	SpriteMappingsManager sprite_mappings_manager;
+	SignalWrapper<Palette> palette;
+	SignalWrapper<SpriteMappings> sprite_mappings;
 	TileManager tile_manager;
 	SpriteViewer sprite_viewer;
 	PaletteEditor palette_editor;

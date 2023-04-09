@@ -53,28 +53,4 @@ struct Palette
 	std::array<Line, TOTAL_LINES> lines;
 };
 
-class PaletteManager : public QObject
-{
-	Q_OBJECT
-
-public:
-	const Palette& palette() const
-	{
-		return m_palette;
-	}
-
-	const void modifyPalette(const std::function<void(Palette &palette)> &callback)
-	{
-		callback(m_palette);
-
-		emit changed();
-	}
-
-signals:
-	void changed();
-
-private:
-	Palette m_palette;
-};
-
 #endif // PALETTE_H

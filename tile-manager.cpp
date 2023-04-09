@@ -2,11 +2,11 @@
 
 #include <algorithm>
 
-TileManager::TileManager(const PaletteManager &palette_manager)
-    : palette(palette_manager.palette())
+TileManager::TileManager(const SignalWrapper<Palette> &palette)
+    : palette(*palette)
 	, invalid_tile_pixmaps(createPixmaps(createInvalidTilePixmap()))
 {
-	connect(&palette_manager, &PaletteManager::changed, this, &TileManager::regeneratePixmaps);
+	connect(&palette, &SignalWrapper<Palette>::modified, this, &TileManager::regeneratePixmaps);
 }
 
 void TileManager::deleteTile(const int tile_index)

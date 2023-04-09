@@ -9,18 +9,19 @@
 
 #include "colour-button.h"
 #include "palette.h"
+#include "signal-wrapper.h"
 
 class PaletteEditor : public QWidget
 {
 	Q_OBJECT
 
 public:
-	PaletteEditor(PaletteManager &palette_manager);
+	PaletteEditor(SignalWrapper<Palette> &palette);
 
 private:
 	QGridLayout grid_layout;
 	std::array<std::array<ColourButton, Palette::COLOURS_PER_LINE>, Palette::TOTAL_LINES> buttons;
-	PaletteManager &palette_manager;
+	SignalWrapper<Palette> &palette;
 
 private slots:
 	void setButtonColour(int palette_line, int palette_index, const QColor &colour);

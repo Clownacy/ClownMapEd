@@ -5,18 +5,18 @@
 
 #include "utilities.h"
 
-SpriteViewer::SpriteViewer(const TileManager &tile_manager, const SpriteMappingsManager &sprite_mappings_manager)
-	: sprite_mappings(sprite_mappings_manager.sprite_mappings())
+SpriteViewer::SpriteViewer(const TileManager &tile_manager, const SignalWrapper<SpriteMappings> &sprite_mappings)
+	: sprite_mappings(*sprite_mappings)
     , tile_manager(tile_manager)
 {
 	setAutoFillBackground(true);
 
 	connect(&tile_manager, &TileManager::pixmapsChanged, this, qOverload<>(&SpriteViewer::update));
 
-	connect(&sprite_mappings_manager, &SpriteMappingsManager::mappingsModified, this,
+	connect(&sprite_mappings, &SignalWrapper<SpriteMappings>::modified, this,
 		[this]()
 		{
-			if (sprite_mappings.frames.size() == 0)
+			if (this->sprite_mappings.frames.size() == 0)
 				m_selected_sprite_index = -1;
 			else
 				m_selected_sprite_index = qBound(0, m_selected_sprite_index, this->sprite_mappings.frames.size() - 1);

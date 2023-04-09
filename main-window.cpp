@@ -20,15 +20,15 @@
 MainWindow::MainWindow(QWidget* const parent)
 	: QMainWindow(parent)
 	, ui(new Ui::MainWindow)
-    , tile_manager(palette_manager)
-	, sprite_viewer(tile_manager, sprite_mappings_manager)
-    , palette_editor(palette_manager)
+    , tile_manager(palette)
+	, sprite_viewer(tile_manager, sprite_mappings)
+    , palette_editor(palette)
 	, sprite_piece_picker(tile_manager)
     , tile_viewer(tile_manager)
 {
 	ui->setupUi(this);
 
-	palette_manager.modifyPalette(
+	palette.modify(
 		[](Palette &palette)
 		{
 			palette.reset();
@@ -54,13 +54,13 @@ MainWindow::MainWindow(QWidget* const parent)
 
 	const auto update_background_colour = [this]()
 	{
-		const QColor &background_colour = palette_manager.palette().lines[0].colours[0].toQColor256();
+		const QColor &background_colour = palette->lines[0].colours[0].toQColor256();
 
 		sprite_viewer.setBackgroundColour(background_colour);
 		tile_viewer.setBackgroundColour(background_colour);
 	};
 
-	connect(&palette_manager, &PaletteManager::changed, this, update_background_colour);
+	connect(&palette, &SignalWrapper<Palette>::modified, this, update_background_colour);
 
 	update_background_colour();
 
@@ -82,7 +82,7 @@ MainWindow::MainWindow(QWidget* const parent)
 
 					if (frame_index != -1)
 					{
-						const auto &frames = sprite_mappings_manager.sprite_mappings().frames;
+						const auto &frames = sprite_mappings->frames;
 						const int piece_index = sprite_viewer.selected_piece_index();
 
 						if (piece_index == -1)
@@ -117,12 +117,12 @@ MainWindow::MainWindow(QWidget* const parent)
 	};
 
 	connect(&sprite_viewer, &SpriteViewer::selectedSpriteChanged, this, tile_viewer_select_sprite);
-	connect(&sprite_mappings_manager, &SpriteMappingsManager::mappingsModified, this, tile_viewer_select_sprite);
+	connect(&sprite_mappings, &SignalWrapper<SpriteMappings>::modified, this, tile_viewer_select_sprite);
 
 	connect(&sprite_piece_picker, &SpritePiecePicker::pieceSelected, this,
 		[this](const int width, const int height)
 		{
-			sprite_mappings_manager.modifySpriteMappings(
+			sprite_mappings.modify(
 				[this, width, height](SpriteMappings &mappings)
 				{
 					if (sprite_viewer.selected_sprite_index() == -1)
@@ -217,7 +217,7 @@ MainWindow::MainWindow(QWidget* const parent)
 
 			DataStream stream(&file);
 
-			palette_manager.modifyPalette(
+			palette.modify(
 				[&stream, starting_palette_line](Palette &palette)
 				{
 					palette.fromDataStream(stream, starting_palette_line);
@@ -234,7 +234,7 @@ MainWindow::MainWindow(QWidget* const parent)
 			if (!file.open(QFile::ReadOnly))
 				return;
 
-			sprite_mappings_manager.modifySpriteMappings(
+			sprite_mappings.modify(
 				[&file](SpriteMappings &mappings)
 				{
 					mappings = SpriteMappings::fromFile(file);
@@ -255,7 +255,7 @@ MainWindow::MainWindow(QWidget* const parent)
 
 			const DynamicPatternLoadCues dplcs = DynamicPatternLoadCues::fromFile(file);
 
-			sprite_mappings_manager.modifySpriteMappings(
+			sprite_mappings.modify(
 				[&dplcs](SpriteMappings &mappings)
 				{
 					mappings.applyDPLCs(dplcs);
@@ -359,7 +359,7 @@ MainWindow::MainWindow(QWidget* const parent)
 		DataStream stream(&file);
 
 		for (int i = starting_palette_line; i < ending_palette_line; ++i)
-			palette_manager.palette().lines[i].toDataStream(stream);
+			palette->lines[i].toDataStream(stream);
 	};
 
 	connect(ui->actionSave_Primary_Palette_Line, &QAction::triggered, this,
@@ -395,7 +395,7 @@ MainWindow::MainWindow(QWidget* const parent)
 			file.open(QFile::OpenModeFlag::WriteOnly);
 			DataStream stream(&file);
 
-			auto sprite_mappings_copy = sprite_mappings_manager.sprite_mappings();
+			auto sprite_mappings_copy = *sprite_mappings;
 			sprite_mappings_copy.removeDPLCs();
 			sprite_mappings_copy.toDataStream(stream);
 		}
@@ -413,7 +413,7 @@ MainWindow::MainWindow(QWidget* const parent)
 			file.open(QFile::OpenModeFlag::WriteOnly);
 			DataStream stream(&file);
 
-			auto sprite_mappings_copy = sprite_mappings_manager.sprite_mappings();
+			auto sprite_mappings_copy = *sprite_mappings;
 			sprite_mappings_copy.removeDPLCs().toDataStream(stream);
 		}
 	);
@@ -426,7 +426,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionUnload_Palette, &QAction::triggered, this,
 		[this]()
 		{
-			palette_manager.modifyPalette(
+			palette.modify(
 				[](Palette &palette)
 				{
 					palette.reset();
@@ -437,7 +437,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionUnload_Mappings, &QAction::triggered, this,
 		[this]()
 		{
-			sprite_mappings_manager.modifySpriteMappings(
+			sprite_mappings.modify(
 				[](SpriteMappings &mappings)
 				{
 					mappings.frames.clear();
@@ -448,7 +448,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionUnload_Pattern_Cues, &QAction::triggered, this,
 		[this]()
 		{
-			sprite_mappings_manager.modifySpriteMappings(
+			sprite_mappings.modify(
 				[](SpriteMappings &mappings)
 				{
 					mappings.removeDPLCs();
@@ -476,7 +476,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionSwap_Sprite_with_Next, &QAction::triggered, this,
 		[this]()
 		{
-			sprite_mappings_manager.modifySpriteMappings(
+			sprite_mappings.modify(
 				[this](SpriteMappings &mappings)
 				{
 					auto &frames = mappings.frames;
@@ -492,7 +492,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionSwap_Sprite_with_Previous, &QAction::triggered, this,
 		[this]()
 		{
-			sprite_mappings_manager.modifySpriteMappings(
+			sprite_mappings.modify(
 				[this](SpriteMappings &mappings)
 				{
 					auto &frames = mappings.frames;
@@ -515,14 +515,14 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionLast_Sprite, &QAction::triggered, this,
 		[this]()
 		{
-			sprite_viewer.setSelectedSprite(sprite_mappings_manager.sprite_mappings().frames.size() - 1);
+			sprite_viewer.setSelectedSprite(sprite_mappings->frames.size() - 1);
 		}
 	);
 
 	connect(ui->actionInsert_New_Sprite, &QAction::triggered, this,
 		[this]()
 		{
-			sprite_mappings_manager.modifySpriteMappings(
+			sprite_mappings.modify(
 				[this](SpriteMappings &mappings)
 				{
 					mappings.frames.insert(sprite_viewer.selected_sprite_index() + 1, SpriteFrame());
@@ -536,7 +536,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionDuplicate_Sprite, &QAction::triggered, this,
 		[this]()
 		{
-			sprite_mappings_manager.modifySpriteMappings(
+			sprite_mappings.modify(
 				[this](SpriteMappings &mappings)
 				{
 					auto &frames = mappings.frames;
@@ -552,7 +552,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionDelete_Sprite, &QAction::triggered, this,
 		[this]()
 		{
-			sprite_mappings_manager.modifySpriteMappings(
+			sprite_mappings.modify(
 				[this](SpriteMappings &mappings)
 				{
 					mappings.frames.remove(sprite_viewer.selected_sprite_index());
@@ -584,7 +584,7 @@ MainWindow::MainWindow(QWidget* const parent)
 		{
 			sprite_viewer.setSelectedPiece(sprite_viewer.selected_piece_index() - 1);
 
-			sprite_mappings_manager.modifySpriteMappings(
+			sprite_mappings.modify(
 				[this](SpriteMappings &mappings)
 				{
 					mappings.frames[sprite_viewer.selected_sprite_index()].pieces.remove(sprite_viewer.selected_piece_index() + 1);
@@ -596,7 +596,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionDuplicate_Sprite_Piece, &QAction::triggered, this,
 		[this]()
 		{
-			sprite_mappings_manager.modifySpriteMappings(
+			sprite_mappings.modify(
 				[this](SpriteMappings &mappings)
 				{
 					auto &pieces = mappings.frames[sprite_viewer.selected_sprite_index()].pieces;
@@ -612,7 +612,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionMove_Piece_into_Next_Sprite, &QAction::triggered, this,
 		[this]()
 		{
-			sprite_mappings_manager.modifySpriteMappings(
+			sprite_mappings.modify(
 				[this](SpriteMappings &mappings)
 				{
 					const int selected_sprite_index = sprite_viewer.selected_sprite_index();
@@ -634,7 +634,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionMove_Piece_into_Previous_Sprite, &QAction::triggered, this,
 		[this]()
 		{
-			sprite_mappings_manager.modifySpriteMappings(
+			sprite_mappings.modify(
 				[this](SpriteMappings &mappings)
 				{
 					const int selected_sprite_index = sprite_viewer.selected_sprite_index();
@@ -656,7 +656,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionMove_Piece_into_New_Sprite, &QAction::triggered, this,
 		[this]()
 		{
-			sprite_mappings_manager.modifySpriteMappings(
+			sprite_mappings.modify(
 				[this](SpriteMappings &mappings)
 				{
 					const int selected_sprite_index = sprite_viewer.selected_sprite_index();
@@ -679,7 +679,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionMove_Piece_toward_Back, &QAction::triggered, this,
 		[this]()
 		{
-			sprite_mappings_manager.modifySpriteMappings(
+			sprite_mappings.modify(
 				[this](SpriteMappings &mappings)
 				{
 					auto &pieces = mappings.frames[sprite_viewer.selected_sprite_index()].pieces;
@@ -697,7 +697,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionMove_Piece_toward_Front, &QAction::triggered, this,
 		[this]()
 		{
-			sprite_mappings_manager.modifySpriteMappings(
+			sprite_mappings.modify(
 				[this](SpriteMappings &mappings)
 				{
 					auto &pieces = mappings.frames[sprite_viewer.selected_sprite_index()].pieces;
@@ -715,7 +715,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionMove_Piece_Behind_Others, &QAction::triggered, this,
 		[this]()
 		{
-			sprite_mappings_manager.modifySpriteMappings(
+			sprite_mappings.modify(
 				[this](SpriteMappings &mappings)
 				{
 					auto &pieces = mappings.frames[sprite_viewer.selected_sprite_index()].pieces;
@@ -733,7 +733,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionMove_Piece_in_Front_of_Others, &QAction::triggered, this,
 		[this]()
 		{
-			sprite_mappings_manager.modifySpriteMappings(
+			sprite_mappings.modify(
 				[this](SpriteMappings &mappings)
 				{
 					auto &pieces = mappings.frames[sprite_viewer.selected_sprite_index()].pieces;
@@ -754,7 +754,7 @@ MainWindow::MainWindow(QWidget* const parent)
 
 	const auto transform_frame_or_piece = [this](const std::function<void(SpritePiece &piece)> &callback)
 	{
-		sprite_mappings_manager.modifySpriteMappings(
+		sprite_mappings.modify(
 			[this, &callback](SpriteMappings &mappings)
 			{
 				auto &frame = mappings.frames[sprite_viewer.selected_sprite_index()];
@@ -777,7 +777,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionFlip_Horizontally, &QAction::triggered, this,
 		[this, transform_frame_or_piece]()
 		{
-			const auto &frame = sprite_mappings_manager.sprite_mappings().frames[sprite_viewer.selected_sprite_index()];
+			const auto &frame = sprite_mappings->frames[sprite_viewer.selected_sprite_index()];
 			const QRect &rect = sprite_viewer.selected_piece_index() == -1 ? frame.rect() : frame.pieces[sprite_viewer.selected_piece_index()].rect();
 
 			transform_frame_or_piece(
@@ -793,7 +793,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionFlip_Vertically, &QAction::triggered, this,
 		[this, transform_frame_or_piece]()
 		{
-			const auto &frame = sprite_mappings_manager.sprite_mappings().frames[sprite_viewer.selected_sprite_index()];
+			const auto &frame = sprite_mappings->frames[sprite_viewer.selected_sprite_index()];
 			const QRect &rect = sprite_viewer.selected_piece_index() == -1 ? frame.rect() : frame.pieces[sprite_viewer.selected_piece_index()].rect();
 
 			transform_frame_or_piece(
@@ -873,7 +873,7 @@ MainWindow::MainWindow(QWidget* const parent)
 					for (auto &tile_selected : selected)
 						tile_selected = true;
 
-					for (const auto &frame : sprite_mappings_manager.sprite_mappings().frames)
+					for (const auto &frame : sprite_mappings->frames)
 						for (const auto &piece : frame.pieces)
 							for (int i = 0; i < piece.width * piece.height; ++i)
 								selected[piece.tile_index + i] = false;
@@ -888,7 +888,7 @@ MainWindow::MainWindow(QWidget* const parent)
 			tile_viewer.setSelection(false,
 				[this](QVector<bool> &selected)
 				{
-					sprite_mappings_manager.modifySpriteMappings(
+					sprite_mappings.modify(
 						[this, &selected](SpriteMappings &mappings)
 						{
 							int selected_tile;
@@ -918,7 +918,7 @@ MainWindow::MainWindow(QWidget* const parent)
 		{
 			const int selected_tile_index = tile_viewer.selection().indexOf(true);
 
-			const auto &frames = sprite_mappings_manager.sprite_mappings().frames;
+			const auto &frames = sprite_mappings->frames;
 			for (int frame_index = 0; frame_index < frames.size(); ++frame_index)
 			{
 				const auto &frame = frames[frame_index];
@@ -969,7 +969,7 @@ MainWindow::MainWindow(QWidget* const parent)
 			tile_viewer.setSelection(false,
 				[this](QVector<bool> &selected)
 				{
-					sprite_mappings_manager.modifySpriteMappings(
+					sprite_mappings.modify(
 						[this, &selected](SpriteMappings &mappings)
 						{
 							int selected_tile = -1;
@@ -1025,7 +1025,7 @@ MainWindow::MainWindow(QWidget* const parent)
 			set_tile_selection_and_update_piece_picker(
 				[this](QVector<bool> &selected)
 				{
-					for (const auto &piece : sprite_mappings_manager.sprite_mappings().frames[sprite_viewer.selected_sprite_index()].pieces)
+					for (const auto &piece : sprite_mappings->frames[sprite_viewer.selected_sprite_index()].pieces)
 						for (int i = 0; i < piece.width * piece.height; ++i)
 							selected[piece.tile_index + i] = true;
 				}
@@ -1132,9 +1132,9 @@ MainWindow::MainWindow(QWidget* const parent)
 	const auto update_menubar = [this]()
 	{
 		const int selected_sprite_index = sprite_viewer.selected_sprite_index();
-		const bool no_sprites = sprite_mappings_manager.sprite_mappings().frames.size() == 0;
+		const bool no_sprites = sprite_mappings->frames.size() == 0;
 		const bool is_first_sprite = no_sprites || selected_sprite_index == 0;
-		const bool is_last_sprite = no_sprites || selected_sprite_index == sprite_mappings_manager.sprite_mappings().frames.size() - 1;
+		const bool is_last_sprite = no_sprites || selected_sprite_index == sprite_mappings->frames.size() - 1;
 		const bool no_sprite_selected = no_sprites;
 
 		ui->actionNext_Sprite->setDisabled(is_last_sprite);
@@ -1148,9 +1148,9 @@ MainWindow::MainWindow(QWidget* const parent)
 		ui->actionDelete_Sprite->setDisabled(no_sprite_selected);
 
 		const int selected_piece_index = sprite_viewer.selected_piece_index();
-		const bool no_pieces = no_sprites || sprite_mappings_manager.sprite_mappings().frames[selected_sprite_index].pieces.size() == 0;
+		const bool no_pieces = no_sprites || sprite_mappings->frames[selected_sprite_index].pieces.size() == 0;
 		const bool is_first_piece = no_pieces || selected_piece_index == 0;
-		const bool is_last_piece = no_pieces || selected_piece_index == sprite_mappings_manager.sprite_mappings().frames[selected_sprite_index].pieces.size() - 1;
+		const bool is_last_piece = no_pieces || selected_piece_index == sprite_mappings->frames[selected_sprite_index].pieces.size() - 1;
 		const bool no_piece_selected = no_pieces || selected_piece_index == -1;
 
 		ui->actionNext_Sprite_Piece->setDisabled(no_pieces);
@@ -1183,7 +1183,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	};
 
 	connect(&sprite_viewer, &SpriteViewer::selectedSpriteChanged, this, update_menubar);
-	connect(&sprite_mappings_manager, &SpriteMappingsManager::mappingsModified, this, update_menubar);
+	connect(&sprite_mappings, &SignalWrapper<SpriteMappings>::modified, this, update_menubar);
 
 	// Manually update the menubar upon startup so that the various options are properly enabled.
 	update_menubar();
@@ -1199,15 +1199,15 @@ MainWindow::MainWindow(QWidget* const parent)
 			return " | " + string + (index == -1 ? "s: " : (" " + QString::number(index, 0x10).toUpper() + "/")) + QString::number(total, 0x10).toUpper();
 		};
 
-		const QString frame_string = do_string_thingy("Frame", sprite_viewer.selected_sprite_index(), sprite_mappings_manager.sprite_mappings().frames.size());
-		const QString piece_string = sprite_viewer.selected_sprite_index() == -1 ? "" : do_string_thingy("Piece", sprite_viewer.selected_piece_index(), sprite_mappings_manager.sprite_mappings().frames[sprite_viewer.selected_sprite_index()].pieces.size());
+		const QString frame_string = do_string_thingy("Frame", sprite_viewer.selected_sprite_index(), sprite_mappings->frames.size());
+		const QString piece_string = sprite_viewer.selected_sprite_index() == -1 ? "" : do_string_thingy("Piece", sprite_viewer.selected_piece_index(), sprite_mappings->frames[sprite_viewer.selected_sprite_index()].pieces.size());
 		const QString tile_string = do_string_thingy("Tile", tile_viewer.selection().indexOf(true), tile_manager.total_tiles());
 
 		setWindowTitle("ClownMapEd" + frame_string + piece_string + tile_string);
 	};
 
 	connect(&sprite_viewer, &SpriteViewer::selectedSpriteChanged, this, update_title);
-	connect(&sprite_mappings_manager, &SpriteMappingsManager::mappingsModified, this, update_title);
+	connect(&sprite_mappings, &SignalWrapper<SpriteMappings>::modified, this, update_title);
 	connect(&tile_viewer, &TileViewer::tileSelected, this, update_title);
 
 	update_title();

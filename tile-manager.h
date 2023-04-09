@@ -11,6 +11,7 @@
 #include <QVector>
 
 #include "palette.h"
+#include "signal-wrapper.h"
 
 class TileManager : public QObject
 {
@@ -30,7 +31,7 @@ public:
 	static constexpr int TILE_HEIGHT = 8;
 	static constexpr int TILE_SIZE_IN_BYTES = TILE_WIDTH * TILE_HEIGHT / 2;
 
-	TileManager(const PaletteManager &palette_manager);
+        TileManager(const SignalWrapper<Palette> &palette_manager);
 
 	void unloadTiles()
 	{
