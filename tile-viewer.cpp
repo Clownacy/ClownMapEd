@@ -176,18 +176,18 @@ void TileViewer::mousePressEvent(QMouseEvent* const event)
 	const int tile_x = event->x() / TILE_WIDTH_SCALED;
 	const int tile_y = event->y() / TILE_HEIGHT_SCALED;
 
-	if (tile_x < tiles_per_row && tile_y < total_rows)
-	{
-		const int tile_index = m_scroll + tile_y * tiles_per_row + tile_x;
+	const int tile_index = m_scroll + tile_y * tiles_per_row + tile_x;
 
-		clearSelection();
-		setSelection(false,
-			[tile_index](QVector<bool> &selection)
-			{
-				selection[tile_index] = true;
-			}
-		);
+	if (tile_index >= selected.size())
+		return;
 
-		emit tileSelected(tile_index);
-	}
+	clearSelection();
+	setSelection(false,
+		[tile_index](QVector<bool> &selection)
+		{
+			selection[tile_index] = true;
+		}
+	);
+
+	emit tileSelected(tile_index);
 }
