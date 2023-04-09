@@ -237,7 +237,7 @@ MainWindow::MainWindow(QWidget* const parent)
 			sprite_mappings.modify(
 				[&file](SpriteMappings &mappings)
 				{
-					mappings = SpriteMappings::fromFile(file);
+					mappings.fromFile(file);
 				}
 			);
 
@@ -253,12 +253,10 @@ MainWindow::MainWindow(QWidget* const parent)
 			if (!file.open(QFile::ReadOnly))
 				return;
 
-			const DynamicPatternLoadCues dplcs = DynamicPatternLoadCues::fromFile(file);
-
 			sprite_mappings.modify(
-				[&dplcs](SpriteMappings &mappings)
+				[&file](SpriteMappings &mappings)
 				{
-					mappings.applyDPLCs(dplcs);
+					mappings.applyDPLCs(DynamicPatternLoadCues(file));
 				}
 			);
 		}

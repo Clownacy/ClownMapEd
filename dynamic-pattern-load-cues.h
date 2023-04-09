@@ -5,23 +5,22 @@
 #include <QVector>
 
 #include "data-stream.h"
-#include "utilities.h"
 
 struct DynamicPatternLoadCues
 {
-	struct TileCopy
-	{
-		int start;
-		int length;
-
-		int size_encoded() const;
-		int total_segments() const;
-		void toDataStream(DataStream &stream) const;
-	};
-
 	struct Frame
 	{
-		QVector<TileCopy> copies;
+		struct Copy
+		{
+			int start;
+			int length;
+
+			int size_encoded() const;
+			int total_segments() const;
+			void toDataStream(DataStream &stream) const;
+		};
+
+		QVector<Copy> copies;
 
 		int getMappedTile(int tile_index) const;
 		int size_encoded() const;
@@ -29,9 +28,11 @@ struct DynamicPatternLoadCues
 		void toDataStream(DataStream &stream) const;
 	};
 
+	DynamicPatternLoadCues() = default;
+	DynamicPatternLoadCues(QFile &file);
+
 	QVector<Frame> frames;
 
-	static DynamicPatternLoadCues fromFile(QFile &file);
 	void toDataStream(DataStream &stream) const;
 };
 

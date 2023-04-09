@@ -1,8 +1,9 @@
 #include "dynamic-pattern-load-cues.h"
 
 #include "data-stream.h"
+#include "utilities.h"
 
-DynamicPatternLoadCues DynamicPatternLoadCues::fromFile(QFile &file)
+DynamicPatternLoadCues::DynamicPatternLoadCues(QFile &file)
 {
 	DataStream stream(&file);
 	stream.setByteOrder(DataStream::BigEndian);
@@ -10,7 +11,7 @@ DynamicPatternLoadCues DynamicPatternLoadCues::fromFile(QFile &file)
 	uint earliest_frame = stream.read<quint16>();
 	uint total_frames = 1;
 
-	while (file.pos() < earliest_frame)
+	for (uint position = sizeof(quint16); position < earliest_frame; position += sizeof(quint16))
 	{
 		const uint frame_offset = stream.read<quint16>();
 
@@ -23,13 +24,11 @@ DynamicPatternLoadCues DynamicPatternLoadCues::fromFile(QFile &file)
 			earliest_frame = frame_offset;
 	}
 
-	DynamicPatternLoadCues dplcs;
-
-	dplcs.frames.resize(total_frames);
+	frames.resize(total_frames);
 
 	for (uint current_frame = 0; current_frame < total_frames; ++current_frame)
 	{
-		Frame &frame = dplcs.frames[current_frame];
+		Frame &frame = frames[current_frame];
 
 		file.seek(current_frame * 2);
 		file.seek(stream.read<quint16>());
@@ -44,11 +43,9 @@ DynamicPatternLoadCues DynamicPatternLoadCues::fromFile(QFile &file)
 			const int total_tiles = (word >> 4 * 3) + 1;
 			const int tile_index = word & 0xFFF;
 
-			frame.copies[current_copy] = TileCopy{tile_index, total_tiles};
+			frame.copies[current_copy] = Frame::Copy{tile_index, total_tiles};
 		}
 	}
-
-	return dplcs;
 }
 
 void DynamicPatternLoadCues::toDataStream(DataStream &stream) const
@@ -116,17 +113,17 @@ void DynamicPatternLoadCues::Frame::toDataStream(DataStream &stream) const
 	stream.setByteOrder(original_byte_order);
 }
 
-int DynamicPatternLoadCues::TileCopy::size_encoded() const
+int DynamicPatternLoadCues::Frame::Copy::size_encoded() const
 {
 	return sizeof(quint16) * total_segments();
 }
 
-int DynamicPatternLoadCues::TileCopy::total_segments() const
+int DynamicPatternLoadCues::Frame::Copy::total_segments() const
 {
 	return Utilities::DivideCeiling(length, 0x10);
 }
 
-void DynamicPatternLoadCues::TileCopy::toDataStream(DataStream &stream) const
+void DynamicPatternLoadCues::Frame::Copy::toDataStream(DataStream &stream) const
 {
 	const auto original_byte_order = stream.byteOrder();
 	stream.setByteOrder(DataStream::BigEndian);

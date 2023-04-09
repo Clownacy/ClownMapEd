@@ -9,7 +9,7 @@
 
 struct SpritePiece
 {
-	static SpritePiece fromDataStream(DataStream &stream);
+	void fromDataStream(DataStream &stream);
 	void toDataStream(DataStream &stream) const;
 	static constexpr int size_encoded = 8;
 

@@ -2,19 +2,18 @@
 
 #include <climits>
 
-SpriteFrame SpriteFrame::fromDataStream(DataStream &stream)
+void SpriteFrame::fromDataStream(DataStream &stream)
 {
+	const auto original_byte_order = stream.byteOrder();
 	stream.setByteOrder(DataStream::BigEndian);
 
-	SpriteFrame frame;
-
 	const uint total_pieces = stream.read<quint16>();
-	frame.pieces.resize(total_pieces);
+	pieces.resize(total_pieces);
 
-	for (auto &piece : frame.pieces)
-		piece = SpritePiece::fromDataStream(stream);
+	for (auto &piece : pieces)
+		piece.fromDataStream(stream);
 
-	return frame;
+	stream.setByteOrder(original_byte_order);
 }
 
 void SpriteFrame::toDataStream(DataStream &stream) const

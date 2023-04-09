@@ -2,7 +2,7 @@
 
 #include "data-stream.h"
 
-SpriteMappings SpriteMappings::fromFile(QFile &file)
+void SpriteMappings::fromFile(QFile &file)
 {
 	DataStream stream(&file);
 	stream.setByteOrder(DataStream::BigEndian);
@@ -23,19 +23,15 @@ SpriteMappings SpriteMappings::fromFile(QFile &file)
 			earliest_frame = frame_offset;
 	}
 
-	SpriteMappings mappings;
-
-	mappings.frames.resize(total_frames);
+	frames.resize(total_frames);
 
 	for (uint current_frame = 0; current_frame < total_frames; ++current_frame)
 	{
 		file.seek(current_frame * 2);
 		file.seek(stream.read<quint16>());
 
-		mappings.frames[current_frame] = SpriteFrame::fromDataStream(stream);
+		frames[current_frame].fromDataStream(stream);
 	}
-
-	return mappings;
 }
 
 void SpriteMappings::toDataStream(DataStream &stream) const

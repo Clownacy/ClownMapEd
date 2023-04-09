@@ -28,5 +28,5 @@ void SpritePiecePicker::updateSpritePieces()
 {
 	for (int y = 0; y < MAX_PIECE_HEIGHT; ++y)
 		for (int x = 0; x < MAX_PIECE_WIDTH; ++x)
-			buttons[y][x].setSpritePiece({0, 0, x + 1, y + 1, false, palette_line, false, false, tile_index});
+			buttons[y][x].setSpritePiece(SpritePiece{0, 0, x + 1, y + 1, false, palette_line, false, false, tile_index});
 }

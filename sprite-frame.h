@@ -10,7 +10,7 @@
 
 struct SpriteFrame
 {
-	static SpriteFrame fromDataStream(DataStream &stream);
+	void fromDataStream(DataStream &stream);
 	void toDataStream(DataStream &stream) const;
 	int size_encoded() const
 	{
