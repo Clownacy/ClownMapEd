@@ -9,6 +9,7 @@
 #include <QFile>
 #include <QFileDialog>
 #include <QKeyEvent>
+#include <QMessageBox>
 
 #include "comper.h"
 #include "kosinski.h"
@@ -152,17 +153,24 @@ MainWindow::MainWindow(QWidget* const parent)
 			std::ifstream file_stream(file_path.toStdString(), std::ifstream::in | std::ifstream::binary);
 
 			if (!file_stream.is_open())
+			{
+				QMessageBox::critical(this, "Error", "Failed to load file: file could not be opened for reading.");
 				return;
+			}
 
 			std::stringstream string_stream(std::stringstream::in | std::stringstream::out | std::stringstream::binary);
 
 			if (!decompression_function(file_stream, string_stream))
+			{
+				QMessageBox::critical(this, "Error", "Failed to load file: data could not be decompressed file. Your chosen compression format may have been incorrect.");
 				return;
+			}
 
 			const std::string string = string_stream.str();
 			if (!tile_manager.setTiles(string.begin(), string.end()))
 			{
-				// TODO: Should probably show an error message or something.
+				QMessageBox::critical(this, "Error", "Failed to load file: data ends with an incomplete tile. The file might not actually be tile data.");
+				return;
 			}
 		}
 	};
@@ -213,7 +221,10 @@ MainWindow::MainWindow(QWidget* const parent)
 		{
 			QFile file(file_path);
 			if (!file.open(QFile::ReadOnly))
+			{
+				QMessageBox::critical(this, "Error", "Failed to load file: file could not be opened for reading.");
 				return;
+			}
 
 			DataStream stream(&file);
 
@@ -232,7 +243,10 @@ MainWindow::MainWindow(QWidget* const parent)
 		{
 			QFile file(file_path);
 			if (!file.open(QFile::ReadOnly))
+			{
+				QMessageBox::critical(this, "Error", "Failed to load file: file could not be opened for reading.");
 				return;
+			}
 
 			sprite_mappings.modify(
 				[&file](SpriteMappings &mappings)
@@ -251,7 +265,10 @@ MainWindow::MainWindow(QWidget* const parent)
 		{
 			QFile file(file_path);
 			if (!file.open(QFile::ReadOnly))
+			{
+				QMessageBox::critical(this, "Error", "Failed to load file: file could not be opened for reading.");
 				return;
+			}
 
 			sprite_mappings.modify(
 				[&file](SpriteMappings &mappings)
@@ -352,7 +369,10 @@ MainWindow::MainWindow(QWidget* const parent)
 		std::ofstream file(file_path.toStdString(), std::ofstream::out | std::ofstream::binary);
 
 		if (!file.is_open())
+		{
+			QMessageBox::critical(this, "Error", "Failed to save file: file could not be opened for writing.");
 			return;
+		}
 
 		const auto &tile_bytes = tile_manager.tile_bytes();
 
@@ -363,7 +383,8 @@ MainWindow::MainWindow(QWidget* const parent)
 
 		if (!callback(string_stream, file))
 		{
-			// TODO: Error message.
+			QMessageBox::critical(this, "Error", "Failed to save file: data could not be compressed.");
+			return;
 		}
 	};
 
@@ -398,9 +419,11 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionModuled_Kosinski, &QAction::triggered, this,
 		[this, save_tile_file]()
 		{
-			// TODO: An error message. Also, this should be a part of mdcomp.
-			if (tile_manager.tile_bytes().size() > 0xFFFF)
+			if (tile_manager.tile_bytes().size() * tile_manager.tile_bytes().data()->size() > 0xFFFF)
+			{
+				QMessageBox::critical(this, "Error", "Tile data is too large for moduled compression.");
 				return;
+			}
 
 			save_tile_file("Save Moduled Kosinski-Compressed Tile Graphics File", [](std::istream &in, std::ostream &out){return kosinski::moduled_encode(in, out);});
 		}
@@ -416,9 +439,11 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionModuled_Kosinski_2, &QAction::triggered, this,
 		[this, save_tile_file]()
 		{
-			// TODO: An error message. Also, this should be a part of mdcomp.
-			if (tile_manager.tile_bytes().size() > 0xFFFF)
+			if (tile_manager.tile_bytes().size() * tile_manager.tile_bytes().data()->size() > 0xFFFF)
+			{
+				QMessageBox::critical(this, "Error", "Tile data is too large for moduled compression.");
 				return;
+			}
 
 			save_tile_file("Save Moduled Kosinski+-Compressed Tile Graphics File", [](std::istream &in, std::ostream &out){return kosplus::moduled_encode(in, out);});
 		}
@@ -436,7 +461,10 @@ MainWindow::MainWindow(QWidget* const parent)
 		const QString file_path = QFileDialog::getSaveFileName(this, "Save Palette File");
 
 		if (file_path.isNull())
+		{
+			QMessageBox::critical(this, "Error", "Failed to save file: file could not be opened for writing.");
 			return;
+		}
 
 		QFile file(file_path);
 		file.open(QFile::OpenModeFlag::WriteOnly);
@@ -473,7 +501,10 @@ MainWindow::MainWindow(QWidget* const parent)
 			const QString file_path = QFileDialog::getSaveFileName(this, "Save Sprite Mappings File");
 
 			if (file_path.isNull())
+			{
+				QMessageBox::critical(this, "Error", "Failed to save file: file could not be opened for writing.");
 				return;
+			}
 
 			QFile file(file_path);
 			file.open(QFile::OpenModeFlag::WriteOnly);
@@ -491,7 +522,10 @@ MainWindow::MainWindow(QWidget* const parent)
 			const QString file_path = QFileDialog::getSaveFileName(this, "Save Dynamic Pattern Loading Cue File");
 
 			if (file_path.isNull())
+			{
+				QMessageBox::critical(this, "Error", "Failed to save file: file could not be opened for writing.");
 				return;
+			}
 
 			QFile file(file_path);
 			file.open(QFile::OpenModeFlag::WriteOnly);

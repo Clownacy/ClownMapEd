@@ -1,5 +1,3 @@
-- Popup when you try to load mappings after loading DPLCs.
-- Popups on errors such as unable to open file.
 - Sprite spacing (figure out what algorithm SonMapEd uses).
 - Add scrollbar to tile viewer.
 - Don't bother drawing sprites that are off-screen.
