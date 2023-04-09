@@ -1202,12 +1202,19 @@ MainWindow::MainWindow(QWidget* const parent)
 		sprite_piece_picker.setPaletteLine(line);
 		sprite_viewer.setStartingPaletteLine(line);
 		tile_viewer.setPaletteLine(line);
+
+		ui->actionRender_Starting_with_Palette_Line_1->setChecked(line == 0);
+		ui->actionRender_Starting_with_Palette_Line_2->setChecked(line == 1);
+		ui->actionRender_Starting_with_Palette_Line_3->setChecked(line == 2);
+		ui->actionRender_Starting_with_Palette_Line_4->setChecked(line == 3);
 	};
 
 	connect(ui->actionRender_Starting_with_Palette_Line_1, &QAction::triggered, this, [set_starting_palette_line](){set_starting_palette_line(0);});
 	connect(ui->actionRender_Starting_with_Palette_Line_2, &QAction::triggered, this, [set_starting_palette_line](){set_starting_palette_line(1);});
 	connect(ui->actionRender_Starting_with_Palette_Line_3, &QAction::triggered, this, [set_starting_palette_line](){set_starting_palette_line(2);});
 	connect(ui->actionRender_Starting_with_Palette_Line_4, &QAction::triggered, this, [set_starting_palette_line](){set_starting_palette_line(3);});
+
+	set_starting_palette_line(0);
 
 	////////////////////////
 	// Menubar Activation //
