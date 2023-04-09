@@ -45,27 +45,28 @@ MainWindow::MainWindow(QWidget* const parent)
 
 	centralWidget()->setLayout(&vertical_layout);
 
-	// TODO: Replace this with the below lambda.
-	sprite_viewer.setBackgroundColour(palette_manager.palette().lines[0].colours[0].toQColor256());
-	tile_viewer.setBackgroundColour(palette_manager.palette().lines[0].colours[0].toQColor256());
-
 	horizontal_layout.setMargin(vertical_layout.margin());
 	vertical_layout.setMargin(0);
+
+	///////////////////////
+	// Background Colour //
+	///////////////////////
+
+	const auto update_background_colour = [this]()
+	{
+		const QColor &background_colour = palette_manager.palette().lines[0].colours[0].toQColor256();
+
+		sprite_viewer.setBackgroundColour(background_colour);
+		tile_viewer.setBackgroundColour(background_colour);
+	};
+
+	connect(&palette_manager, &PaletteManager::changed, this, update_background_colour);
+
+	update_background_colour();
 
 	///////////////////
 	// Misc. Signals //
 	///////////////////
-
-	connect(&palette_manager, &PaletteManager::changed, this,
-		[this]()
-		{
-			const QColor &background_colour = palette_manager.palette().lines[0].colours[0].toQColor256();
-
-			sprite_viewer.setBackgroundColour(background_colour);
-			tile_viewer.setBackgroundColour(background_colour);
-			sprite_piece_picker.setBackgroundColour(background_colour); // TODO: Remove this.
-		}
-	);
 
 	connect(&tile_viewer, &TileViewer::tileSelected, &sprite_piece_picker, &SpritePiecePicker::setSelectedTile);
 

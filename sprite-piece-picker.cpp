@@ -24,13 +24,6 @@ SpritePiecePicker::SpritePiecePicker(TileManager &tile_manager)
 			connect(&buttons[y][x], &SpritePieceButton::clicked, this, [this, x, y](){emit pieceSelected(x + 1, y + 1);});
 }
 
-void SpritePiecePicker::setBackgroundColour(const QColor &colour)
-{
-	for (auto &row : buttons)
-		for (auto &button : row)
-			button.setBackgroundColour(colour);
-}
-
 void SpritePiecePicker::updateSpritePieces()
 {
 	for (int y = 0; y < MAX_PIECE_HEIGHT; ++y)

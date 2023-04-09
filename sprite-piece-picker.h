@@ -17,8 +17,6 @@ class SpritePiecePicker : public QWidget
 public:
 	SpritePiecePicker(TileManager &tile_manager);
 
-	void setBackgroundColour(const QColor &colour);
-
 	void setPaletteLine(const int palette_line)
 	{
 		this->palette_line = palette_line;

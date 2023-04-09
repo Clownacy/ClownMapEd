@@ -16,11 +16,6 @@ public:
 
 	const SpritePiece& sprite_piece() const { return m_sprite_piece; }
 	void setSpritePiece(const SpritePiece &sprite_piece);
-	void setBackgroundColour(const QColor &colour)
-	{
-		background_colour = colour;
-		update();
-	}
 
 protected:
 	void paintEvent(QPaintEvent *event) override;
@@ -28,7 +23,6 @@ protected:
 private:
 	const TileManager &tile_manager;
 	SpritePiece m_sprite_piece;
-	QColor background_colour;
 };
 
 #endif // SPRITE_PIECE_BUTTON_H
