@@ -4,11 +4,6 @@
 
 #include "data-stream.h"
 
-Palette::Palette()
-{
-	reset();
-}
-
 void Palette::reset()
 {
 	for (uint line = 0; line < TOTAL_LINES; ++line)
@@ -46,68 +41,86 @@ void Palette::reset()
 					break;
 			}
 
-			colours[line][index] = colour;
+			lines[line].colours[index] = colour;
 		}
 	}
-
-	emit changed();
 }
 
-void Palette::loadFromFile(const QString &file_path, const int starting_palette_line)
+void Palette::toDataStream(DataStream &stream, const int starting_palette_line, const int ending_palette_line) const
 {
-	QFile file(file_path);
-	if (!file.open(QFile::ReadOnly))
-		return;
-
-	DataStream stream(&file);
-	stream.setByteOrder(DataStream::BigEndian);
-
-	const qint64 total_colours = starting_palette_line * COLOURS_PER_LINE + file.size() / sizeof(quint16);
-
-	for (qint64 line = starting_palette_line; line < qMin(static_cast<qint64>(TOTAL_LINES), total_colours / COLOURS_PER_LINE); ++line)
-		for (qint64 colour = 0; colour < qMin(static_cast<qint64>(COLOURS_PER_LINE), total_colours - line * COLOURS_PER_LINE); ++colour)
-			colours[line][colour] = stream.read<quint16>();
-
-	emit changed();
+	for (int line = starting_palette_line; line < ending_palette_line; ++line)
+		lines[line].toDataStream(stream);
 }
 
-void Palette::setColour(const int palette_line, const int palette_index, const QColor &colour)
+void Palette::fromDataStream(DataStream &stream, const int starting_palette_line)
 {
-	if (palette_line >= TOTAL_LINES || palette_index >= COLOURS_PER_LINE)
-		return;
-
-	colours[palette_line][palette_index] = QColorToMD(colour);
-
-	emit changed();
+	for (int line = starting_palette_line; line < TOTAL_LINES; ++line)
+		lines[line].fromDataStream(stream);
 }
 
-QColor Palette::MDToQColour(const uint md_colour, const std::function<uint(uint)> &callback)
+void Palette::Line::toDataStream(DataStream &stream) const
 {
-	// This isn't exactly what SonMapEd does:
-	// For some reason, SonMapEd treats the colours as 4-bit-per-channel,
-	// when they're really only 3-bit-per-channel.
-	const uint red = (md_colour >> 1) & 7;
-	const uint green = (md_colour >> 5) & 7;
-	const uint blue = (md_colour >> 9) & 7;
-
-	return QColor(callback(red), callback(green), callback(blue));
+	for (auto &colour : colours)
+		colour.toDataStream(stream);
 }
 
-QColor Palette::MDToQColor224(const uint md_colour)
+void Palette::Line::fromDataStream(DataStream &stream)
 {
-	return MDToQColour(md_colour, [](const uint colour_channel){return colour_channel << 5;});
+	for (auto &colour : colours)
+		colour.fromDataStream(stream);
 }
 
-QColor Palette::MDToQColor256(const uint md_colour)
-{
-	return MDToQColour(md_colour, [](const uint colour_channel){return colour_channel << 5 | colour_channel << 2 | colour_channel >> 1;});
-}
-
-uint Palette::QColorToMD(const QColor &colour)
+Palette::Line::Colour& Palette::Line::Colour::operator=(const QColor &colour)
 {
 	const uint red = (static_cast<uint>(colour.red()) >> 5) & 7;
 	const uint green = (static_cast<uint>(colour.green()) >> 5) & 7;
 	const uint blue = (static_cast<uint>(colour.blue()) >> 5) & 7;
 
-	return (blue << 9) | (green << 5) | (red << 1);
+	this->colour = (blue << 9) | (green << 5) | (red << 1);
+
+	return *this;
+}
+
+QColor Palette::Line::Colour::toQColor(const std::function<uint(uint)> &callback) const
+{
+	// This isn't exactly what SonMapEd does:
+	// For some reason, SonMapEd treats the colours as 4-bit-per-channel,
+	// when they're really only 3-bit-per-channel.
+	const uint red = (colour >> 1) & 7;
+	const uint green = (colour >> 5) & 7;
+	const uint blue = (colour >> 9) & 7;
+
+	return QColor(callback(red), callback(green), callback(blue));
+}
+
+QColor Palette::Line::Colour::toQColor224() const
+{
+	return toQColor([](const uint colour_channel){return colour_channel << 5;});
+}
+
+QColor Palette::Line::Colour::toQColor256() const
+{
+	return toQColor([](const uint colour_channel){return colour_channel << 5 | colour_channel << 2 | colour_channel >> 1;});
+}
+void Palette::Line::Colour::toDataStream(DataStream &stream) const
+{
+	const auto original_byte_order = stream.byteOrder();
+	stream.setByteOrder(DataStream::BigEndian);
+
+	stream.write<quint16>(colour);
+
+	stream.setByteOrder(original_byte_order);
+}
+
+void Palette::Line::Colour::fromDataStream(DataStream &stream)
+{
+	if (stream.status() != DataStream::Status::Ok)
+		return;
+
+	const auto original_byte_order = stream.byteOrder();
+	stream.setByteOrder(DataStream::BigEndian);
+
+	colour = stream.read<quint16>();
+
+	stream.setByteOrder(original_byte_order);
 }

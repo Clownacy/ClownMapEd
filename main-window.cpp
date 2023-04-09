@@ -20,13 +20,20 @@
 MainWindow::MainWindow(QWidget* const parent)
 	: QMainWindow(parent)
 	, ui(new Ui::MainWindow)
-    , tile_manager(palette)
+    , tile_manager(palette_manager)
 	, sprite_viewer(tile_manager, sprite_mappings_manager)
-    , palette_editor(palette)
+    , palette_editor(palette_manager)
 	, sprite_piece_picker(tile_manager)
     , tile_viewer(tile_manager)
 {
 	ui->setupUi(this);
+
+	palette_manager.modifyPalette(
+		[](Palette &palette)
+		{
+			palette.reset();
+		}
+	);
 
 	horizontal_layout.addWidget(&sprite_piece_picker);
 	horizontal_layout.addWidget(&palette_editor);
@@ -38,8 +45,9 @@ MainWindow::MainWindow(QWidget* const parent)
 
 	centralWidget()->setLayout(&vertical_layout);
 
-	sprite_viewer.setBackgroundColour(palette.colour256(0, 0));
-	tile_viewer.setBackgroundColour(palette.colour256(0, 0));
+	// TODO: Replace this with the below lambda.
+	sprite_viewer.setBackgroundColour(palette_manager.palette().lines[0].colours[0].toQColor256());
+	tile_viewer.setBackgroundColour(palette_manager.palette().lines[0].colours[0].toQColor256());
 
 	horizontal_layout.setMargin(vertical_layout.margin());
 	vertical_layout.setMargin(0);
@@ -48,14 +56,14 @@ MainWindow::MainWindow(QWidget* const parent)
 	// Misc. Signals //
 	///////////////////
 
-	connect(&palette, &Palette::changed, this,
+	connect(&palette_manager, &PaletteManager::changed, this,
 		[this]()
 		{
-			const QColor &background_colour = palette.colour256(0, 0);
+			const QColor &background_colour = palette_manager.palette().lines[0].colours[0].toQColor256();
 
 			sprite_viewer.setBackgroundColour(background_colour);
 			tile_viewer.setBackgroundColour(background_colour);
-			sprite_piece_picker.setBackgroundColour(background_colour);
+			sprite_piece_picker.setBackgroundColour(background_colour); // TODO: Remove this.
 		}
 	);
 
@@ -198,10 +206,23 @@ MainWindow::MainWindow(QWidget* const parent)
 		load_tile_file(file_path, comper::decode);
 	};
 
-	const auto load_primary_palette_file = [this](const QString &file_path)
+	const auto load_palette_file = [this](const QString &file_path, const int starting_palette_line)
 	{
 		if (!file_path.isNull())
-			palette.loadFromFile(file_path, 0);
+		{
+			QFile file(file_path);
+			if (!file.open(QFile::ReadOnly))
+				return;
+
+			DataStream stream(&file);
+
+			palette_manager.modifyPalette(
+				[&stream, starting_palette_line](Palette &palette)
+				{
+					palette.fromDataStream(stream, starting_palette_line);
+				}
+			);
+		}
 	};
 
 	const auto load_sprite_mappings_file = [this](const QString &file_path)
@@ -292,16 +313,16 @@ MainWindow::MainWindow(QWidget* const parent)
 	);
 
 	connect(ui->actionLoad_Primary_Palette, &QAction::triggered, this,
-		[this, load_primary_palette_file]()
+		[this, load_palette_file]()
 		{
-			load_primary_palette_file(QFileDialog::getOpenFileName(this, "Open Palette File"));
+			load_palette_file(QFileDialog::getOpenFileName(this, "Open Palette File"), 0);
 		}
 	);
 
 	connect(ui->actionLoad_Secondary_Palette_Lines, &QAction::triggered, this,
-		[this]()
+		[this, load_palette_file]()
 		{
-			palette.loadFromFile(QFileDialog::getOpenFileName(this, "Open Palette File"), 1);
+			load_palette_file(QFileDialog::getOpenFileName(this, "Open Palette File"), 1);
 		}
 	);
 
@@ -324,6 +345,42 @@ MainWindow::MainWindow(QWidget* const parent)
 	//////////////////////////////////
 	// Menubar: File/Save Data File //
 	//////////////////////////////////
+
+	const auto save_palette_file = [this](const int starting_palette_line, const int ending_palette_line)
+	{
+		const QString file_path = QFileDialog::getSaveFileName(this, "Save Palette File");
+
+		if (file_path.isNull())
+			return;
+
+		QFile file(file_path);
+		file.open(QFile::OpenModeFlag::WriteOnly);
+		DataStream stream(&file);
+
+		for (int i = starting_palette_line; i < ending_palette_line; ++i)
+			palette_manager.palette().lines[i].toDataStream(stream);
+	};
+
+	connect(ui->actionSave_Primary_Palette_Line, &QAction::triggered, this,
+		[save_palette_file]()
+		{
+			save_palette_file(0, 1);
+		}
+	);
+
+	connect(ui->actionSave_Secondary_Palette_Lines, &QAction::triggered, this,
+		[save_palette_file]()
+		{
+			save_palette_file(1, Palette::TOTAL_LINES);
+		}
+	);
+
+	connect(ui->actionSave_Full_Palette, &QAction::triggered, this,
+		[save_palette_file]()
+		{
+			save_palette_file(0, Palette::TOTAL_LINES);
+		}
+	);
 
 	connect(ui->actionSave_Mappings, &QAction::triggered, this,
 		[this]()
@@ -365,7 +422,17 @@ MainWindow::MainWindow(QWidget* const parent)
 	///////////////////////////////
 
 	connect(ui->actionUnload_Tile_Graphics, &QAction::triggered, &tile_manager, &TileManager::unloadTiles);
-	connect(ui->actionUnload_Palette, &QAction::triggered, &palette, &Palette::reset);
+	connect(ui->actionUnload_Palette, &QAction::triggered, this,
+		[this]()
+		{
+			palette_manager.modifyPalette(
+				[](Palette &palette)
+				{
+					palette.reset();
+				}
+			);
+		}
+	);
 	connect(ui->actionUnload_Mappings, &QAction::triggered, this,
 		[this]()
 		{

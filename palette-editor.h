@@ -15,12 +15,12 @@ class PaletteEditor : public QWidget
 	Q_OBJECT
 
 public:
-	PaletteEditor(Palette &palette);
+	PaletteEditor(PaletteManager &palette_manager);
 
 private:
 	QGridLayout grid_layout;
 	std::array<std::array<ColourButton, Palette::COLOURS_PER_LINE>, Palette::TOTAL_LINES> buttons;
-	Palette &palette;
+	PaletteManager &palette_manager;
 
 private slots:
 	void setButtonColour(int palette_line, int palette_index, const QColor &colour);

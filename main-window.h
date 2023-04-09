@@ -27,7 +27,7 @@ public:
 
 private:
 	Ui::MainWindow *ui;
-	Palette palette;
+	PaletteManager palette_manager;
 	SpriteMappingsManager sprite_mappings_manager;
 	TileManager tile_manager;
 	SpriteViewer sprite_viewer;

@@ -68,6 +68,10 @@
      <property name="title">
       <string>&amp;Save Data File</string>
      </property>
+     <addaction name="actionSave_Primary_Palette_Line"/>
+     <addaction name="actionSave_Secondary_Palette_Lines"/>
+     <addaction name="actionSave_Full_Palette"/>
+     <addaction name="separator"/>
      <addaction name="actionSave_Mappings"/>
      <addaction name="actionSave_Pattern_Cues"/>
     </widget>
@@ -706,6 +710,30 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Alt+P</string>
+   </property>
+  </action>
+  <action name="actionSave_Primary_Palette_Line">
+   <property name="text">
+    <string>Save Primary Palette Line...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+P</string>
+   </property>
+  </action>
+  <action name="actionSave_Secondary_Palette_Lines">
+   <property name="text">
+    <string>Save Secondary Palette Lines...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+Shift+P</string>
+   </property>
+  </action>
+  <action name="actionSave_Full_Palette">
+   <property name="text">
+    <string>Save Full Palette...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+Shift+F</string>
    </property>
   </action>
  </widget>

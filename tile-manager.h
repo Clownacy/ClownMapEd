@@ -30,7 +30,7 @@ public:
 	static constexpr int TILE_HEIGHT = 8;
 	static constexpr int TILE_SIZE_IN_BYTES = TILE_WIDTH * TILE_HEIGHT / 2;
 
-	TileManager(const Palette &palette);
+	TileManager(const PaletteManager &palette_manager);
 
 	void unloadTiles()
 	{

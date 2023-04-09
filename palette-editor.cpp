@@ -3,8 +3,8 @@
 #include <QColorDialog>
 #include <QSizePolicy>
 
-PaletteEditor::PaletteEditor(Palette &palette)
-	: palette(palette)
+PaletteEditor::PaletteEditor(PaletteManager &palette_manager)
+	: palette_manager(palette_manager)
 {
 	setSizePolicy(QSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum));
 	setLayout(&grid_layout);
@@ -28,12 +28,17 @@ PaletteEditor::PaletteEditor(Palette &palette)
 					{
 						button.setColour(selected_colour);
 
-						this->palette.setColour(line, index, selected_colour);
+						this->palette_manager.modifyPalette(
+							[line, index, &selected_colour](Palette &palette)
+							{
+								palette.lines[line].colours[index] = selected_colour;
+							}
+						);
 					}
 				}
 			);
 
-			button.setColour(palette.colour224(line, index));
+			button.setColour(palette_manager.palette().lines[line].colours[index].toQColor224());
 
 			button.setFixedSize(20, 20);
 
@@ -41,12 +46,12 @@ PaletteEditor::PaletteEditor(Palette &palette)
 		}
 	}
 
-	connect(&palette, &Palette::changed, this,
+	connect(&palette_manager, &PaletteManager::changed, this,
 		[this]()
 		{
 			for (int line = 0; line < Palette::TOTAL_LINES; ++line)
 				for (int index = 0; index < Palette::COLOURS_PER_LINE; ++index)
-					buttons[line][index].setColour(this->palette.colour224(line, index));
+					buttons[line][index].setColour(this->palette_manager.palette().lines[line].colours[index].toQColor224());
 
 			update();
 		}
