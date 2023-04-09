@@ -222,30 +222,48 @@
    <property name="text">
     <string>&amp;Nemesis...</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+N</string>
+   </property>
   </action>
   <action name="actionLoad_Tiles_Kosinski">
    <property name="text">
     <string>&amp;Kosinski...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+K</string>
    </property>
   </action>
   <action name="actionLoad_Tiles_Moduled_Kosinski">
    <property name="text">
     <string>&amp;Moduled Kosinski...</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+M</string>
+   </property>
   </action>
   <action name="actionLoad_Tiles_Kosinski_Plus">
    <property name="text">
-    <string>Kosinski+...</string>
+    <string>Kosinski&amp;+...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+P</string>
    </property>
   </action>
   <action name="actionLoad_Tiles_Comper">
    <property name="text">
     <string>&amp;Comper...</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+C</string>
+   </property>
   </action>
   <action name="actionLoad_Tiles_Moduled_Kosinski_Plus">
    <property name="text">
     <string>Moduled Kosinski+...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+L</string>
    </property>
   </action>
   <action name="actionNext_Sprite">
