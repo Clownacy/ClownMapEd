@@ -345,6 +345,92 @@ MainWindow::MainWindow(QWidget* const parent)
 	// Menubar: File/Save Data File //
 	//////////////////////////////////
 
+	const auto save_tile_file = [this](const QString &prompt, bool (* const callback)(std::istream &in, std::ostream &out))
+	{
+		const QString file_path = QFileDialog::getSaveFileName(this, prompt);
+
+		std::ofstream file(file_path.toStdString(), std::ofstream::out | std::ofstream::binary);
+
+		if (!file.is_open())
+			return;
+
+		const auto &tile_bytes = tile_manager.tile_bytes();
+
+		// TODO: This copy should not be necessary.
+		// Maybe I should modify mdcomp to use a better interface.
+		std::stringstream string_stream;
+		string_stream.write(reinterpret_cast<const char*>(tile_bytes.data()->data()), tile_bytes.size() * tile_bytes.data()->size());
+
+		if (!callback(string_stream, file))
+		{
+			// TODO: Error message.
+		}
+	};
+
+	connect(ui->actionUncompressed, &QAction::triggered, this,
+		[save_tile_file]()
+		{
+			save_tile_file("Save Tile Graphics File",
+				[](std::istream &in, std::ostream &out)
+				{
+					out << in.rdbuf();
+
+					return true;
+				}
+			);
+		}
+	);
+
+	connect(ui->actionNemesis, &QAction::triggered, this,
+		[save_tile_file]()
+		{
+			save_tile_file("Save Nemesis-Compressed Tile Graphics File", nemesis::encode);
+		}
+	);
+
+	connect(ui->actionKosinski, &QAction::triggered, this,
+		[save_tile_file]()
+		{
+			save_tile_file("Save Kosinski-Compressed Tile Graphics File", kosinski::encode);
+		}
+	);
+
+	connect(ui->actionModuled_Kosinski, &QAction::triggered, this,
+		[this, save_tile_file]()
+		{
+			// TODO: An error message. Also, this should be a part of mdcomp.
+			if (tile_manager.tile_bytes().size() > 0xFFFF)
+				return;
+
+			save_tile_file("Save Moduled Kosinski-Compressed Tile Graphics File", [](std::istream &in, std::ostream &out){return kosinski::moduled_encode(in, out);});
+		}
+	);
+
+	connect(ui->actionKosinski_2, &QAction::triggered, this,
+		[save_tile_file]()
+		{
+			save_tile_file("Save Kosinski+-Compressed Tile Graphics File", kosplus::encode);
+		}
+	);
+
+	connect(ui->actionModuled_Kosinski_2, &QAction::triggered, this,
+		[this, save_tile_file]()
+		{
+			// TODO: An error message. Also, this should be a part of mdcomp.
+			if (tile_manager.tile_bytes().size() > 0xFFFF)
+				return;
+
+			save_tile_file("Save Moduled Kosinski+-Compressed Tile Graphics File", [](std::istream &in, std::ostream &out){return kosplus::moduled_encode(in, out);});
+		}
+	);
+
+	connect(ui->actionComper, &QAction::triggered, this,
+		[save_tile_file]()
+		{
+			save_tile_file("Save Comper-Compressed Tile Graphics File", comper::encode);
+		}
+	);
+
 	const auto save_palette_file = [this](const int starting_palette_line, const int ending_palette_line)
 	{
 		const QString file_path = QFileDialog::getSaveFileName(this, "Save Palette File");

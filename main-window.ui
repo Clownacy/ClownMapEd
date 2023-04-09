@@ -68,6 +68,20 @@
      <property name="title">
       <string>&amp;Save Data File</string>
      </property>
+     <widget class="QMenu" name="menuSave_Tile_Graphics">
+      <property name="title">
+       <string>Save Tile Graphics</string>
+      </property>
+      <addaction name="actionUncompressed"/>
+      <addaction name="actionNemesis"/>
+      <addaction name="actionKosinski"/>
+      <addaction name="actionModuled_Kosinski"/>
+      <addaction name="actionKosinski_2"/>
+      <addaction name="actionModuled_Kosinski_2"/>
+      <addaction name="actionComper"/>
+     </widget>
+     <addaction name="menuSave_Tile_Graphics"/>
+     <addaction name="separator"/>
      <addaction name="actionSave_Primary_Palette_Line"/>
      <addaction name="actionSave_Secondary_Palette_Lines"/>
      <addaction name="actionSave_Full_Palette"/>
@@ -216,6 +230,9 @@
   <action name="actionLoad_Tiles_Uncompressed">
    <property name="text">
     <string>&amp;Uncompressed...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+G</string>
    </property>
   </action>
   <action name="actionLoad_Tiles_Nemesis">
@@ -752,6 +769,62 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Alt+Shift+F</string>
+   </property>
+  </action>
+  <action name="actionUncompressed">
+   <property name="text">
+    <string>Uncompressed...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+G</string>
+   </property>
+  </action>
+  <action name="actionNemesis">
+   <property name="text">
+    <string>Nemesis...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+Shift+N</string>
+   </property>
+  </action>
+  <action name="actionKosinski">
+   <property name="text">
+    <string>Kosinski...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+Shift+K</string>
+   </property>
+  </action>
+  <action name="actionModuled_Kosinski">
+   <property name="text">
+    <string>Moduled Kosinski...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+Shift+M</string>
+   </property>
+  </action>
+  <action name="actionKosinski_2">
+   <property name="text">
+    <string>Kosinski+...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+Shift+P</string>
+   </property>
+  </action>
+  <action name="actionModuled_Kosinski_2">
+   <property name="text">
+    <string>Moduled Kosinski+...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+Shift+L</string>
+   </property>
+  </action>
+  <action name="actionComper">
+   <property name="text">
+    <string>Comper...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+Shift+C</string>
    </property>
   </action>
  </widget>

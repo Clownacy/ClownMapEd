@@ -10,6 +10,7 @@
 #include <QPixmap>
 #include <QVector>
 
+#include "data-stream.h"
 #include "palette.h"
 #include "signal-wrapper.h"
 
@@ -80,6 +81,10 @@ public:
 	void deleteTile(int tile_index);
 	void duplicateTile(int tile_index, int insert_index);
 	void clearTile(int tile_index);
+	auto& tile_bytes() const
+	{
+		return tiles_bytes;
+	}
 
 signals:
 	void pixmapsChanged();
