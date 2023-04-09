@@ -221,7 +221,7 @@
   </action>
   <action name="actionLoad_Mappings">
    <property name="text">
-    <string>Load Sprite &amp;Mappings...</string>
+    <string>Load &amp;Mappings...</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+M</string>
@@ -769,7 +769,7 @@
   </action>
   <action name="actionSave_Secondary_Palette_Lines">
    <property name="text">
-    <string>Save Secondary Palette Lines...</string>
+    <string>Save &amp;Secondary Palette Lines...</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Alt+Shift+P</string>
@@ -777,7 +777,7 @@
   </action>
   <action name="actionSave_Full_Palette">
    <property name="text">
-    <string>Save Full Palette...</string>
+    <string>Save &amp;Full Palette...</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Alt+Shift+F</string>
@@ -785,7 +785,7 @@
   </action>
   <action name="actionUncompressed">
    <property name="text">
-    <string>Uncompressed...</string>
+    <string>&amp;Uncompressed...</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+G</string>
@@ -793,7 +793,7 @@
   </action>
   <action name="actionNemesis">
    <property name="text">
-    <string>Nemesis...</string>
+    <string>&amp;Nemesis...</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Alt+Shift+N</string>
@@ -801,7 +801,7 @@
   </action>
   <action name="actionKosinski">
    <property name="text">
-    <string>Kosinski...</string>
+    <string>&amp;Kosinski...</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Alt+Shift+K</string>
@@ -809,7 +809,7 @@
   </action>
   <action name="actionModuled_Kosinski">
    <property name="text">
-    <string>Moduled Kosinski...</string>
+    <string>&amp;Moduled Kosinski...</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Alt+Shift+M</string>
@@ -817,7 +817,7 @@
   </action>
   <action name="actionKosinski_2">
    <property name="text">
-    <string>Kosinski+...</string>
+    <string>Kosinski&amp;+...</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Alt+Shift+P</string>
@@ -833,7 +833,7 @@
   </action>
   <action name="actionComper">
    <property name="text">
-    <string>Comper...</string>
+    <string>&amp;Comper...</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Alt+Shift+C</string>
