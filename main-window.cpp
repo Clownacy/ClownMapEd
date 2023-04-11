@@ -461,13 +461,12 @@ MainWindow::MainWindow(QWidget* const parent)
 		const QString file_path = QFileDialog::getSaveFileName(this, "Save Palette File");
 
 		if (file_path.isNull())
-		{
-			QMessageBox::critical(this, "Error", "Failed to save file: file could not be opened for writing.");
 			return;
-		}
 
 		QFile file(file_path);
-		file.open(QFile::OpenModeFlag::WriteOnly);
+		if (!file.open(QFile::OpenModeFlag::WriteOnly))
+			QMessageBox::critical(this, "Error", "Failed to save file: file could not be opened for writing.");
+
 		DataStream stream(&file);
 
 		for (int i = starting_palette_line; i < ending_palette_line; ++i)
@@ -501,13 +500,12 @@ MainWindow::MainWindow(QWidget* const parent)
 			const QString file_path = QFileDialog::getSaveFileName(this, "Save Sprite Mappings File");
 
 			if (file_path.isNull())
-			{
-				QMessageBox::critical(this, "Error", "Failed to save file: file could not be opened for writing.");
 				return;
-			}
 
 			QFile file(file_path);
-			file.open(QFile::OpenModeFlag::WriteOnly);
+			if (!file.open(QFile::OpenModeFlag::WriteOnly))
+				QMessageBox::critical(this, "Error", "Failed to save file: file could not be opened for writing.");
+
 			DataStream stream(&file);
 
 			auto sprite_mappings_copy = *sprite_mappings;
@@ -519,16 +517,16 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionSave_Pattern_Cues, &QAction::triggered, this,
 		[this]()
 		{
+			// TODO: This file-opening code is repeated a few times, so see if I can move it to a function.
 			const QString file_path = QFileDialog::getSaveFileName(this, "Save Dynamic Pattern Loading Cue File");
 
 			if (file_path.isNull())
-			{
-				QMessageBox::critical(this, "Error", "Failed to save file: file could not be opened for writing.");
 				return;
-			}
 
 			QFile file(file_path);
-			file.open(QFile::OpenModeFlag::WriteOnly);
+			if (!file.open(QFile::OpenModeFlag::WriteOnly))
+				QMessageBox::critical(this, "Error", "Failed to save file: file could not be opened for writing.");
+
 			DataStream stream(&file);
 
 			auto sprite_mappings_copy = *sprite_mappings;
@@ -1022,7 +1020,7 @@ MainWindow::MainWindow(QWidget* const parent)
 					for (auto &tile_selected : selected)
 						tile_selected = true;
 
-					for (const auto &frame : sprite_mappings->frames)
+					for (const auto &frame : qAsConst(sprite_mappings->frames))
 						for (const auto &piece : frame.pieces)
 							for (int i = 0; i < piece.width * piece.height; ++i)
 								selected[piece.tile_index + i] = false;
@@ -1174,7 +1172,7 @@ MainWindow::MainWindow(QWidget* const parent)
 			set_tile_selection_and_update_piece_picker(
 				[this](QVector<bool> &selected)
 				{
-					for (const auto &piece : sprite_mappings->frames[sprite_viewer.selected_sprite_index()].pieces)
+					for (const auto &piece : qAsConst(sprite_mappings->frames[sprite_viewer.selected_sprite_index()].pieces))
 						for (int i = 0; i < piece.width * piece.height; ++i)
 							selected[piece.tile_index + i] = true;
 				}
