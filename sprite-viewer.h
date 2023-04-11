@@ -31,9 +31,14 @@ public slots:
 
 	void setBackgroundColour(const QColor &colour);
 
+	int starting_palette_line() const
+	{
+		return m_starting_palette_line;
+	}
+
 	void setStartingPaletteLine(const int palette_line)
 	{
-		starting_palette_line = palette_line;
+		m_starting_palette_line = palette_line;
 		update();
 	}
 
@@ -46,7 +51,7 @@ protected:
 private:
 	int m_selected_sprite_index = -1;
 	int m_selected_piece_index = -1;
-	int starting_palette_line = 0;
+	int m_starting_palette_line = 0;
 	const SpriteMappings &sprite_mappings;
 	const TileManager &tile_manager;
 };

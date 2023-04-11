@@ -584,6 +584,37 @@ MainWindow::MainWindow(QWidget* const parent)
 		}
 	);
 
+	///////////////////////////////////
+	// Menubar: File/Export to Image //
+	///////////////////////////////////
+
+	connect(ui->actionRender_Sprite_Image, &QAction::triggered, this,
+		[this]()
+		{
+			const QString file_path = QFileDialog::getSaveFileName(this, "Render Sprite Frame", QString(), "Image (*.png *.bmp)");
+
+			if (file_path.isNull())
+				return;
+
+			const auto &frame = sprite_mappings->frames[sprite_viewer.selected_sprite_index()];
+
+			QImage image(frame.rect().width(), frame.rect().height(), QImage::Format_RGB32);
+
+			// Fill image with a reserved colour (this indicates
+			// transparency and should never occur in a sprite).
+			image.fill(QColor(0xFF, 0, 0xFF));
+
+			// Render the sprite onto the image.
+			QPainter painter(&image);
+			painter.translate(-frame.left(), -frame.top());
+			frame.draw(painter, tile_manager, TileManager::PixmapType::NO_BACKGROUND, 0, TileManager::PixmapType::NO_BACKGROUND, sprite_viewer.starting_palette_line());
+
+			// Save the image to disk.
+			if (!image.save(file_path))
+				QMessageBox::critical(this, "Error", "Failed to export image.");
+		}
+	);
+
 	//////////////////////////
 	// Menubar: Edit/Sprite //
 	//////////////////////////
@@ -1261,6 +1292,8 @@ MainWindow::MainWindow(QWidget* const parent)
 		const bool is_first_sprite = no_sprites || selected_sprite_index == 0;
 		const bool is_last_sprite = no_sprites || selected_sprite_index == sprite_mappings->frames.size() - 1;
 		const bool no_sprite_selected = no_sprites;
+
+		ui->actionRender_Sprite_Image->setDisabled(no_sprite_selected);
 
 		ui->actionNext_Sprite->setDisabled(is_last_sprite);
 		ui->actionPrevious_Sprite->setDisabled(is_first_sprite);

@@ -89,9 +89,17 @@
      <addaction name="actionSave_Mappings"/>
      <addaction name="actionSave_Pattern_Cues"/>
     </widget>
+    <widget class="QMenu" name="menuSave_to_Image">
+     <property name="title">
+      <string>Save to Image</string>
+     </property>
+     <addaction name="actionRender_Sprite_Image"/>
+    </widget>
     <addaction name="menuLoad_Data_File"/>
     <addaction name="menu_Save_Data_File"/>
     <addaction name="menuUnload_Data"/>
+    <addaction name="separator"/>
+    <addaction name="menuSave_to_Image"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
     <addaction name="separator"/>
@@ -837,6 +845,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Alt+Shift+C</string>
+   </property>
+  </action>
+  <action name="actionRender_Sprite_Image">
+   <property name="text">
+    <string>Render Sprite Image...</string>
    </property>
   </action>
  </widget>
