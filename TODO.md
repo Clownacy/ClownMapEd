@@ -1,6 +1,12 @@
+- Support for alternative DPIs.
+- Support for assembly mappings/DPLCs.
+- Support for Sonic 1 mappings/DPLCs.
+- Support for Sonic 3 & Knuckles mappings/DPLCs.
 - Sprite spacing (figure out what algorithm SonMapEd uses).
 - Add scrollbar to tile viewer.
 - Don't bother drawing sprites that are off-screen.
 - 'Select unmapped tiles' shows that auto-scrolling is still screwy (Sonic 2 Sonic sprites).
 - Tall sprites make the sprite viewer taller.
 - Extra controls: https://forums.sonicretro.org/index.php?threads/sonmaped-sprite-mappings-editor.8736/
+- Save states.
+- Remember current sprites across restarts.
