@@ -41,6 +41,12 @@ public slots:
 		update();
 	}
 
+	void setHideDuplicateTiles(const bool enabled)
+	{
+		m_hide_duplicate_tiles = enabled;
+		update();
+	}
+
 signals:
 	void selectedSpriteChanged();
 
@@ -51,6 +57,7 @@ private:
 	int m_selected_sprite_index = -1;
 	int m_selected_piece_index = -1;
 	int m_starting_palette_line = 0;
+	bool m_hide_duplicate_tiles = false;
 	const SpriteMappings &sprite_mappings;
 	const TileManager &tile_manager;
 };

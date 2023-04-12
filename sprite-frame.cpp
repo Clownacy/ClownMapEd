@@ -29,7 +29,20 @@ void SpriteFrame::toDataStream(DataStream &stream) const
 	stream.setByteOrder(original_byte_order);
 }
 
-void SpriteFrame::draw(QPainter &painter, const TileManager &tile_manager, const TileManager::PixmapType effect, const int starting_palette_line, const int x_offset, const int y_offset, const std::optional<std::pair<int, TileManager::PixmapType>> &selected_piece, std::unordered_map<int, bool>* recorded_tiles) const
+void SpriteFrame::draw(QPainter &painter, bool hide_duplicate_tiles, const TileManager &tile_manager, const TileManager::PixmapType effect, const int starting_palette_line, const int x_offset, const int y_offset, const std::optional<std::pair<int, TileManager::PixmapType>> &selected_piece) const
+{
+	if (hide_duplicate_tiles)
+	{
+		std::unordered_map<int, bool> recorded_tiles;
+		drawInternal(painter, tile_manager, effect, starting_palette_line, x_offset, y_offset, selected_piece, &recorded_tiles);
+	}
+	else
+	{
+		drawInternal(painter, tile_manager, effect, starting_palette_line, x_offset, y_offset, selected_piece, nullptr);
+	}
+}
+
+void SpriteFrame::drawInternal(QPainter &painter, const TileManager &tile_manager, const TileManager::PixmapType effect, const int starting_palette_line, const int x_offset, const int y_offset, const std::optional<std::pair<int, TileManager::PixmapType>> &selected_piece, std::unordered_map<int, bool>* recorded_tiles) const
 {
 	// Must draw in reverse order.
 	for (uint i = 0; i < 2; ++i)

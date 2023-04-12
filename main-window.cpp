@@ -605,10 +605,7 @@ MainWindow::MainWindow(QWidget* const parent)
 		// Render the sprite onto the image.
 		QPainter painter(&image);
 
-		if (render_as_is)
-			frame.draw(painter, tile_manager, TileManager::PixmapType::NO_BACKGROUND, sprite_viewer.starting_palette_line(), -frame_rect.left(), -frame_rect.top());
-		else
-			frame.drawWithoutDuplicateTiles(painter, tile_manager, TileManager::PixmapType::WITH_BACKGROUND, sprite_viewer.starting_palette_line(), -frame_rect.left(), -frame_rect.top());
+		frame.draw(painter, !render_as_is, tile_manager, render_as_is ? TileManager::PixmapType::NO_BACKGROUND : TileManager::PixmapType::WITH_BACKGROUND, sprite_viewer.starting_palette_line(), -frame_rect.left(), -frame_rect.top());
 
 		// Save the image to disk.
 		if (!image.save(file_path))
@@ -1275,6 +1272,8 @@ MainWindow::MainWindow(QWidget* const parent)
 	/////////////////////////////
 	// Settings/Tile Rendering //
 	/////////////////////////////
+
+	connect(ui->actionHide_Duplicated_Tiles_in_Frames, &QAction::triggered, &sprite_viewer, &SpriteViewer::setHideDuplicateTiles);
 
 	const auto set_starting_palette_line = [this](const int line)
 	{

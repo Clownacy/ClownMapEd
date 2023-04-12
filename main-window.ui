@@ -187,6 +187,8 @@
      <property name="title">
       <string>Tile &amp;Rendering</string>
      </property>
+     <addaction name="actionHide_Duplicated_Tiles_in_Frames"/>
+     <addaction name="separator"/>
      <addaction name="actionRender_Starting_with_Palette_Line_1"/>
      <addaction name="actionRender_Starting_with_Palette_Line_2"/>
      <addaction name="actionRender_Starting_with_Palette_Line_3"/>
@@ -859,6 +861,17 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+E</string>
+   </property>
+  </action>
+  <action name="actionHide_Duplicated_Tiles_in_Frames">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Hide Duplicated Tiles in Frames</string>
+   </property>
+   <property name="shortcut">
+    <string>D</string>
    </property>
   </action>
  </widget>
