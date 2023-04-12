@@ -172,6 +172,8 @@ MainWindow::MainWindow(QWidget* const parent)
 				QMessageBox::critical(this, "Error", "Failed to load file: data ends with an incomplete tile. The file might not actually be tile data.");
 				return;
 			}
+
+			tile_viewer.setScroll(0);
 		}
 	};
 
