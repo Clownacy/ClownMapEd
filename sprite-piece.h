@@ -1,6 +1,8 @@
 #ifndef SPRITE_PIECE_H
 #define SPRITE_PIECE_H
 
+#include <unordered_map>
+
 #include <QPainter>
 #include <QRect>
 
@@ -13,7 +15,7 @@ struct SpritePiece
 	void toDataStream(DataStream &stream) const;
 	static constexpr int size_encoded = 8;
 
-	void draw(QPainter &painter, const TileManager &tile_manager, TileManager::PixmapType effect, int starting_palette_line = 0, int x_offset = 0, int y_offset = 0) const;
+	void draw(QPainter &painter, const TileManager &tile_manager, TileManager::PixmapType effect, int starting_palette_line = 0, int x_offset = 0, int y_offset = 0, std::unordered_map<int, bool> *recorded_tiles = nullptr) const;
 
 	QRect rect() const
 	{

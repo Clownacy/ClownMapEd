@@ -2,6 +2,7 @@
 #define SPRITE_FRAME_H
 
 #include <optional>
+#include <unordered_map>
 #include <utility>
 
 #include <QRect>
@@ -20,7 +21,12 @@ struct SpriteFrame
 		return sizeof(quint16) + SpritePiece::size_encoded * pieces.size();
 	}
 
-	void draw(QPainter &painter, const TileManager &tile_manager, TileManager::PixmapType effect, int starting_palette_line = 0, int x_offset = 0, int y_offset = 0, const std::optional<std::pair<int, TileManager::PixmapType>> &selected_piece = std::nullopt) const;
+	void drawWithoutDuplicateTiles(QPainter &painter, const TileManager &tile_manager, TileManager::PixmapType effect, int starting_palette_line = 0, int x_offset = 0, int y_offset = 0, const std::optional<std::pair<int, TileManager::PixmapType>> &selected_piece = std::nullopt) const
+	{
+		std::unordered_map<int, bool> recorded_tiles;
+		draw(painter, tile_manager, effect, starting_palette_line, x_offset, y_offset, selected_piece, &recorded_tiles);
+	}
+	void draw(QPainter &painter, const TileManager &tile_manager, TileManager::PixmapType effect, int starting_palette_line = 0, int x_offset = 0, int y_offset = 0, const std::optional<std::pair<int, TileManager::PixmapType>> &selected_piece = std::nullopt, std::unordered_map<int, bool>* recorded_tiles = nullptr) const;
 	QRect rect() const;
 
 	QVector<SpritePiece> pieces;

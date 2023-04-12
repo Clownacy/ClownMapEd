@@ -586,30 +586,46 @@ MainWindow::MainWindow(QWidget* const parent)
 	// Menubar: File/Export to Image //
 	///////////////////////////////////
 
-	connect(ui->actionRender_Sprite_Image, &QAction::triggered, this,
-		[this]()
-		{
-			const QString file_path = QFileDialog::getSaveFileName(this, "Render Sprite Frame", QString(), "Image (*.png *.bmp)");
+	const auto export_image = [this](const bool render_as_is)
+	{
+		const QString file_path = QFileDialog::getSaveFileName(this, render_as_is ? "Render Sprite Frame" : "Export Sprite Frame", QString(), "Image (*.png *.bmp)");
 
-			if (file_path.isNull())
-				return;
+		if (file_path.isNull())
+			return;
 
-			const auto &frame = sprite_mappings->frames[sprite_viewer.selected_sprite_index()];
-			const auto &frame_rect = frame.rect();
+		const auto &frame = sprite_mappings->frames[sprite_viewer.selected_sprite_index()];
+		const auto &frame_rect = frame.rect();
 
-			QImage image(frame_rect.width(), frame_rect.height(), QImage::Format_RGB32);
+		QImage image(frame_rect.width(), frame_rect.height(), QImage::Format_RGB32);
 
-			// Fill image with a reserved colour (this indicates
-			// transparency and should never occur in a sprite).
-			image.fill(QColor(0xFF, 0, 0xFF));
+		// Fill image with a reserved colour (this indicates
+		// transparency and should never occur in a sprite).
+		image.fill(QColor(0xFF, 0, 0xFF));
 
-			// Render the sprite onto the image.
-			QPainter painter(&image);
+		// Render the sprite onto the image.
+		QPainter painter(&image);
+
+		if (render_as_is)
 			frame.draw(painter, tile_manager, TileManager::PixmapType::NO_BACKGROUND, sprite_viewer.starting_palette_line(), -frame_rect.left(), -frame_rect.top());
+		else
+			frame.drawWithoutDuplicateTiles(painter, tile_manager, TileManager::PixmapType::WITH_BACKGROUND, sprite_viewer.starting_palette_line(), -frame_rect.left(), -frame_rect.top());
 
-			// Save the image to disk.
-			if (!image.save(file_path))
-				QMessageBox::critical(this, "Error", "Failed to export image.");
+		// Save the image to disk.
+		if (!image.save(file_path))
+			QMessageBox::critical(this, "Error", "Failed to export image.");
+	};
+
+	connect(ui->actionExport_Sprite_Frame, &QAction::triggered, this,
+		[export_image]()
+		{
+			export_image(false);
+		}
+	);
+
+	connect(ui->actionRender_Sprite_Image, &QAction::triggered, this,
+		[export_image]()
+		{
+			export_image(true);
 		}
 	);
 
@@ -1291,6 +1307,7 @@ MainWindow::MainWindow(QWidget* const parent)
 		const bool is_last_sprite = no_sprites || selected_sprite_index == sprite_mappings->frames.size() - 1;
 		const bool no_sprite_selected = no_sprites;
 
+		ui->actionExport_Sprite_Frame->setDisabled(no_sprite_selected);
 		ui->actionRender_Sprite_Image->setDisabled(no_sprite_selected);
 
 		ui->actionNext_Sprite->setDisabled(is_last_sprite);

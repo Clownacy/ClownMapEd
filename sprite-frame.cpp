@@ -29,13 +29,13 @@ void SpriteFrame::toDataStream(DataStream &stream) const
 	stream.setByteOrder(original_byte_order);
 }
 
-void SpriteFrame::draw(QPainter &painter, const TileManager &tile_manager, const TileManager::PixmapType effect, const int starting_palette_line, const int x_offset, const int y_offset, const std::optional<std::pair<int, TileManager::PixmapType>> &selected_piece) const
+void SpriteFrame::draw(QPainter &painter, const TileManager &tile_manager, const TileManager::PixmapType effect, const int starting_palette_line, const int x_offset, const int y_offset, const std::optional<std::pair<int, TileManager::PixmapType>> &selected_piece, std::unordered_map<int, bool>* recorded_tiles) const
 {
 	// Must draw in reverse order.
 	for (uint i = 0; i < 2; ++i)
 		for (auto piece = pieces.crbegin(); piece != pieces.crend(); ++piece)
 			if (piece->priority == (i != 0))
-				piece->draw(painter, tile_manager, selected_piece && &*piece == &pieces[selected_piece->first] ? selected_piece->second : effect, starting_palette_line, x_offset, y_offset);
+				piece->draw(painter, tile_manager, selected_piece && &*piece == &pieces[selected_piece->first] ? selected_piece->second : effect, starting_palette_line, x_offset, y_offset, recorded_tiles);
 }
 
 QRect SpriteFrame::rect() const

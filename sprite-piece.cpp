@@ -47,7 +47,7 @@ void SpritePiece::toDataStream(DataStream &stream) const
 	stream.setByteOrder(original_byte_order);
 }
 
-void SpritePiece::draw(QPainter &painter, const TileManager &tile_manager, const TileManager::PixmapType effect, const int starting_palette_line, const int x_offset, const int y_offset) const
+void SpritePiece::draw(QPainter &painter, const TileManager &tile_manager, const TileManager::PixmapType effect, const int starting_palette_line, const int x_offset, const int y_offset, std::unordered_map<int, bool>* const recorded_tiles) const
 {
 	const QTransform flip_transform = QTransform::fromScale(x_flip ? -1 : 1, y_flip ? -1 : 1);
 
@@ -59,16 +59,29 @@ void SpritePiece::draw(QPainter &painter, const TileManager &tile_manager, const
 
 		for (int tile_y = 0; tile_y < height; ++tile_y)
 		{
-			const int tile_y_corrected = y_flip ? height - tile_y - 1 : tile_y;
+			bool skip_tile = false;
 
-			const QRect rect(
-				x_offset + x + tile_x_corrected * TileManager::TILE_WIDTH,
-				y_offset + y + tile_y_corrected * TileManager::TILE_HEIGHT,
-				TileManager::TILE_WIDTH,
-				TileManager::TILE_HEIGHT
-			);
+			if (recorded_tiles != nullptr)
+			{
+				skip_tile = (*recorded_tiles)[current_tile_index];
+				(*recorded_tiles)[current_tile_index] = true;
+			}
 
-			painter.drawPixmap(rect, tile_manager.pixmaps(current_tile_index++, (starting_palette_line + palette_line) % Palette::TOTAL_LINES, effect).transformed(flip_transform), QRectF(0, 0, TileManager::TILE_WIDTH, TileManager::TILE_HEIGHT));
+			if (!skip_tile)
+			{
+				const int tile_y_corrected = y_flip ? height - tile_y - 1 : tile_y;
+
+				const QRect rect(
+					x_offset + x + tile_x_corrected * TileManager::TILE_WIDTH,
+					y_offset + y + tile_y_corrected * TileManager::TILE_HEIGHT,
+					TileManager::TILE_WIDTH,
+					TileManager::TILE_HEIGHT
+				);
+
+				painter.drawPixmap(rect, tile_manager.pixmaps(current_tile_index, (starting_palette_line + palette_line) % Palette::TOTAL_LINES, effect).transformed(flip_transform), QRectF(0, 0, TileManager::TILE_WIDTH, TileManager::TILE_HEIGHT));
+			}
+
+			++current_tile_index;
 		}
 	}
 }

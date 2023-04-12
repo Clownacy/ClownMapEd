@@ -142,7 +142,7 @@ void SpriteViewer::paintEvent(QPaintEvent* const event)
 
 	// Draw selected sprite.
 	if (m_selected_piece_index == -1)
-            selected_sprite.draw(painter, tile_manager, TileManager::PixmapType::NO_BACKGROUND, m_starting_palette_line);
+		selected_sprite.draw(painter, tile_manager, TileManager::PixmapType::NO_BACKGROUND, m_starting_palette_line);
 	else
             selected_sprite.draw(painter, tile_manager, TileManager::PixmapType::TRANSPARENT, m_starting_palette_line, 0, 0, std::make_pair(m_selected_piece_index, TileManager::PixmapType::NO_BACKGROUND));
 
