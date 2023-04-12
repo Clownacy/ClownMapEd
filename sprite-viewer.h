@@ -25,16 +25,15 @@ public:
 		return m_selected_piece_index;
 	}
 
-public slots:
-	void setSelectedSprite(int sprite_index);
-	void setSelectedPiece(int piece_index);
-
-	void setBackgroundColour(const QColor &colour);
-
 	int starting_palette_line() const
 	{
 		return m_starting_palette_line;
 	}
+
+public slots:
+	void setSelectedSprite(int sprite_index);
+	void setSelectedPiece(int piece_index);
+	void setBackgroundColour(const QColor &colour);
 
 	void setStartingPaletteLine(const int palette_line)
 	{
