@@ -56,7 +56,7 @@ void TileManager::regeneratePixmap(const int tile_index)
 				const uint pixel_index = x + y * TILE_WIDTH;
 				const uint palette_index = (tiles_bytes[tile_index][pixel_index >> 1] >> (~(pixel_index << 2) & 4)) & 0xF;
 
-				rgb_pixels[y][x] = palette_index == 0 ? QColor(0, 0, 0, 0) : palette.lines[line].colours[palette_index].toQColor256();
+				rgb_pixels[y][x] = palette_index == 0 ? QColor(0, 0, 0, 0) : palette.lines[line].colours[palette_index].toQColor224();
 			}
 		}
 
@@ -85,7 +85,7 @@ std::array<QPixmap, static_cast<std::size_t>(TileManager::PixmapType::MAX)> Tile
 		return QPixmap::fromImage(QImage(&working_bitmap[0][0][0], TILE_WIDTH, TILE_HEIGHT, QImage::Format::Format_RGBA8888_Premultiplied));
 	};
 
-	const QColor background_colour = palette.lines[0].colours[0].toQColor256();
+	const QColor background_colour = palette.lines[0].colours[0].toQColor224();
 
 	std::array<QPixmap, static_cast<std::size_t>(PixmapType::MAX)> pixmaps;
 

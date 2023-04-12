@@ -55,7 +55,7 @@ MainWindow::MainWindow(QWidget* const parent)
 
 	const auto update_background_colour = [this]()
 	{
-		const QColor &background_colour = palette->lines[0].colours[0].toQColor256();
+		const QColor &background_colour = palette->lines[0].colours[0].toQColor224();
 
 		sprite_viewer.setBackgroundColour(background_colour);
 		tile_viewer.setBackgroundColour(background_colour);
