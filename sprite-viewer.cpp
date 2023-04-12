@@ -153,8 +153,8 @@ void SpriteViewer::paintEvent(QPaintEvent* const event)
 
 	for (int i = m_selected_sprite_index; i-- > 0; )
 	{
-		x_offset += qMin(-16, frames[i + 1].left());
-		x_offset -= frames[i].right();
+		x_offset += qMin(-16, frames[i + 1].rect().left());
+		x_offset -= frames[i].rect().right();
                 frames[i].draw(painter, tile_manager, TileManager::PixmapType::TRANSPARENT, 0, TileManager::PixmapType::TRANSPARENT, m_starting_palette_line, x_offset, 0);
 	}
 
@@ -163,8 +163,8 @@ void SpriteViewer::paintEvent(QPaintEvent* const event)
 
 	for (int i = m_selected_sprite_index + 1; i < frames.size(); ++i)
 	{
-		x_offset += qMax(16, frames[i - 1].right());
-		x_offset -= frames[i].left();
+		x_offset += qMax(16, frames[i - 1].rect().right());
+		x_offset -= frames[i].rect().left();
                 frames[i].draw(painter, tile_manager, TileManager::PixmapType::TRANSPARENT, 0, TileManager::PixmapType::TRANSPARENT, m_starting_palette_line, x_offset, 0);
 	}
 }

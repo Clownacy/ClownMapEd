@@ -595,8 +595,9 @@ MainWindow::MainWindow(QWidget* const parent)
 				return;
 
 			const auto &frame = sprite_mappings->frames[sprite_viewer.selected_sprite_index()];
+			const auto &frame_rect = frame.rect();
 
-			QImage image(frame.rect().width(), frame.rect().height(), QImage::Format_RGB32);
+			QImage image(frame_rect.width(), frame_rect.height(), QImage::Format_RGB32);
 
 			// Fill image with a reserved colour (this indicates
 			// transparency and should never occur in a sprite).
@@ -604,7 +605,7 @@ MainWindow::MainWindow(QWidget* const parent)
 
 			// Render the sprite onto the image.
 			QPainter painter(&image);
-			painter.translate(-frame.left(), -frame.top());
+			painter.translate(-frame_rect.left(), -frame_rect.top());
 			frame.draw(painter, tile_manager, TileManager::PixmapType::NO_BACKGROUND, 0, TileManager::PixmapType::NO_BACKGROUND, sprite_viewer.starting_palette_line());
 
 			// Save the image to disk.
