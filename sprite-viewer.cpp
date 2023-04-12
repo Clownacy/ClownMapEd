@@ -142,9 +142,9 @@ void SpriteViewer::paintEvent(QPaintEvent* const event)
 
 	// Draw selected sprite.
 	if (m_selected_piece_index == -1)
-            selected_sprite.draw(painter, tile_manager, TileManager::PixmapType::NO_BACKGROUND, 0, TileManager::PixmapType::NO_BACKGROUND, m_starting_palette_line);
+            selected_sprite.draw(painter, tile_manager, TileManager::PixmapType::NO_BACKGROUND, m_starting_palette_line);
 	else
-            selected_sprite.draw(painter, tile_manager, TileManager::PixmapType::TRANSPARENT, m_selected_piece_index, TileManager::PixmapType::NO_BACKGROUND, m_starting_palette_line);
+            selected_sprite.draw(painter, tile_manager, TileManager::PixmapType::TRANSPARENT, m_starting_palette_line, 0, 0, std::make_pair(m_selected_piece_index, TileManager::PixmapType::NO_BACKGROUND));
 
 	int x_offset;
 
@@ -155,7 +155,7 @@ void SpriteViewer::paintEvent(QPaintEvent* const event)
 	{
 		x_offset += qMin(-16, frames[i + 1].rect().left());
 		x_offset -= frames[i].rect().right();
-                frames[i].draw(painter, tile_manager, TileManager::PixmapType::TRANSPARENT, 0, TileManager::PixmapType::TRANSPARENT, m_starting_palette_line, x_offset, 0);
+                frames[i].draw(painter, tile_manager, TileManager::PixmapType::TRANSPARENT, m_starting_palette_line, x_offset);
 	}
 
 	// Draw sprites to the right of the selected sprite.
@@ -165,7 +165,7 @@ void SpriteViewer::paintEvent(QPaintEvent* const event)
 	{
 		x_offset += qMax(16, frames[i - 1].rect().right());
 		x_offset -= frames[i].rect().left();
-                frames[i].draw(painter, tile_manager, TileManager::PixmapType::TRANSPARENT, 0, TileManager::PixmapType::TRANSPARENT, m_starting_palette_line, x_offset, 0);
+                frames[i].draw(painter, tile_manager, TileManager::PixmapType::TRANSPARENT, m_starting_palette_line, x_offset);
 	}
 }
 

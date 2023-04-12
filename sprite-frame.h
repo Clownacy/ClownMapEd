@@ -1,6 +1,9 @@
 #ifndef SPRITE_FRAME_H
 #define SPRITE_FRAME_H
 
+#include <optional>
+#include <utility>
+
 #include <QRect>
 #include <QVector>
 
@@ -17,7 +20,7 @@ struct SpriteFrame
 		return sizeof(quint16) + SpritePiece::size_encoded * pieces.size();
 	}
 
-	void draw(QPainter &painter, const TileManager &tile_manager, TileManager::PixmapType unselected_effect, int selected_piece_index, TileManager::PixmapType selected_effect, int starting_palette_line = 0, int x_offset = 0, int y_offset = 0) const;
+	void draw(QPainter &painter, const TileManager &tile_manager, TileManager::PixmapType effect, int starting_palette_line = 0, int x_offset = 0, int y_offset = 0, const std::optional<std::pair<int, TileManager::PixmapType>> &selected_piece = std::nullopt) const;
 	QRect rect() const;
 
 	QVector<SpritePiece> pieces;

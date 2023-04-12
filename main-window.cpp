@@ -605,8 +605,7 @@ MainWindow::MainWindow(QWidget* const parent)
 
 			// Render the sprite onto the image.
 			QPainter painter(&image);
-			painter.translate(-frame_rect.left(), -frame_rect.top());
-			frame.draw(painter, tile_manager, TileManager::PixmapType::NO_BACKGROUND, 0, TileManager::PixmapType::NO_BACKGROUND, sprite_viewer.starting_palette_line());
+			frame.draw(painter, tile_manager, TileManager::PixmapType::NO_BACKGROUND, sprite_viewer.starting_palette_line(), -frame_rect.left(), -frame_rect.top());
 
 			// Save the image to disk.
 			if (!image.save(file_path))
