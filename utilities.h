@@ -14,7 +14,7 @@ QSizeF GetDPIScale(const QWidget *widget);
 
 template <typename T>
 // TODO: This shouldn't be static.
-static inline T DivideCeiling(const T a, const T b)
+inline T DivideCeiling(const T a, const T b)
 {
 	return (a + (b - 1)) / b;
 }
