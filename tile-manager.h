@@ -81,6 +81,7 @@ public:
 	void deleteTile(int tile_index);
 	void duplicateTile(int tile_index, int insert_index);
 	void clearTile(int tile_index);
+	void modifyTiles(const std::function<void(QVector<std::array<uchar, TILE_SIZE_IN_BYTES>>&)> &callback);
 	auto& tile_bytes() const
 	{
 		return tiles_bytes;

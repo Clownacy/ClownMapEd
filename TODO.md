@@ -10,3 +10,4 @@
 - Extra controls: https://forums.sonicretro.org/index.php?threads/sonmaped-sprite-mappings-editor.8736/
 - Save states.
 - Remember current sprites across restarts.
+- Make tile viewer selection XOR with the background colour too.

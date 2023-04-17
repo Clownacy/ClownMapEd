@@ -47,41 +47,57 @@ void SpritePiece::toDataStream(DataStream &stream) const
 	stream.setByteOrder(original_byte_order);
 }
 
-void SpritePiece::draw(QPainter &painter, const TileManager &tile_manager, const TileManager::PixmapType effect, const int starting_palette_line, const int x_offset, const int y_offset, std::unordered_map<int, bool>* const recorded_tiles) const
+void SpritePiece::getTiles(QVector<SpritePiece::Tile> &tiles) const
 {
-	const QTransform flip_transform = QTransform::fromScale(x_flip ? -1 : 1, y_flip ? -1 : 1);
+	iterateTiles(
+		[&tiles](const SpritePiece::Tile &tile)
+		{
+			tiles.push_back(tile);
+		}
+	);
+}
 
-	uint current_tile_index = tile_index;
+void SpritePiece::getUniqueTiles(QVector<SpritePiece::Tile> &tiles) const
+{
+	iterateTiles(
+		[&tiles](const SpritePiece::Tile &new_tile)
+		{
+			for (const auto &tile : qAsConst(tiles))
+				if (tile.index == new_tile.index)
+					return;
+
+			tiles.push_back(new_tile);
+		}
+	);
+}
+
+void SpritePiece::iterateTiles(const std::function<void(const SpritePiece::Tile&)> &callback) const
+{
+	int current_tile_index = tile_index;
 
 	for (int tile_x = 0; tile_x < width; ++tile_x)
 	{
-		const int tile_x_corrected = x_flip ? width - tile_x - 1 : tile_x;
+		const int tile_x_corrected = (x_flip ? width - tile_x - 1 : tile_x) * TileManager::TILE_WIDTH;
 
 		for (int tile_y = 0; tile_y < height; ++tile_y)
 		{
-			bool skip_tile = false;
+			const int tile_y_corrected = (y_flip ? height - tile_y - 1 : tile_y) * TileManager::TILE_HEIGHT;
 
-			if (recorded_tiles != nullptr)
-			{
-				skip_tile = (*recorded_tiles)[current_tile_index];
-				(*recorded_tiles)[current_tile_index] = true;
-			}
-
-			if (!skip_tile)
-			{
-				const int tile_y_corrected = y_flip ? height - tile_y - 1 : tile_y;
-
-				const QRect rect(
-					x_offset + x + tile_x_corrected * TileManager::TILE_WIDTH,
-					y_offset + y + tile_y_corrected * TileManager::TILE_HEIGHT,
-					TileManager::TILE_WIDTH,
-					TileManager::TILE_HEIGHT
-				);
-
-				painter.drawPixmap(rect, tile_manager.pixmaps(current_tile_index, (starting_palette_line + palette_line) % Palette::TOTAL_LINES, effect).transformed(flip_transform), QRectF(0, 0, TileManager::TILE_WIDTH, TileManager::TILE_HEIGHT));
-			}
+			callback({current_tile_index, x + tile_x_corrected, y + tile_y_corrected, palette_line, x_flip, y_flip});
 
 			++current_tile_index;
 		}
 	}
+}
+
+void SpritePiece::Tile::draw(QPainter &painter, const TileManager &tile_manager, const TileManager::PixmapType effect) const
+{
+	const QRect rect(
+		x,
+		y,
+		TileManager::TILE_WIDTH,
+		TileManager::TILE_HEIGHT
+	);
+
+	painter.drawPixmap(rect, tile_manager.pixmaps(index, palette_line, effect).transformed(QTransform::fromScale(x_flip ? -1 : 1, y_flip ? -1 : 1)), QRectF(0, 0, TileManager::TILE_WIDTH, TileManager::TILE_HEIGHT));
 }

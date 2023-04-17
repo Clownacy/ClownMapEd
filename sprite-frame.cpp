@@ -31,24 +31,38 @@ void SpriteFrame::toDataStream(DataStream &stream) const
 
 void SpriteFrame::draw(QPainter &painter, bool hide_duplicate_tiles, const TileManager &tile_manager, const TileManager::PixmapType effect, const int starting_palette_line, const int x_offset, const int y_offset, const std::optional<std::pair<int, TileManager::PixmapType>> &selected_piece) const
 {
+	QVector<SpritePiece::Tile> tiles;
+
 	if (hide_duplicate_tiles)
 	{
-		std::unordered_map<int, bool> recorded_tiles;
-		drawInternal(painter, tile_manager, effect, starting_palette_line, x_offset, y_offset, selected_piece, &recorded_tiles);
+		iteratePieces(
+			[&tiles](const SpritePiece &piece)
+			{
+				piece.getUniqueTiles(tiles);
+			}
+		);
 	}
 	else
 	{
-		drawInternal(painter, tile_manager, effect, starting_palette_line, x_offset, y_offset, selected_piece, nullptr);
+		iteratePieces(
+			[&tiles](const SpritePiece &piece)
+			{
+				piece.getTiles(tiles);
+			}
+		);
 	}
-}
 
-void SpriteFrame::drawInternal(QPainter &painter, const TileManager &tile_manager, const TileManager::PixmapType effect, const int starting_palette_line, const int x_offset, const int y_offset, const std::optional<std::pair<int, TileManager::PixmapType>> &selected_piece, std::unordered_map<int, bool>* recorded_tiles) const
-{
-	// Must draw in reverse order.
-	for (uint i = 0; i < 2; ++i)
-		for (auto piece = pieces.crbegin(); piece != pieces.crend(); ++piece)
-			if (piece->priority == (i != 0))
-				piece->draw(painter, tile_manager, selected_piece && &*piece == &pieces[selected_piece->first] ? selected_piece->second : effect, starting_palette_line, x_offset, y_offset, recorded_tiles);
+	for (const auto &tile : qAsConst(tiles))
+	{
+		SpritePiece::Tile adjusted_tile = tile;
+
+		adjusted_tile.x += x_offset;
+		adjusted_tile.y += y_offset;
+		adjusted_tile.palette_line += starting_palette_line;
+		adjusted_tile.palette_line %= Palette::TOTAL_LINES;
+
+		adjusted_tile.draw(painter, tile_manager, effect);
+	}
 }
 
 QRect SpriteFrame::rect() const
@@ -78,4 +92,13 @@ QRect SpriteFrame::rect() const
 		y2 = 0;
 
 	return QRect(QPoint(x1, y1), QPoint(x2, y2));
+}
+
+void SpriteFrame::iteratePieces(const std::function<void(const SpritePiece&)> &callback) const
+{
+	// Must draw in reverse order.
+	for (uint i = 0; i < 2; ++i)
+		for (auto piece = pieces.crbegin(); piece != pieces.crend(); ++piece)
+			if (piece->priority == (i != 0))
+				callback(*piece);
 }

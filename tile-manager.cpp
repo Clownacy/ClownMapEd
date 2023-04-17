@@ -33,6 +33,12 @@ void TileManager::clearTile(const int tile_index)
 	emit pixmapsChanged();
 }
 
+void TileManager::modifyTiles(const std::function<void(QVector<std::array<uchar, TILE_SIZE_IN_BYTES>>&)> &callback)
+{
+	callback(tiles_bytes);
+	regeneratePixmaps();
+}
+
 void TileManager::regeneratePixmaps()
 {
 	invalid_tile_pixmaps = createPixmaps(createInvalidTilePixmap());

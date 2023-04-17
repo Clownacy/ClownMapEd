@@ -585,8 +585,122 @@ MainWindow::MainWindow(QWidget* const parent)
 	);
 
 	///////////////////////////////////
-	// Menubar: File/Export to Image //
+	// Menubar: File/Load from Image //
 	///////////////////////////////////
+
+	const auto frame_to_qimage = [this](const SpriteFrame &frame, const bool render_as_is)
+	{
+		const auto &frame_rect = frame.rect();
+
+		QImage image(frame_rect.width(), frame_rect.height(), QImage::Format_RGB32);
+
+		// Fill image with a reserved colour (this indicates
+		// transparency and should never occur in a sprite).
+		image.fill(QColor(0xFF, 0, 0xFF));
+
+		// Render the sprite onto the image.
+		QPainter painter(&image);
+
+		frame.draw(painter, !render_as_is, tile_manager, render_as_is ? TileManager::PixmapType::NO_BACKGROUND : TileManager::PixmapType::WITH_BACKGROUND, sprite_viewer.starting_palette_line(), -frame_rect.left(), -frame_rect.top());
+
+		return image;
+	};
+
+	connect(ui->actionImport_Sprite_over_Active_Frame, &QAction::triggered, this,
+		[this, frame_to_qimage]()
+		{
+			const QString file_path = QFileDialog::getOpenFileName(this, "Import Sprite Frame", QString(), "Image (*.png *.bmp)");
+
+			if (file_path.isNull())
+				return;
+
+			QImage their_image(file_path);
+
+			if (their_image.isNull())
+			{
+				QMessageBox::critical(this, "Error", "Failed to import image: file could not be loaded.");
+				return;
+			}
+
+			const SpriteFrame &frame = sprite_mappings->frames[sprite_viewer.selected_sprite_index()];
+			const QImage our_image = frame_to_qimage(frame, false);
+
+			if (their_image.size() != our_image.size())
+			{
+				// TODO: Use an error message that is similar to SonMapEd's.
+				QMessageBox::critical(this, "Error", "Failed to import image: the imported image is a different size to the sprite it's replacing.");
+				return;
+			}
+
+			for (int y = 0; y < our_image.height(); ++y)
+			{
+				for (int x = 0; x < our_image.width(); ++x)
+				{
+					if ((their_image.pixel(x, y) == qRgb(0xFF, 0, 0xFF)) != (our_image.pixel(x, y) == qRgb(0xFF, 0, 0xFF)))
+					{
+						// TODO: Use an error message that is similar to SonMapEd's.
+						QMessageBox::critical(this, "Error", "Failed to import image: the imported image does not match the layout of the sprite it's replacing.");
+						return;
+					}
+				}
+			}
+
+			tile_manager.modifyTiles(
+				[this, &frame, &their_image](QVector<std::array<uchar, TileManager::TILE_SIZE_IN_BYTES>> &tile_bytes)
+				{
+					// TODO: This doesn't account for overlapping pieces, which is a mistake that SonMapEd also makes. Is there anything that can be done about this?
+					const QVector<SpritePiece::Tile> tiles = frame.getUniqueTiles();
+					const int frame_left = frame.rect().left();
+					const int frame_top = frame.rect().top();
+
+					for (const auto &tile : tiles)
+					{
+						for (int y = 0; y < TileManager::TILE_HEIGHT; ++y)
+						{
+							const int image_y = tile.y + (tile.y_flip ? TileManager::TILE_HEIGHT - y - 1 : y) - frame_top;
+
+							for (int x = 0; x < TileManager::TILE_HEIGHT; ++x)
+							{
+								const int image_x = tile.x + (tile.x_flip ? TileManager::TILE_WIDTH - x - 1 : x) - frame_left;
+
+								const QColor their_colour = QColor(their_image.pixel(image_x, image_y));
+
+								// Find the closest colour in the palette line to the imported pixel colour.
+								uint closest_colour_index;
+								ulong closest_distance = static_cast<ulong>(-1);
+
+								for (uint colour_index = 0; colour_index < Palette::COLOURS_PER_LINE; ++colour_index)
+								{
+									const QColor our_colour = palette->lines[(tile.palette_line + sprite_viewer.starting_palette_line()) % Palette::TOTAL_LINES].colours[colour_index].toQColor224();
+
+									std::array<ulong, 3> colour_deltas;
+									colour_deltas[0] = our_colour.red() - their_colour.red();
+									colour_deltas[1] = our_colour.green() - their_colour.green();
+									colour_deltas[2] = our_colour.blue() - their_colour.blue();
+
+									const ulong difference = colour_deltas[0] * colour_deltas[0] + colour_deltas[1] * colour_deltas[1] + colour_deltas[2] * colour_deltas[2];
+
+									if (difference < closest_distance)
+									{
+										closest_distance = difference;
+										closest_colour_index = colour_index;
+									}
+								}
+
+								const uint shift = (x % 2 == 0) * 4;
+								uchar &byte = tile_bytes[tile.index][(x + y * 8) / 2];
+								byte = (byte & ~(0xF << shift)) | (closest_colour_index << shift);
+							}
+						}
+					}
+				}
+			);
+		}
+	);
+
+	/////////////////////////////////
+	// Menubar: File/Save to Image //
+	/////////////////////////////////
 
 	const auto export_image = [this](const bool render_as_is)
 	{
