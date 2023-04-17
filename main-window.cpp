@@ -17,7 +17,10 @@
 #include "kosplus.h"
 #include "nemesis.h"
 
+#include "CIEDE2000/CIEDE2000.h"
+
 #include "dynamic-pattern-load-cues.h"
+#include "utilities.h"
 
 MainWindow::MainWindow(QWidget* const parent)
 	: QMainWindow(parent)
@@ -671,46 +674,23 @@ MainWindow::MainWindow(QWidget* const parent)
 
 								// This big block of code is responsible for converting a single pixel.
 
-								const auto qcolor_to_gamma_corrected_array = [](const QColor &colour)
-								{
-									std::array<qreal, 3> gamma_corrected_colour;
-									colour.getRgbF(&gamma_corrected_colour[0], &gamma_corrected_colour[1], &gamma_corrected_colour[2]);
-
-									// Convert to perceived brightness.
-									for (auto &colour_channel : gamma_corrected_colour)
-										colour_channel = qPow(colour_channel / qreal(255.0), qreal(2.2));
-
-									return gamma_corrected_colour;
-								};
-
-								const auto their_colour = qcolor_to_gamma_corrected_array(QColor(their_image.pixel(image_x, image_y)));
+								const auto their_colour = Utilities::QColorToLAB(QColor(their_image.pixel(image_x, image_y)));
 
 								// Find the closest colour in the palette line to the imported pixel colour.
 								uint closest_colour_index;
-								qreal closest_distance = std::numeric_limits<qreal>::max();
+								double closest_distance = std::numeric_limits<double>::max();
 
 								for (uint colour_index = 0; colour_index < Palette::COLOURS_PER_LINE; ++colour_index)
 								{
-									const auto our_colour = qcolor_to_gamma_corrected_array(palette->lines[(tile.palette_line + sprite_viewer.starting_palette_line()) % Palette::TOTAL_LINES].colours[colour_index].toQColor224());
+									const auto our_colour = Utilities::QColorToLAB(palette->lines[(tile.palette_line + sprite_viewer.starting_palette_line()) % Palette::TOTAL_LINES].colours[colour_index].toQColor224());
 
-									std::array<qreal, 3> colour_deltas;
-									for (uint i = 0; i < colour_deltas.size(); ++i)
-										colour_deltas[i] = our_colour[i] - their_colour[i];
+									CIEDE2000::LAB lab1 = {their_colour[0], their_colour[1], their_colour[2]};
+									CIEDE2000::LAB lab2 = {our_colour[0], our_colour[1], our_colour[2]};
+									const double distance = CIEDE2000::CIEDE2000(lab1, lab2);
 
-									// Account for the fact that the human eye has different sensitivities to each colour channel.
-									colour_deltas[0] *= qreal(0.2126); // Red
-									colour_deltas[1] *= qreal(0.7152); // Green
-									colour_deltas[2] *= qreal(0.0722); // Blue
-
-									// We square each channel delta because a big difference in a single channel
-									// is more significant than a small difference in multiple channels.
-									qreal difference = 0;
-									for (const auto delta : colour_deltas)
-										difference += delta * delta;
-
-									if (difference < closest_distance)
+									if (distance < closest_distance)
 									{
-										closest_distance = difference;
+										closest_distance = distance;
 										closest_colour_index = colour_index;
 									}
 								}

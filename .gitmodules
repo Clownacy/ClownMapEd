@@ -1,3 +1,6 @@
 [submodule "FW-KENSC-ShellExt"]
 	path = FW-KENSC-ShellExt
 	url = https://github.com/MainMemory/FW-KENSC-ShellExt
+[submodule "CIEDE2000"]
+	path = CIEDE2000
+	url = https://github.com/gfiumara/CIEDE2000

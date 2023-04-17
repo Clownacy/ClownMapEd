@@ -123,3 +123,16 @@ add_library(mdcomp STATIC
 target_include_directories(mdcomp PUBLIC ${mdcomp_directory})
 
 target_link_libraries(ClownMapEd PRIVATE mdcomp)
+
+#############
+# CIEDE2000 #
+#############
+
+add_library(CIEDE2000 STATIC
+	"CIEDE2000/CIEDE2000.cpp"
+	"CIEDE2000/CIEDE2000.h"
+)
+
+target_include_directories(CIEDE2000 PRIVATE "CIEDE2000")
+
+target_link_libraries(ClownMapEd PRIVATE CIEDE2000)
