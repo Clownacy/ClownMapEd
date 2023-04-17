@@ -11,3 +11,4 @@
 - Save states.
 - Remember current sprites across restarts.
 - Make tile viewer selection XOR with the background colour too.
+- Dragging and dropping palette colours.
