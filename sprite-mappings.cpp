@@ -7,6 +7,8 @@ void SpriteMappings::fromFile(QFile &file)
 	DataStream stream(&file);
 	stream.setByteOrder(DataStream::BigEndian);
 
+	// We need a heuristic to determine how many frames are contained
+	// in this file, since the file itself lacks a proper indicator.
 	uint earliest_frame = stream.read<quint16>();
 	uint total_frames = 1;
 
@@ -14,12 +16,16 @@ void SpriteMappings::fromFile(QFile &file)
 	{
 		const uint frame_offset = stream.read<quint16>();
 
-		if ((frame_offset & 1) != 0)
+		// Valid offsets are never odd. // TODO: Except in Sonic 1...
+		if (frame_offset % 2 != 0)
 			break;
 
 		++total_frames;
 
-		if (earliest_frame > frame_offset)
+		// The first frame (and others) can have an offset of 0. This is a neat trick to encode
+		// a sprite with 0 pieces without wasting any bytes. This trick can through off this
+		// heuristic, so we need to explicitly check for it.
+		if (frame_offset != 0 && frame_offset < earliest_frame)
 			earliest_frame = frame_offset;
 	}
 
