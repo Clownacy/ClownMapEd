@@ -19,6 +19,8 @@
 
 #include "CIEDE2000/CIEDE2000.h"
 
+#include "clownassembler/semantic.h"
+
 #include "dynamic-pattern-load-cues.h"
 #include "utilities.h"
 
@@ -344,6 +346,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionLoad_Secondary_Palette_Lines, &QAction::triggered, this,
 		[this, load_palette_file]()
 		{
+			// TODO: What if the user cancels?
 			load_palette_file(QFileDialog::getOpenFileName(this, "Open Palette File"), 1);
 		}
 	);
@@ -351,7 +354,36 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionLoad_Mappings, &QAction::triggered, this,
 		[this, load_sprite_mappings_file]()
 		{
-			load_sprite_mappings_file(QFileDialog::getOpenFileName(this, "Open Sprite Mappings File"));
+			const QString file_path = QFileDialog::getOpenFileName(this, "Open Sprite Mappings File", QString(), "Sprite Mappings (*.bin *.asm)");
+
+			if (file_path.isNull())
+				return;
+
+			const int extension_position = file_path.lastIndexOf('.');
+
+			if (extension_position != -1 && QStringView(file_path.data() + extension_position) == QString(".asm"))
+			{
+				// TODO: This is terrible: refactor clownassembler to support using memory buffers as input/output!
+				FILE* const in_file = fopen(file_path.toStdString().c_str(), "r");
+				FILE* const out_file = fopen("clownmaped-temporary", "wb");
+
+				const cc_bool assembled_successfully = ClownAssembler_Assemble(in_file, out_file, nullptr, nullptr, file_path.toStdString().c_str(), cc_false, cc_true, cc_false);
+
+				fclose(in_file);
+				fclose(out_file);
+
+				if (!assembled_successfully)
+				{
+					QMessageBox::critical(this, "Error", "Failed to load mappings: file could not be assembled.");
+					return;
+				}
+
+				load_sprite_mappings_file("clownmaped-temporary");
+			}
+			else
+			{
+				load_sprite_mappings_file(file_path);
+			}
 		}
 	);
 

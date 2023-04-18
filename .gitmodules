@@ -4,3 +4,6 @@
 [submodule "CIEDE2000"]
 	path = CIEDE2000
 	url = https://github.com/gfiumara/CIEDE2000
+[submodule "clownassembler"]
+	path = clownassembler
+	url = https://github.com/Clownacy/clownassembler
