@@ -23,7 +23,7 @@ void SpriteMappings::fromFile(QFile &file, const SpritePiece::Format format)
 		++total_frames;
 
 		// The first frame (and others) can have an offset of 0. This is a neat trick to encode
-		// a sprite with 0 pieces without wasting any bytes. This trick can through off this
+		// a sprite with 0 pieces without wasting any bytes. This trick can throw off this
 		// heuristic, so we need to explicitly check for it.
 		if (frame_offset != 0 && frame_offset < earliest_frame)
 			earliest_frame = frame_offset;
