@@ -2,29 +2,33 @@
 
 #include <climits>
 
-void SpriteFrame::fromDataStream(DataStream &stream)
+void SpriteFrame::fromDataStream(DataStream &stream, const SpritePiece::Format format)
 {
 	const auto original_byte_order = stream.byteOrder();
 	stream.setByteOrder(DataStream::BigEndian);
 
-	const uint total_pieces = stream.read<quint16>();
+	const int total_pieces = format == SpritePiece::Format::SONIC_1 ? stream.read<quint8>() : stream.read<quint16>();
 	pieces.resize(total_pieces);
 
 	for (auto &piece : pieces)
-		piece.fromDataStream(stream);
+		piece.fromDataStream(stream, format);
 
 	stream.setByteOrder(original_byte_order);
 }
 
-void SpriteFrame::toDataStream(DataStream &stream) const
+void SpriteFrame::toDataStream(DataStream &stream, const SpritePiece::Format format) const
 {
 	const auto original_byte_order = stream.byteOrder();
 	stream.setByteOrder(DataStream::BigEndian);
 
-	stream.write<quint16>(pieces.size());
+	// TODO: Report to the user when this is truncated!
+	if (format == SpritePiece::Format::SONIC_1)
+		stream.write<quint8>(pieces.size());
+	else
+		stream.write<quint16>(pieces.size());
 
 	for (const auto &piece : pieces)
-		piece.toDataStream(stream);
+		piece.toDataStream(stream, format);
 
 	stream.setByteOrder(original_byte_order);
 }

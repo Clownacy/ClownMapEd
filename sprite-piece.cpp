@@ -1,6 +1,6 @@
 #include "sprite-piece.h"
 
-void SpritePiece::fromDataStream(DataStream &stream)
+void SpritePiece::fromDataStream(DataStream &stream, const Format format)
 {
 	const auto original_byte_order = stream.byteOrder();
 	stream.setByteOrder(DataStream::BigEndian);
@@ -16,33 +16,53 @@ void SpritePiece::fromDataStream(DataStream &stream)
 	y_flip = (art_tile & (1 << 12)) != 0;
 	x_flip = (art_tile & (1 << 11)) != 0;
 	tile_index = art_tile & 0x7FF;
-	stream.read<quint16>(); // TODO - 2-player data?
-	x = stream.read<qint16>();
+
+	switch (format)
+	{
+		case Format::SONIC_1:
+			x = stream.read<qint8>();
+			break;
+
+		case Format::SONIC_2:
+			stream.read<quint16>(); // TODO: Actually use the 2-player data?
+			// Fallthrough
+		case Format::SONIC_3_AND_KNUCKLES:
+			x = stream.read<qint16>();
+			break;
+	}
 
 	stream.setByteOrder(original_byte_order);
 }
 
-void SpritePiece::toDataStream(DataStream &stream) const
+void SpritePiece::toDataStream(DataStream &stream, const Format format) const
 {
 	const auto original_byte_order = stream.byteOrder();
 	stream.setByteOrder(DataStream::BigEndian);
 
+	// TODO: Report to the user when the coordinates are truncated!
 	stream.write<qint8>(y);
-	stream.write<quint8>((width - 1) << 2 | height - 1);
+	stream.write<quint8>((static_cast<uint>(width) - 1) << 2 | static_cast<uint>(height) - 1);
 
-	stream.write<quint16>(static_cast<uint>(priority) << 15
-						| static_cast<uint>(palette_line) << 13
-						| static_cast<uint>(y_flip) << 12
-						| static_cast<uint>(x_flip) << 11
-						| static_cast<uint>(tile_index));
+	const uint art_tile_upper_bits = static_cast<uint>(priority) << 15
+								   | static_cast<uint>(palette_line) << 13
+								   | static_cast<uint>(y_flip) << 12
+								   | static_cast<uint>(x_flip) << 11;
 
-	stream.write<quint16>(static_cast<uint>(priority) << 15
-						| static_cast<uint>(palette_line) << 13
-						| static_cast<uint>(y_flip) << 12
-						| static_cast<uint>(x_flip) << 11
-						| static_cast<uint>(tile_index) / 2);
+	stream.write<quint16>(art_tile_upper_bits | static_cast<uint>(tile_index));
 
-	stream.write<qint16>(x);
+	switch (format)
+	{
+		case Format::SONIC_1:
+			stream.write<qint8>(x);
+			break;
+
+		case Format::SONIC_2:
+			stream.write<quint16>(art_tile_upper_bits | static_cast<uint>(tile_index) / 2);
+			// Fallthrough
+		case Format::SONIC_3_AND_KNUCKLES:
+			stream.write<qint16>(x);
+			break;
+	}
 
 	stream.setByteOrder(original_byte_order);
 }

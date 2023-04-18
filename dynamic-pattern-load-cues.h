@@ -28,6 +28,7 @@ struct DynamicPatternLoadCues
 		void toDataStream(DataStream &stream) const;
 	};
 
+	// TODO: Replace explicit constuctors with a method!
 	DynamicPatternLoadCues() = default;
 	DynamicPatternLoadCues(QFile &file);
 

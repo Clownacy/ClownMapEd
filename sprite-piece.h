@@ -12,6 +12,13 @@
 
 struct SpritePiece
 {
+	enum class Format
+	{
+		SONIC_1,
+		SONIC_2,
+		SONIC_3_AND_KNUCKLES
+	};
+
 	struct Tile
 	{
 		void draw(QPainter &painter, const TileManager &tile_manager, TileManager::PixmapType effect) const;
@@ -24,8 +31,8 @@ struct SpritePiece
 		bool y_flip;
 	};
 
-	void fromDataStream(DataStream &stream);
-	void toDataStream(DataStream &stream) const;
+	void fromDataStream(DataStream &stream, Format format);
+	void toDataStream(DataStream &stream, Format format) const;
 	static constexpr int size_encoded = 8;
 
 	QRect rect() const

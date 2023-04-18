@@ -37,6 +37,7 @@ private:
 	TileViewer tile_viewer;
 	QVBoxLayout vertical_layout;
 	QHBoxLayout horizontal_layout;
+	SpritePiece::Format game_format;
 };
 
 #endif // MAIN_WINDOW_H

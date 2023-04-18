@@ -2,7 +2,7 @@
 
 #include "data-stream.h"
 
-void SpriteMappings::fromFile(QFile &file)
+void SpriteMappings::fromFile(QFile &file, const SpritePiece::Format format)
 {
 	DataStream stream(&file);
 	stream.setByteOrder(DataStream::BigEndian);
@@ -16,8 +16,8 @@ void SpriteMappings::fromFile(QFile &file)
 	{
 		const uint frame_offset = stream.read<quint16>();
 
-		// Valid offsets are never odd. // TODO: Except in Sonic 1...
-		if (frame_offset % 2 != 0)
+		// Valid offsets are never odd.
+		if ((format == SpritePiece::Format::SONIC_2 || format == SpritePiece::Format::SONIC_3_AND_KNUCKLES) && frame_offset % 2 != 0)
 			break;
 
 		++total_frames;
@@ -36,11 +36,11 @@ void SpriteMappings::fromFile(QFile &file)
 		file.seek(current_frame * 2);
 		file.seek(stream.read<quint16>());
 
-		frames[current_frame].fromDataStream(stream);
+		frames[current_frame].fromDataStream(stream, format);
 	}
 }
 
-void SpriteMappings::toDataStream(DataStream &stream) const
+void SpriteMappings::toDataStream(DataStream &stream, const SpritePiece::Format format) const
 {
 	const auto original_byte_order = stream.byteOrder();
 	stream.setByteOrder(DataStream::BigEndian);
@@ -53,7 +53,7 @@ void SpriteMappings::toDataStream(DataStream &stream) const
 	}
 
 	for (const auto &frame : frames)
-		frame.toDataStream(stream);
+		frame.toDataStream(stream, format);
 
 	stream.setByteOrder(original_byte_order);
 }

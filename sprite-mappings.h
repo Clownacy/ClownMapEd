@@ -10,8 +10,8 @@
 
 struct SpriteMappings
 {
-	void fromFile(QFile &file);
-	void toDataStream(DataStream &stream) const;
+	void fromFile(QFile &file, SpritePiece::Format format);
+	void toDataStream(DataStream &stream, SpritePiece::Format format) const;
 
 	bool applyDPLCs(const DynamicPatternLoadCues &dplcs);
 	DynamicPatternLoadCues removeDPLCs();

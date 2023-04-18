@@ -245,44 +245,84 @@ MainWindow::MainWindow(QWidget* const parent)
 		);
 	};
 
-	const auto load_sprite_mappings_file = [this](const QString &file_path)
+	const auto load_asm_or_bin_file = [this](const QString &file_path, const std::function<void(const QString &file_path)> &callback)
 	{
 		if (file_path.isNull())
 			return;
 
-		QFile file(file_path);
-		if (!file.open(QFile::ReadOnly))
-		{
-			QMessageBox::critical(this, "Error", "Failed to load file: file could not be opened for reading.");
-			return;
-		}
+		const int extension_position = file_path.lastIndexOf('.');
 
-		sprite_mappings.modify(
-			[&file](SpriteMappings &mappings)
+		if (extension_position != -1 && QStringView(file_path.data() + extension_position) == QString(".asm"))
+		{
+			const char* const temporary_filename = "clownmaped-temporary";
+
+			// TODO: This is terrible: refactor clownassembler to support using memory buffers as input/output!
+			FILE* const in_file = fopen(file_path.toStdString().c_str(), "r");
+			FILE* const out_file = fopen(temporary_filename, "wb");
+
+			const cc_bool assembled_successfully = ClownAssembler_Assemble(in_file, out_file, nullptr, nullptr, file_path.toStdString().c_str(), cc_false, cc_true, cc_false);
+
+			fclose(in_file);
+			fclose(out_file);
+
+			if (!assembled_successfully)
 			{
-				mappings.fromFile(file);
+				QMessageBox::critical(this, "Error", "Failed to load mappings: file could not be assembled.");
+				return;
+			}
+
+			callback(temporary_filename);
+
+			remove(temporary_filename);
+		}
+		else
+		{
+			callback(file_path);
+		};
+	};
+
+	const auto load_sprite_mappings_file = [this, &load_asm_or_bin_file](const QString &file_path)
+	{
+		load_asm_or_bin_file(file_path,
+			[this](const QString &file_path)
+			{
+				QFile file(file_path);
+				if (!file.open(QFile::ReadOnly))
+				{
+					QMessageBox::critical(this, "Error", "Failed to load file: file could not be opened for reading.");
+					return;
+				}
+
+				sprite_mappings.modify(
+					[this, &file](SpriteMappings &mappings)
+					{
+						mappings.fromFile(file, game_format);
+					}
+				);
 			}
 		);
 
 		sprite_viewer.setSelectedSprite(0);
 	};
 
-	const auto load_dynamic_pattern_load_cue_file = [this](const QString &file_path)
+	const auto load_dynamic_pattern_load_cue_file = [this, &load_asm_or_bin_file](const QString &file_path)
 	{
-		if (file_path.isNull())
-			return;
-
-		QFile file(file_path);
-		if (!file.open(QFile::ReadOnly))
-		{
-			QMessageBox::critical(this, "Error", "Failed to load file: file could not be opened for reading.");
-			return;
-		}
-
-		sprite_mappings.modify(
-			[&file](SpriteMappings &mappings)
+		load_asm_or_bin_file(file_path,
+			[this](const QString &file_path)
 			{
-				mappings.applyDPLCs(DynamicPatternLoadCues(file));
+				QFile file(file_path);
+				if (!file.open(QFile::ReadOnly))
+				{
+					QMessageBox::critical(this, "Error", "Failed to load file: file could not be opened for reading.");
+					return;
+				}
+
+				sprite_mappings.modify(
+					[&file](SpriteMappings &mappings)
+					{
+						mappings.applyDPLCs(DynamicPatternLoadCues(file));
+					}
+				);
 			}
 		);
 	};
@@ -353,42 +393,14 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionLoad_Mappings, &QAction::triggered, this,
 		[this, load_sprite_mappings_file]()
 		{
-			const QString file_path = QFileDialog::getOpenFileName(this, "Open Sprite Mappings File", QString(), "Sprite Mappings (*.bin *.asm)");
-
-			if (file_path.isNull())
-				return;
-
-			const int extension_position = file_path.lastIndexOf('.');
-
-			if (extension_position != -1 && QStringView(file_path.data() + extension_position) == QString(".asm"))
-			{
-				// TODO: This is terrible: refactor clownassembler to support using memory buffers as input/output!
-				FILE* const in_file = fopen(file_path.toStdString().c_str(), "r");
-				FILE* const out_file = fopen("clownmaped-temporary", "wb");
-
-				const cc_bool assembled_successfully = ClownAssembler_Assemble(in_file, out_file, nullptr, nullptr, file_path.toStdString().c_str(), cc_false, cc_true, cc_false);
-
-				fclose(in_file);
-				fclose(out_file);
-
-				if (!assembled_successfully)
-				{
-					QMessageBox::critical(this, "Error", "Failed to load mappings: file could not be assembled.");
-					return;
-				}
-
-				load_sprite_mappings_file("clownmaped-temporary");
-			}
-			else
-			{
-				load_sprite_mappings_file(file_path);
-			}
+			load_sprite_mappings_file(QFileDialog::getOpenFileName(this, "Open Sprite Mappings File", QString(), "Sprite Mappings (*.bin *.asm)"));
 		}
 	);
 
 	connect(ui->actionLoad_Sprite_Pattern_Cues, &QAction::triggered, this,
 		[this, load_dynamic_pattern_load_cue_file]()
 		{
+			// TODO: Filters.
 			load_dynamic_pattern_load_cue_file(QFileDialog::getOpenFileName(this, "Open Dynamic Pattern Loading Cue File"));
 		}
 	);
@@ -550,7 +562,7 @@ MainWindow::MainWindow(QWidget* const parent)
 
 			auto sprite_mappings_copy = *sprite_mappings;
 			sprite_mappings_copy.removeDPLCs();
-			sprite_mappings_copy.toDataStream(stream);
+			sprite_mappings_copy.toDataStream(stream, game_format);
 		}
 	);
 
@@ -1427,6 +1439,25 @@ MainWindow::MainWindow(QWidget* const parent)
 			tile_viewer.setScroll(tile_viewer.scroll() + 8);
 		}
 	);
+
+	//////////////////////////
+	// Settings/Game Format //
+	//////////////////////////
+
+	const auto set_game_format = [this](const SpritePiece::Format format)
+	{
+		game_format = format;
+
+		ui->actionSonic_1->setChecked(format == SpritePiece::Format::SONIC_1);
+		ui->actionSonic_2->setChecked(format == SpritePiece::Format::SONIC_2);
+		ui->actionSonic_3_Knuckles->setChecked(format == SpritePiece::Format::SONIC_3_AND_KNUCKLES);
+	};
+
+	connect(ui->actionSonic_1, &QAction::triggered, this, [set_game_format](){set_game_format(SpritePiece::Format::SONIC_1);});
+	connect(ui->actionSonic_2, &QAction::triggered, this, [set_game_format](){set_game_format(SpritePiece::Format::SONIC_2);});
+	connect(ui->actionSonic_3_Knuckles, &QAction::triggered, this, [set_game_format](){set_game_format(SpritePiece::Format::SONIC_3_AND_KNUCKLES);});
+
+	set_game_format(SpritePiece::Format::SONIC_1);
 
 	/////////////////////////////
 	// Settings/Tile Rendering //

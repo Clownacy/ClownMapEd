@@ -16,8 +16,8 @@
 
 struct SpriteFrame
 {
-	void fromDataStream(DataStream &stream);
-	void toDataStream(DataStream &stream) const;
+	void fromDataStream(DataStream &stream, SpritePiece::Format format);
+	void toDataStream(DataStream &stream, SpritePiece::Format format) const;
 	int size_encoded() const
 	{
 		return sizeof(quint16) + SpritePiece::size_encoded * pieces.size();
