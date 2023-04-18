@@ -154,33 +154,33 @@ MainWindow::MainWindow(QWidget* const parent)
 
 	const auto load_tile_file = [this](const QString &file_path, bool (* const decompression_function)(std::istream &src, std::iostream &dst))
 	{
-		if (!file_path.isNull())
+		if (file_path.isNull())
+			return;
+
+		std::ifstream file_stream(file_path.toStdString(), std::ifstream::in | std::ifstream::binary);
+
+		if (!file_stream.is_open())
 		{
-			std::ifstream file_stream(file_path.toStdString(), std::ifstream::in | std::ifstream::binary);
-
-			if (!file_stream.is_open())
-			{
-				QMessageBox::critical(this, "Error", "Failed to load file: file could not be opened for reading.");
-				return;
-			}
-
-			std::stringstream string_stream(std::stringstream::in | std::stringstream::out | std::stringstream::binary);
-
-			if (!decompression_function(file_stream, string_stream))
-			{
-				QMessageBox::critical(this, "Error", "Failed to load file: data could not be decompressed file. Your chosen compression format may have been incorrect.");
-				return;
-			}
-
-			const std::string string = string_stream.str();
-			if (!tile_manager.setTiles(string.begin(), string.end()))
-			{
-				QMessageBox::critical(this, "Error", "Failed to load file: data ends with an incomplete tile. The file might not actually be tile data.");
-				return;
-			}
-
-			tile_viewer.setScroll(0);
+			QMessageBox::critical(this, "Error", "Failed to load file: file could not be opened for reading.");
+			return;
 		}
+
+		std::stringstream string_stream(std::stringstream::in | std::stringstream::out | std::stringstream::binary);
+
+		if (!decompression_function(file_stream, string_stream))
+		{
+			QMessageBox::critical(this, "Error", "Failed to load file: data could not be decompressed file. Your chosen compression format may have been incorrect.");
+			return;
+		}
+
+		const std::string string = string_stream.str();
+		if (!tile_manager.setTiles(string.begin(), string.end()))
+		{
+			QMessageBox::critical(this, "Error", "Failed to load file: data ends with an incomplete tile. The file might not actually be tile data.");
+			return;
+		}
+
+		tile_viewer.setScroll(0);
 	};
 
 	const auto load_uncompressed_tile_file = [load_tile_file](const QString &file_path)
@@ -225,66 +225,66 @@ MainWindow::MainWindow(QWidget* const parent)
 
 	const auto load_palette_file = [this](const QString &file_path, const int starting_palette_line)
 	{
-		if (!file_path.isNull())
+		if (file_path.isNull())
+			return;
+
+		QFile file(file_path);
+		if (!file.open(QFile::ReadOnly))
 		{
-			QFile file(file_path);
-			if (!file.open(QFile::ReadOnly))
-			{
-				QMessageBox::critical(this, "Error", "Failed to load file: file could not be opened for reading.");
-				return;
-			}
-
-			DataStream stream(&file);
-
-			palette.modify(
-				[&stream, starting_palette_line](Palette &palette)
-				{
-					palette.fromDataStream(stream, starting_palette_line);
-				}
-			);
+			QMessageBox::critical(this, "Error", "Failed to load file: file could not be opened for reading.");
+			return;
 		}
+
+		DataStream stream(&file);
+
+		palette.modify(
+			[&stream, starting_palette_line](Palette &palette)
+			{
+				palette.fromDataStream(stream, starting_palette_line);
+			}
+		);
 	};
 
 	const auto load_sprite_mappings_file = [this](const QString &file_path)
 	{
-		if (!file_path.isNull())
+		if (file_path.isNull())
+			return;
+
+		QFile file(file_path);
+		if (!file.open(QFile::ReadOnly))
 		{
-			QFile file(file_path);
-			if (!file.open(QFile::ReadOnly))
-			{
-				QMessageBox::critical(this, "Error", "Failed to load file: file could not be opened for reading.");
-				return;
-			}
-
-			sprite_mappings.modify(
-				[&file](SpriteMappings &mappings)
-				{
-					mappings.fromFile(file);
-				}
-			);
-
-			sprite_viewer.setSelectedSprite(0);
+			QMessageBox::critical(this, "Error", "Failed to load file: file could not be opened for reading.");
+			return;
 		}
+
+		sprite_mappings.modify(
+			[&file](SpriteMappings &mappings)
+			{
+				mappings.fromFile(file);
+			}
+		);
+
+		sprite_viewer.setSelectedSprite(0);
 	};
 
 	const auto load_dynamic_pattern_load_cue_file = [this](const QString &file_path)
 	{
-		if (!file_path.isNull())
-		{
-			QFile file(file_path);
-			if (!file.open(QFile::ReadOnly))
-			{
-				QMessageBox::critical(this, "Error", "Failed to load file: file could not be opened for reading.");
-				return;
-			}
+		if (file_path.isNull())
+			return;
 
-			sprite_mappings.modify(
-				[&file](SpriteMappings &mappings)
-				{
-					mappings.applyDPLCs(DynamicPatternLoadCues(file));
-				}
-			);
+		QFile file(file_path);
+		if (!file.open(QFile::ReadOnly))
+		{
+			QMessageBox::critical(this, "Error", "Failed to load file: file could not be opened for reading.");
+			return;
 		}
+
+		sprite_mappings.modify(
+			[&file](SpriteMappings &mappings)
+			{
+				mappings.applyDPLCs(DynamicPatternLoadCues(file));
+			}
+		);
 	};
 
 	connect(ui->actionLoad_Tiles_Uncompressed, &QAction::triggered, this,
@@ -346,7 +346,6 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionLoad_Secondary_Palette_Lines, &QAction::triggered, this,
 		[this, load_palette_file]()
 		{
-			// TODO: What if the user cancels?
 			load_palette_file(QFileDialog::getOpenFileName(this, "Open Palette File"), 1);
 		}
 	);
@@ -403,6 +402,9 @@ MainWindow::MainWindow(QWidget* const parent)
 	const auto save_tile_file = [this](const QString &prompt, bool (* const callback)(std::istream &in, std::ostream &out))
 	{
 		const QString file_path = QFileDialog::getSaveFileName(this, prompt);
+
+		if (file_path.isNull())
+			return;
 
 		std::ofstream file(file_path.toStdString(), std::ofstream::out | std::ofstream::binary);
 
