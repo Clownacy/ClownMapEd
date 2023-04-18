@@ -318,9 +318,9 @@ MainWindow::MainWindow(QWidget* const parent)
 				}
 
 				sprite_mappings.modify(
-					[&file](SpriteMappings &mappings)
+					[this, &file](SpriteMappings &mappings)
 					{
-						mappings.applyDPLCs(DynamicPatternLoadCues(file));
+						mappings.applyDPLCs(DynamicPatternLoadCues(file, game_format == SpritePiece::Format::SONIC_1 ? DynamicPatternLoadCues::Format::SONIC_1 : DynamicPatternLoadCues::Format::SONIC_2_AND_3_AND_KNUCKLES_AND_CD));
 					}
 				);
 			}

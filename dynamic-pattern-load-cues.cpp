@@ -3,7 +3,7 @@
 #include "data-stream.h"
 #include "utilities.h"
 
-DynamicPatternLoadCues::DynamicPatternLoadCues(QFile &file)
+DynamicPatternLoadCues::DynamicPatternLoadCues(QFile &file, const Format format)
 {
 	DataStream stream(&file);
 	stream.setByteOrder(DataStream::BigEndian);
@@ -15,7 +15,7 @@ DynamicPatternLoadCues::DynamicPatternLoadCues(QFile &file)
 	{
 		const uint frame_offset = stream.read<quint16>();
 
-		if ((frame_offset & 1) != 0)
+		if (format == Format::SONIC_2_AND_3_AND_KNUCKLES_AND_CD && (frame_offset & 1) != 0)
 			break;
 
 		++total_frames;
@@ -33,7 +33,7 @@ DynamicPatternLoadCues::DynamicPatternLoadCues(QFile &file)
 		file.seek(current_frame * 2);
 		file.seek(stream.read<quint16>());
 
-		const uint total_copies = stream.read<quint16>();
+		const uint total_copies = format == Format::SONIC_2_AND_3_AND_KNUCKLES_AND_CD ? stream.read<quint16>() :  stream.read<quint8>();
 
 		frame.copies.resize(total_copies);
 

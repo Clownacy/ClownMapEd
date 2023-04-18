@@ -8,6 +8,12 @@
 
 struct DynamicPatternLoadCues
 {
+	enum class Format
+	{
+		SONIC_1,
+		SONIC_2_AND_3_AND_KNUCKLES_AND_CD
+	};
+
 	struct Frame
 	{
 		struct Copy
@@ -30,7 +36,7 @@ struct DynamicPatternLoadCues
 
 	// TODO: Replace explicit constuctors with a method!
 	DynamicPatternLoadCues() = default;
-	DynamicPatternLoadCues(QFile &file);
+	DynamicPatternLoadCues(QFile &file, Format format);
 
 	QVector<Frame> frames;
 
