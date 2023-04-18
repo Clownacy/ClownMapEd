@@ -1,5 +1,7 @@
 #include "dynamic-pattern-load-cues.h"
 
+#include <QCryptographicHash>
+
 #include "data-stream.h"
 #include "utilities.h"
 
@@ -48,25 +50,26 @@ DynamicPatternLoadCues::DynamicPatternLoadCues(QFile &file, const Format format)
 	}
 }
 
-void DynamicPatternLoadCues::toDataStream(DataStream &stream) const
+void DynamicPatternLoadCues::toQTextStream(QTextStream &stream) const
 {
-	const auto original_byte_order = stream.byteOrder();
-	stream.setByteOrder(DataStream::BigEndian);
+	QCryptographicHash hasher(QCryptographicHash::Algorithm::Md5);
+	hasher.addData(reinterpret_cast<const char*>(this), sizeof(*this));
+	const auto hash = hasher.result();
 
-	const int size_of_offset_table = frames.size() * sizeof(quint16);
+	const QString label = "CME_" + Utilities::IntegerToZeroPaddedHexQString(hash[0]) + Utilities::IntegerToZeroPaddedHexQString(hash[1]) + Utilities::IntegerToZeroPaddedHexQString(hash[2]) + Utilities::IntegerToZeroPaddedHexQString(hash[3]);
 
-	int current_offset = size_of_offset_table;
+	stream << label << ":\n";
+
+	for (const auto &frame : qAsConst(frames))
+		stream << "	dc.w	" << label << '_' << QString::number(&frame - frames.data(), 0x10).toUpper() << '-' << label << '\n';
 
 	for (const auto &frame : qAsConst(frames))
 	{
-		stream.write<quint16>(current_offset);
-		current_offset += sizeof(quint16) + frame.size_encoded();
+		stream << label << '_' << QString::number(&frame - frames.data(), 0x10).toUpper() << ":\n";
+		frame.toQTextStream(stream);
 	}
 
-	for (const auto &frame : qAsConst(frames))
-		frame.toDataStream(stream);
-
-	stream.setByteOrder(original_byte_order);
+	stream << "	even\n";
 }
 
 int DynamicPatternLoadCues::Frame::getMappedTile(const int tile_index) const
@@ -100,17 +103,12 @@ int DynamicPatternLoadCues::Frame::total_segments() const
 	return segments;
 }
 
-void DynamicPatternLoadCues::Frame::toDataStream(DataStream &stream) const
+void DynamicPatternLoadCues::Frame::toQTextStream(QTextStream &stream) const
 {
-	const auto original_byte_order = stream.byteOrder();
-	stream.setByteOrder(DataStream::BigEndian);
-
-	stream.write<quint16>(total_segments());
+	stream << "	dc.w	" << total_segments() << '\n';
 
 	for (const auto &copy : copies)
-		copy.toDataStream(stream);
-
-	stream.setByteOrder(original_byte_order);
+		copy.toQTextStream(stream);
 }
 
 int DynamicPatternLoadCues::Frame::Copy::size_encoded() const
@@ -123,19 +121,14 @@ int DynamicPatternLoadCues::Frame::Copy::total_segments() const
 	return Utilities::DivideCeiling(length, 0x10);
 }
 
-void DynamicPatternLoadCues::Frame::Copy::toDataStream(DataStream &stream) const
+void DynamicPatternLoadCues::Frame::Copy::toQTextStream(QTextStream &stream) const
 {
-	const auto original_byte_order = stream.byteOrder();
-	stream.setByteOrder(DataStream::BigEndian);
-
 	// TODO: Sanity checks (overflow).
 	for (int i = 0; i < total_segments(); ++i)
 	{
 		const int segment_start = start + 0x10 * i;
 		const int segment_length = qMin(0x10, length - 0x10 * i);
 
-		stream.write<quint16>((segment_length - 1) << 12 | (segment_start & 0xFFF));
+		stream << "	dc.w	$" << QString::number((segment_length - 1) << 12 | (segment_start & 0xFFF), 0x10).toUpper() << '\n';
 	}
-
-	stream.setByteOrder(original_byte_order);
 }

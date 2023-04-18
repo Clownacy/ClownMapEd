@@ -4,6 +4,7 @@
 #include <array>
 
 #include <QSizeF>
+#include <QString>
 #include <QWidget>
 #include <QtMath>
 
@@ -17,6 +18,12 @@ template <typename T>
 inline T DivideCeiling(const T a, const T b)
 {
 	return (a + (b - 1)) / b;
+}
+
+template <typename T>
+QString IntegerToZeroPaddedHexQString(const T integer)
+{
+	return QStringLiteral("%1").arg(static_cast<uchar>(integer), sizeof(integer) * 2, 0x10, QLatin1Char('0')).toUpper();
 }
 
 std::array<qreal, 3> QColorTosRGB(const QColor &colour);

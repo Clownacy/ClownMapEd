@@ -2,6 +2,7 @@
 #define DYNAMIC_PATTERN_LOAD_CUES_H
 
 #include <QFile>
+#include <QTextStream>
 #include <QVector>
 
 #include "data-stream.h"
@@ -23,7 +24,7 @@ struct DynamicPatternLoadCues
 
 			int size_encoded() const;
 			int total_segments() const;
-			void toDataStream(DataStream &stream) const;
+			void toQTextStream(QTextStream &stream) const;
 		};
 
 		QVector<Copy> copies;
@@ -31,7 +32,7 @@ struct DynamicPatternLoadCues
 		int getMappedTile(int tile_index) const;
 		int size_encoded() const;
 		int total_segments() const;
-		void toDataStream(DataStream &stream) const;
+		void toQTextStream(QTextStream &stream) const;
 	};
 
 	// TODO: Replace explicit constuctors with a method!
@@ -40,7 +41,7 @@ struct DynamicPatternLoadCues
 
 	QVector<Frame> frames;
 
-	void toDataStream(DataStream &stream) const;
+	void toQTextStream(QTextStream &stream) const;
 };
 
 #endif // DYNAMIC_PATTERN_LOAD_CUES_H

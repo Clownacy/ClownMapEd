@@ -579,10 +579,10 @@ MainWindow::MainWindow(QWidget* const parent)
 			if (!file.open(QFile::OpenModeFlag::WriteOnly))
 				QMessageBox::critical(this, "Error", "Failed to save file: file could not be opened for writing.");
 
-			DataStream stream(&file);
+			QTextStream stream(&file);
 
 			auto sprite_mappings_copy = *sprite_mappings;
-			sprite_mappings_copy.removeDPLCs().toDataStream(stream);
+			sprite_mappings_copy.removeDPLCs().toQTextStream(stream);
 		}
 	);
 
