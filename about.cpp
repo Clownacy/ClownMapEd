@@ -6,6 +6,13 @@ About::About(QWidget *parent) :
 	ui(new Ui::About)
 {
 	ui->setupUi(this);
+
+	setModal(true);
+	setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
+
+	this->setFixedSize(this->size());
+
+	ui->labelIcon->setPixmap(QPixmap(":/Icon/ClownMapEd.png"));
 }
 
 About::~About()
