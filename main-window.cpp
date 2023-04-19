@@ -1583,6 +1583,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	///////////////////
 
 	connect(ui->actionAbout, &QAction::triggered, &about, &QDialog::show);
+	connect(ui->actionLicences, &QAction::triggered, &licences, &QDialog::show);
 
 	////////////////////////
 	// Menubar Activation //
