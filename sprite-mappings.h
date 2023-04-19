@@ -2,6 +2,7 @@
 #define SPRITE_MAPPINGS_H
 
 #include <QFile>
+#include <QTextStream>
 #include <QVector>
 
 #include "data-stream.h"
@@ -11,7 +12,7 @@
 struct SpriteMappings
 {
 	void fromFile(QFile &file, SpritePiece::Format format);
-	void toDataStream(DataStream &stream, SpritePiece::Format format) const;
+	void toQTextStream(QTextStream &stream, SpritePiece::Format format) const;
 
 	bool applyDPLCs(const DynamicPatternLoadCues &dplcs);
 	DynamicPatternLoadCues removeDPLCs();

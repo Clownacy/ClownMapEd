@@ -1,6 +1,9 @@
 #include "sprite-mappings.h"
 
+#include <QRandomGenerator>
+
 #include "data-stream.h"
+#include "utilities.h"
 
 void SpriteMappings::fromFile(QFile &file, const SpritePiece::Format format)
 {
@@ -40,22 +43,31 @@ void SpriteMappings::fromFile(QFile &file, const SpritePiece::Format format)
 	}
 }
 
-void SpriteMappings::toDataStream(DataStream &stream, const SpritePiece::Format format) const
+void SpriteMappings::toQTextStream(QTextStream &stream, const SpritePiece::Format format) const
 {
-	const auto original_byte_order = stream.byteOrder();
-	stream.setByteOrder(DataStream::BigEndian);
+	// TODO: This code is duplicated in the DPLC code. Can this be made into a common function?
+	stream << QStringLiteral("; --------------------------------------------------------------------------------\n"
+	                         "; Sprite mappings - output from ClownMapEd - %1 format\n"
+	                         "; --------------------------------------------------------------------------------\n\n"
+	                        ).arg(format == SpritePiece::Format::SONIC_1 ? QStringLiteral("Sonic 1/CD") : format == SpritePiece::Format::SONIC_2 ? QStringLiteral("Sonic 2") : QStringLiteral("Sonic 3 & Knuckles"));
 
-	int current_offset = frames.size() * sizeof(quint16);
-	for (const auto &frame : frames)
+	const auto unique_number = QRandomGenerator::global()->generate();
+	const QString label = "CME_" + Utilities::IntegerToZeroPaddedHexQString(unique_number);
+
+	stream << label << ":\n";
+
+	for (const auto &frame : qAsConst(frames))
+		stream << "	dc.w	" << label << "_" << QString::number(&frame - frames.data(), 0x10).toUpper() << "-" << label << "\n";
+
+	stream << "\n";
+
+	for (const auto &frame : qAsConst(frames))
 	{
-		stream.write<quint16>(current_offset);
-		current_offset += frame.size_encoded();
+		stream << label << "_" << QString::number(&frame - frames.data(), 0x10).toUpper() << ":\n";
+		frame.toQTextStream(stream, format);
 	}
 
-	for (const auto &frame : frames)
-		frame.toDataStream(stream, format);
-
-	stream.setByteOrder(original_byte_order);
+	stream << "	even\n";
 }
 
 bool SpriteMappings::applyDPLCs(const DynamicPatternLoadCues &dplcs)

@@ -8,6 +8,7 @@
 
 #include <QImage>
 #include <QRect>
+#include <QTextStream>
 #include <QVector>
 
 #include "data-stream.h"
@@ -17,11 +18,7 @@
 struct SpriteFrame
 {
 	void fromDataStream(DataStream &stream, SpritePiece::Format format);
-	void toDataStream(DataStream &stream, SpritePiece::Format format) const;
-	int size_encoded() const
-	{
-		return sizeof(quint16) + SpritePiece::size_encoded * pieces.size();
-	}
+	void toQTextStream(QTextStream &stream, SpritePiece::Format format) const;
 
 	void draw(QPainter &painter, bool hide_duplicate_tiles, const TileManager &tile_manager, TileManager::PixmapType effect, int starting_palette_line = 0, int x_offset = 0, int y_offset = 0, const std::optional<std::pair<int, TileManager::PixmapType>> &selected_piece = std::nullopt) const;
 	QRect rect() const;

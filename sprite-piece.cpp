@@ -1,5 +1,7 @@
 #include "sprite-piece.h"
 
+#include "utilities.h"
+
 void SpritePiece::fromDataStream(DataStream &stream, const Format format)
 {
 	const auto original_byte_order = stream.byteOrder();
@@ -34,37 +36,32 @@ void SpritePiece::fromDataStream(DataStream &stream, const Format format)
 	stream.setByteOrder(original_byte_order);
 }
 
-void SpritePiece::toDataStream(DataStream &stream, const Format format) const
+void SpritePiece::toQTextStream(QTextStream &stream, const Format format) const
 {
-	const auto original_byte_order = stream.byteOrder();
-	stream.setByteOrder(DataStream::BigEndian);
-
 	// TODO: Report to the user when the coordinates are truncated!
-	stream.write<qint8>(y);
-	stream.write<quint8>((static_cast<uint>(width) - 1) << 2 | static_cast<uint>(height) - 1);
+	stream << "\tdc.b\t" << y << "\n";
+	stream << "\tdc.b\t$" << Utilities::IntegerToZeroPaddedHexQString(static_cast<quint8>((static_cast<uint>(width) - 1) << 2 | static_cast<uint>(height) - 1)) << "\n";
 
 	const uint art_tile_upper_bits = static_cast<uint>(priority) << 15
 								   | static_cast<uint>(palette_line) << 13
 								   | static_cast<uint>(y_flip) << 12
 								   | static_cast<uint>(x_flip) << 11;
 
-	stream.write<quint16>(art_tile_upper_bits | static_cast<uint>(tile_index));
+	stream << "\tdc.w\t$" << Utilities::IntegerToZeroPaddedHexQString(static_cast<quint16>(art_tile_upper_bits | static_cast<uint>(tile_index))) << "\n";
 
 	switch (format)
 	{
 		case Format::SONIC_1:
-			stream.write<qint8>(x);
+			stream << "\tdc.b\t" << x << "\n";
 			break;
 
 		case Format::SONIC_2:
-			stream.write<quint16>(art_tile_upper_bits | static_cast<uint>(tile_index) / 2);
+			stream << "\tdc.w\t$" << Utilities::IntegerToZeroPaddedHexQString(static_cast<quint16>(art_tile_upper_bits | static_cast<uint>(tile_index) / 2)) << "\n";
 			// Fallthrough
 		case Format::SONIC_3_AND_KNUCKLES:
-			stream.write<qint16>(x);
+			stream << "\tdc.w\t" << y << "\n";
 			break;
 	}
-
-	stream.setByteOrder(original_byte_order);
 }
 
 void SpritePiece::getTiles(QVector<SpritePiece::Tile> &tiles) const

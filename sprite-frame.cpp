@@ -16,21 +16,16 @@ void SpriteFrame::fromDataStream(DataStream &stream, const SpritePiece::Format f
 	stream.setByteOrder(original_byte_order);
 }
 
-void SpriteFrame::toDataStream(DataStream &stream, const SpritePiece::Format format) const
+void SpriteFrame::toQTextStream(QTextStream &stream, const SpritePiece::Format format) const
 {
-	const auto original_byte_order = stream.byteOrder();
-	stream.setByteOrder(DataStream::BigEndian);
-
 	// TODO: Report to the user when this is truncated!
-	if (format == SpritePiece::Format::SONIC_1)
-		stream.write<quint8>(pieces.size());
-	else
-		stream.write<quint16>(pieces.size());
+	stream << "\tdc." << (format == SpritePiece::Format::SONIC_1 ? "b" : "w") << "\t" << pieces.size() << "\n\n";
 
 	for (const auto &piece : pieces)
-		piece.toDataStream(stream, format);
-
-	stream.setByteOrder(original_byte_order);
+	{
+		piece.toQTextStream(stream, format);
+		stream << "\n";
+	}
 }
 
 void SpriteFrame::draw(QPainter &painter, bool hide_duplicate_tiles, const TileManager &tile_manager, const TileManager::PixmapType effect, const int starting_palette_line, const int x_offset, const int y_offset, const std::optional<std::pair<int, TileManager::PixmapType>> &selected_piece) const

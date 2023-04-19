@@ -5,6 +5,7 @@
 
 #include <QPainter>
 #include <QRect>
+#include <QTextStream>
 #include <QVector>
 
 #include "data-stream.h"
@@ -32,8 +33,7 @@ struct SpritePiece
 	};
 
 	void fromDataStream(DataStream &stream, Format format);
-	void toDataStream(DataStream &stream, Format format) const;
-	static constexpr int size_encoded = 8;
+	void toQTextStream(QTextStream &stream, Format format) const;
 
 	QRect rect() const
 	{

@@ -63,11 +63,11 @@ void DynamicPatternLoadCues::toQTextStream(QTextStream &stream, const Format for
 	stream << label << ":\n";
 
 	for (const auto &frame : qAsConst(frames))
-		stream << "	dc.w	" << label << '_' << QString::number(&frame - frames.data(), 0x10).toUpper() << '-' << label << '\n';
+		stream << "	dc.w	" << label << "_" << QString::number(&frame - frames.data(), 0x10).toUpper() << "-" << label << "\n";
 
 	for (const auto &frame : qAsConst(frames))
 	{
-		stream << label << '_' << QString::number(&frame - frames.data(), 0x10).toUpper() << ":\n";
+		stream << label << "_" << QString::number(&frame - frames.data(), 0x10).toUpper() << ":\n";
 		frame.toQTextStream(stream, format);
 	}
 
