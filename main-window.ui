@@ -211,6 +211,7 @@
     </widget>
     <addaction name="menuGame_Format"/>
     <addaction name="menuTile_Rendering"/>
+    <addaction name="actionPattern_Load_Cues"/>
    </widget>
    <widget class="QMenu" name="menu_View">
     <property name="title">
@@ -929,6 +930,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Alt+Shift+3</string>
+   </property>
+  </action>
+  <action name="actionPattern_Load_Cues">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Pattern Load Cues</string>
    </property>
   </action>
  </widget>

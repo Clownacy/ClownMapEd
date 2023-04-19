@@ -148,6 +148,31 @@ MainWindow::MainWindow(QWidget* const parent)
 		}
 	);
 
+	//////////////////
+	// Window Title //
+	//////////////////
+
+	const auto update_title = [this]()
+	{
+		const auto do_string_thingy = [](const QString &string, const int index, const int total)
+		{
+			return " | " + string + (index == -1 ? "s: " : (" " + QString::number(index, 0x10).toUpper() + "/")) + QString::number(total, 0x10).toUpper();
+		};
+
+		const QString frame_string = do_string_thingy("Frame", sprite_viewer.selected_sprite_index(), sprite_mappings->frames.size());
+		const QString piece_string = sprite_viewer.selected_sprite_index() == -1 ? "" : do_string_thingy("Piece", sprite_viewer.selected_piece_index(), sprite_mappings->frames[sprite_viewer.selected_sprite_index()].pieces.size());
+		const QString tile_string = do_string_thingy("Tile", tile_viewer.selection().indexOf(true), tile_manager.total_tiles());
+		const QString dplc_string = ui->actionPattern_Load_Cues->isChecked() ? " | Cues On" : "";
+
+		setWindowTitle("ClownMapEd" + frame_string + piece_string + tile_string + dplc_string);
+	};
+
+	connect(&sprite_viewer, &SpriteViewer::selectedSpriteChanged, this, update_title);
+	connect(&sprite_mappings, &SignalWrapper<SpriteMappings>::modified, this, update_title);
+	connect(&tile_viewer, &TileViewer::tileSelected, this, update_title);
+
+	update_title();
+
 	//////////////////////////////////
 	// Menubar: File/Load Data File //
 	//////////////////////////////////
@@ -325,6 +350,8 @@ MainWindow::MainWindow(QWidget* const parent)
 				);
 			}
 		);
+
+		ui->actionPattern_Load_Cues->setChecked(true);
 	};
 
 	connect(ui->actionLoad_Tiles_Uncompressed, &QAction::triggered, this,
@@ -560,9 +587,16 @@ MainWindow::MainWindow(QWidget* const parent)
 
 			QTextStream stream(&file);
 
-			auto sprite_mappings_copy = *sprite_mappings;
-			sprite_mappings_copy.removeDPLCs();
-			sprite_mappings_copy.toQTextStream(stream, game_format);
+			if (ui->actionPattern_Load_Cues->isChecked())
+			{
+				auto sprite_mappings_copy = *sprite_mappings;
+				sprite_mappings_copy.removeDPLCs();
+				sprite_mappings_copy.toQTextStream(stream, game_format);
+			}
+			else
+			{
+				sprite_mappings->toQTextStream(stream, game_format);
+			}
 		}
 	);
 
@@ -622,6 +656,8 @@ MainWindow::MainWindow(QWidget* const parent)
 					mappings.removeDPLCs();
 				}
 			);
+
+			ui->actionPattern_Load_Cues->setChecked(false);
 		}
 	);
 	connect(ui->actionUnload_All, &QAction::triggered, this,
@@ -1181,9 +1217,9 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionMove_Up_1_Pixel, &QAction::triggered, this, [move_frame_or_piece](){move_frame_or_piece(0, -1);});
 	connect(ui->actionMove_Down_1_Pixel, &QAction::triggered, this, [move_frame_or_piece](){move_frame_or_piece(0, 1);});
 
-	////////////////
-	// Edit/Tiles //
-	////////////////
+	/////////////////////////
+	// Menubar: Edit/Tiles //
+	/////////////////////////
 
 	const auto set_tile_selection_and_update_piece_picker = [this](const std::function<void(QVector<bool> &selected)> &callback)
 	{
@@ -1364,9 +1400,9 @@ MainWindow::MainWindow(QWidget* const parent)
 		}
 	);
 
-	/////////////////
-	// View/Scroll //
-	/////////////////
+	//////////////////////////
+	// Menubar: View/Scroll //
+	//////////////////////////
 
 	connect(ui->actionScroll_Back_1_Row_Column, &QAction::triggered, this,
 		[this]()
@@ -1440,9 +1476,9 @@ MainWindow::MainWindow(QWidget* const parent)
 		}
 	);
 
-	//////////////////////////
-	// Settings/Game Format //
-	//////////////////////////
+	///////////////////////////////////
+	// Menubar: Settings/Game Format //
+	///////////////////////////////////
 
 	const auto set_game_format = [this](const SpritePiece::Format format)
 	{
@@ -1459,9 +1495,9 @@ MainWindow::MainWindow(QWidget* const parent)
 
 	set_game_format(SpritePiece::Format::SONIC_1);
 
-	/////////////////////////////
-	// Settings/Tile Rendering //
-	/////////////////////////////
+	//////////////////////////////////////
+	// Menubar: Settings/Tile Rendering //
+	//////////////////////////////////////
 
 	connect(ui->actionHide_Duplicated_Tiles_in_Frames, &QAction::triggered, &sprite_viewer, &SpriteViewer::setHideDuplicateTiles);
 
@@ -1483,6 +1519,21 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionRender_Starting_with_Palette_Line_4, &QAction::triggered, this, [set_starting_palette_line](){set_starting_palette_line(3);});
 
 	set_starting_palette_line(0);
+
+	///////////////////////
+	// Menubar: Settings //
+	///////////////////////
+
+	const auto set_pattern_load_cues_enabled = [this, update_title]()
+	{
+		const bool enabled = ui->actionPattern_Load_Cues->isChecked();
+		ui->actionSave_Pattern_Cues->setEnabled(enabled);
+		update_title();
+	};
+
+	connect(ui->actionPattern_Load_Cues, &QAction::changed, this, set_pattern_load_cues_enabled);
+
+	set_pattern_load_cues_enabled();
 
 	////////////////////////
 	// Menubar Activation //
@@ -1549,30 +1600,6 @@ MainWindow::MainWindow(QWidget* const parent)
 
 	// Manually update the menubar upon startup so that the various options are properly enabled.
 	update_menubar();
-
-	//////////////////
-	// Window Title //
-	//////////////////
-
-	const auto update_title = [this]()
-	{
-		const auto do_string_thingy = [](const QString &string, const int index, const int total)
-		{
-			return " | " + string + (index == -1 ? "s: " : (" " + QString::number(index, 0x10).toUpper() + "/")) + QString::number(total, 0x10).toUpper();
-		};
-
-		const QString frame_string = do_string_thingy("Frame", sprite_viewer.selected_sprite_index(), sprite_mappings->frames.size());
-		const QString piece_string = sprite_viewer.selected_sprite_index() == -1 ? "" : do_string_thingy("Piece", sprite_viewer.selected_piece_index(), sprite_mappings->frames[sprite_viewer.selected_sprite_index()].pieces.size());
-		const QString tile_string = do_string_thingy("Tile", tile_viewer.selection().indexOf(true), tile_manager.total_tiles());
-
-		setWindowTitle("ClownMapEd" + frame_string + piece_string + tile_string);
-	};
-
-	connect(&sprite_viewer, &SpriteViewer::selectedSpriteChanged, this, update_title);
-	connect(&sprite_mappings, &SignalWrapper<SpriteMappings>::modified, this, update_title);
-	connect(&tile_viewer, &TileViewer::tileSelected, this, update_title);
-
-	update_title();
 }
 
 MainWindow::~MainWindow()
