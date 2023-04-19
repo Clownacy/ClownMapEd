@@ -582,7 +582,7 @@ MainWindow::MainWindow(QWidget* const parent)
 			QTextStream stream(&file);
 
 			auto sprite_mappings_copy = *sprite_mappings;
-			sprite_mappings_copy.removeDPLCs().toQTextStream(stream);
+			sprite_mappings_copy.removeDPLCs().toQTextStream(stream, game_format == SpritePiece::Format::SONIC_1 ? DynamicPatternLoadCues::Format::SONIC_1 : DynamicPatternLoadCues::Format::SONIC_2_AND_3_AND_KNUCKLES_AND_CD);
 		}
 	);
 

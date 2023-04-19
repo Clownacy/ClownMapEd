@@ -50,11 +50,12 @@ DynamicPatternLoadCues::DynamicPatternLoadCues(QFile &file, const Format format)
 	}
 }
 
-void DynamicPatternLoadCues::toQTextStream(QTextStream &stream) const
+void DynamicPatternLoadCues::toQTextStream(QTextStream &stream, const Format format) const
 {
-	stream << "; --------------------------------------------------------------------------------\n"
-	          "; Dynamic Pattern Loading Cues - output from ClownMapEd - Sonic 2 format\n"
-	          "; --------------------------------------------------------------------------------\n\n";
+	stream << QStringLiteral("; --------------------------------------------------------------------------------\n"
+	                         "; Dynamic Pattern Loading Cues - output from ClownMapEd - %1 format\n"
+	                         "; --------------------------------------------------------------------------------\n\n"
+	                        ).arg(format == Format::SONIC_1 ? QStringLiteral("Sonic 1") : QStringLiteral("Sonic 2/3&K/CD"));
 
 	const auto unique_number = QRandomGenerator::global()->generate();
 	const QString label = "CME_" + Utilities::IntegerToZeroPaddedHexQString(unique_number);
@@ -67,7 +68,7 @@ void DynamicPatternLoadCues::toQTextStream(QTextStream &stream) const
 	for (const auto &frame : qAsConst(frames))
 	{
 		stream << label << '_' << QString::number(&frame - frames.data(), 0x10).toUpper() << ":\n";
-		frame.toQTextStream(stream);
+		frame.toQTextStream(stream, format);
 	}
 
 	stream << "	even\n";
@@ -104,9 +105,9 @@ int DynamicPatternLoadCues::Frame::total_segments() const
 	return segments;
 }
 
-void DynamicPatternLoadCues::Frame::toQTextStream(QTextStream &stream) const
+void DynamicPatternLoadCues::Frame::toQTextStream(QTextStream &stream, const Format format) const
 {
-	stream << "	dc.w	" << total_segments() << '\n';
+	stream << "\tdc." << (format == Format::SONIC_1 ? 'b' : 'w') << '\t' << total_segments() << '\n';
 
 	for (const auto &copy : copies)
 		copy.toQTextStream(stream);
@@ -130,6 +131,6 @@ void DynamicPatternLoadCues::Frame::Copy::toQTextStream(QTextStream &stream) con
 		const int segment_start = start + 0x10 * i;
 		const int segment_length = qMin(0x10, length - 0x10 * i);
 
-		stream << "	dc.w	$" << QString::number((segment_length - 1) << 12 | (segment_start & 0xFFF), 0x10).toUpper() << '\n';
+		stream << "\tdc.w\t$" << QString::number((segment_length - 1) << 12 | (segment_start & 0xFFF), 0x10).toUpper() << '\n';
 	}
 }

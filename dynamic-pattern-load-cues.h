@@ -32,7 +32,7 @@ struct DynamicPatternLoadCues
 		int getMappedTile(int tile_index) const;
 		int size_encoded() const;
 		int total_segments() const;
-		void toQTextStream(QTextStream &stream) const;
+		void toQTextStream(QTextStream &stream, Format format) const;
 	};
 
 	// TODO: Replace explicit constuctors with a method!
@@ -41,7 +41,7 @@ struct DynamicPatternLoadCues
 
 	QVector<Frame> frames;
 
-	void toQTextStream(QTextStream &stream) const;
+	void toQTextStream(QTextStream &stream, Format format) const;
 };
 
 #endif // DYNAMIC_PATTERN_LOAD_CUES_H
