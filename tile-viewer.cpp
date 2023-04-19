@@ -132,6 +132,8 @@ void TileViewer::paintEvent(QPaintEvent* const event)
 	do_visible_rows(
 		[&painter](const int tile_index, const int y, const int length_of_row)
 		{
+			Q_UNUSED(tile_index);
+
 			const QRect rect(0, y * TILE_HEIGHT_SCALED, length_of_row * TILE_WIDTH_SCALED, TILE_HEIGHT_SCALED);
 
 			painter.drawRect(rect);

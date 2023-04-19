@@ -10,7 +10,6 @@
 #include <QPixmap>
 #include <QVector>
 
-#include "data-stream.h"
 #include "palette.h"
 #include "signal-wrapper.h"
 
@@ -32,7 +31,7 @@ public:
 	static constexpr int TILE_HEIGHT = 8;
 	static constexpr int TILE_SIZE_IN_BYTES = TILE_WIDTH * TILE_HEIGHT / 2;
 
-        TileManager(const SignalWrapper<Palette> &palette_manager);
+	TileManager(const SignalWrapper<Palette> &palette_manager);
 
 	void unloadTiles()
 	{
@@ -73,7 +72,7 @@ public:
 			return tile_pixmaps[tile_index][palette_line][static_cast<std::size_t>(type)];
 	}
 
-	const int total_tiles() const
+	int total_tiles() const
 	{
 		return tile_pixmaps.size();
 	}

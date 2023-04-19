@@ -40,7 +40,7 @@ void SpritePiece::toQTextStream(QTextStream &stream, const Format format) const
 {
 	// TODO: Report to the user when the coordinates are truncated!
 	stream << "\tdc.b\t" << y << "\n";
-	stream << "\tdc.b\t$" << Utilities::IntegerToZeroPaddedHexQString(static_cast<quint8>((static_cast<uint>(width) - 1) << 2 | static_cast<uint>(height) - 1)) << "\n";
+	stream << "\tdc.b\t$" << Utilities::IntegerToZeroPaddedHexQString((static_cast<quint8>((static_cast<uint>(width) - 1) << 2) | (static_cast<uint>(height) - 1))) << "\n";
 
 	const uint art_tile_upper_bits = static_cast<uint>(priority) << 15
 								   | static_cast<uint>(palette_line) << 13
