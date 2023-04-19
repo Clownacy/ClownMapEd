@@ -52,6 +52,10 @@ DynamicPatternLoadCues::DynamicPatternLoadCues(QFile &file, const Format format)
 
 void DynamicPatternLoadCues::toQTextStream(QTextStream &stream) const
 {
+	stream << "; --------------------------------------------------------------------------------\n"
+	          "; Dynamic Pattern Loading Cues - output from ClownMapEd - Sonic 2 format\n"
+	          "; --------------------------------------------------------------------------------\n\n";
+
 	const auto unique_number = QRandomGenerator::global()->generate();
 	const QString label = "CME_" + Utilities::IntegerToZeroPaddedHexQString(unique_number);
 
