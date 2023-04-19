@@ -270,27 +270,37 @@ MainWindow::MainWindow(QWidget* const parent)
 		);
 	};
 
-	const auto load_asm_or_bin_file = [this](const QString &file_path, const std::function<void(const QString &file_path)> &callback)
+	const auto assemble_file = [](const char* const input_filename, const char* const output_filename)
+	{
+		// TODO: This is terrible: refactor clownassembler to support using memory buffers as input/output!
+		FILE* const in_file = fopen(input_filename, "r");
+		FILE* const out_file = fopen(output_filename, "wb");
+
+		const cc_bool assembled_successfully = ClownAssembler_Assemble(in_file, out_file, nullptr, nullptr, input_filename, cc_false, cc_true, cc_false);
+
+		fclose(in_file);
+		fclose(out_file);
+
+		return assembled_successfully;
+	};
+
+	const auto is_assembly_file_path = [](const QString &file_path)
+	{
+		const int extension_position = file_path.lastIndexOf('.');
+
+		return extension_position != -1 && QStringView(file_path.data() + extension_position) == QStringLiteral(".asm");
+	};
+
+	const char* const temporary_filename = "clownmaped-temporary";
+
+	const auto load_asm_or_bin_file = [this, assemble_file, is_assembly_file_path, temporary_filename](const QString &file_path, const std::function<void(const QString &file_path)> &callback)
 	{
 		if (file_path.isNull())
 			return;
 
-		const int extension_position = file_path.lastIndexOf('.');
-
-		if (extension_position != -1 && QStringView(file_path.data() + extension_position) == QStringLiteral(".asm"))
+		if (is_assembly_file_path(file_path))
 		{
-			const char* const temporary_filename = "clownmaped-temporary";
-
-			// TODO: This is terrible: refactor clownassembler to support using memory buffers as input/output!
-			FILE* const in_file = fopen(file_path.toStdString().c_str(), "r");
-			FILE* const out_file = fopen(temporary_filename, "wb");
-
-			const cc_bool assembled_successfully = ClownAssembler_Assemble(in_file, out_file, nullptr, nullptr, file_path.toStdString().c_str(), cc_false, cc_true, cc_false);
-
-			fclose(in_file);
-			fclose(out_file);
-
-			if (!assembled_successfully)
+			if (!assemble_file(file_path.toStdString().c_str(), temporary_filename))
 			{
 				QMessageBox::critical(this, "Error", "Failed to load mappings: file could not be assembled.");
 				return;
@@ -306,7 +316,7 @@ MainWindow::MainWindow(QWidget* const parent)
 		};
 	};
 
-	const auto load_sprite_mappings_file = [this, &load_asm_or_bin_file](const QString &file_path)
+	const auto load_sprite_mappings_file = [this, load_asm_or_bin_file](const QString &file_path)
 	{
 		load_asm_or_bin_file(file_path,
 			[this](const QString &file_path)
@@ -330,7 +340,7 @@ MainWindow::MainWindow(QWidget* const parent)
 		);
 	};
 
-	const auto load_dynamic_pattern_load_cue_file = [this, &load_asm_or_bin_file](const QString &file_path)
+	const auto load_dynamic_pattern_load_cue_file = [this, load_asm_or_bin_file](const QString &file_path)
 	{
 		load_asm_or_bin_file(file_path,
 			[this](const QString &file_path)
@@ -580,50 +590,66 @@ MainWindow::MainWindow(QWidget* const parent)
 		}
 	);
 
-	connect(ui->actionSave_Mappings, &QAction::triggered, this,
-		[this]()
+	const auto save_asm_or_bin_file = [assemble_file, is_assembly_file_path, temporary_filename](const QString &file_path, const std::function<void(const QString &file_path)> &callback)
+	{
+		if (file_path.isNull())
+			return;
+
+		if (is_assembly_file_path(file_path))
 		{
-			const QString file_path = QFileDialog::getSaveFileName(this, "Save Sprite Mappings File");
+			callback(file_path);
+		}
+		else
+		{
+			callback(temporary_filename);
+			assemble_file(temporary_filename, file_path.toStdString().c_str());
+		}
+	};
 
-			if (file_path.isNull())
-				return;
+	connect(ui->actionSave_Mappings, &QAction::triggered, this,
+		[this, save_asm_or_bin_file]()
+		{
+			save_asm_or_bin_file(QFileDialog::getSaveFileName(this, "Save Sprite Mappings File"),
+				[this](const QString &file_path)
+				{
+					QFile file(file_path);
+					if (!file.open(QFile::OpenModeFlag::WriteOnly))
+						QMessageBox::critical(this, "Error", "Failed to save file: file could not be opened for writing.");
 
-			QFile file(file_path);
-			if (!file.open(QFile::OpenModeFlag::WriteOnly))
-				QMessageBox::critical(this, "Error", "Failed to save file: file could not be opened for writing.");
+					QTextStream stream(&file);
 
-			QTextStream stream(&file);
-
-			if (ui->actionPattern_Load_Cues->isChecked())
-			{
-				auto sprite_mappings_copy = *sprite_mappings;
-				sprite_mappings_copy.removeDPLCs();
-				sprite_mappings_copy.toQTextStream(stream, game_format);
-			}
-			else
-			{
-				sprite_mappings->toQTextStream(stream, game_format);
-			}
+					if (ui->actionPattern_Load_Cues->isChecked())
+					{
+						auto sprite_mappings_copy = *sprite_mappings;
+						sprite_mappings_copy.removeDPLCs();
+						sprite_mappings_copy.toQTextStream(stream, game_format);
+					}
+					else
+					{
+						sprite_mappings->toQTextStream(stream, game_format);
+					}
+				}
+			);
 		}
 	);
 
 	connect(ui->actionSave_Pattern_Cues, &QAction::triggered, this,
-		[this]()
+		[this, save_asm_or_bin_file]()
 		{
-			// TODO: This file-opening code is repeated a few times, so see if I can move it to a function.
-			const QString file_path = QFileDialog::getSaveFileName(this, "Save Dynamic Pattern Loading Cue File");
+			save_asm_or_bin_file(QFileDialog::getSaveFileName(this, "Save Dynamic Pattern Loading Cue File"),
+				[this](const QString &file_path)
+				{
+					// TODO: This file-opening code is repeated a few times, so see if I can move it to a function.
+					QFile file(file_path);
+					if (!file.open(QFile::OpenModeFlag::WriteOnly))
+						QMessageBox::critical(this, "Error", "Failed to save file: file could not be opened for writing.");
 
-			if (file_path.isNull())
-				return;
+					QTextStream stream(&file);
 
-			QFile file(file_path);
-			if (!file.open(QFile::OpenModeFlag::WriteOnly))
-				QMessageBox::critical(this, "Error", "Failed to save file: file could not be opened for writing.");
-
-			QTextStream stream(&file);
-
-			auto sprite_mappings_copy = *sprite_mappings;
-			sprite_mappings_copy.removeDPLCs().toQTextStream(stream, game_format == SpritePiece::Format::SONIC_1 ? DynamicPatternLoadCues::Format::SONIC_1 : DynamicPatternLoadCues::Format::SONIC_2_AND_3_AND_KNUCKLES_AND_CD);
+					auto sprite_mappings_copy = *sprite_mappings;
+					sprite_mappings_copy.removeDPLCs().toQTextStream(stream, game_format == SpritePiece::Format::SONIC_1 ? DynamicPatternLoadCues::Format::SONIC_1 : DynamicPatternLoadCues::Format::SONIC_2_AND_3_AND_KNUCKLES_AND_CD);
+				}
+			);
 		}
 	);
 
