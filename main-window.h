@@ -5,6 +5,7 @@
 #include <QMainWindow>
 #include <QVBoxLayout>
 
+#include "about.h"
 #include "palette.h"
 #include "palette-editor.h"
 #include "signal-wrapper.h"
@@ -38,6 +39,7 @@ private:
 	QVBoxLayout vertical_layout;
 	QHBoxLayout horizontal_layout;
 	SpritePiece::Format game_format;
+	About about;
 };
 
 #endif // MAIN_WINDOW_H

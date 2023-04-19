@@ -1542,6 +1542,12 @@ MainWindow::MainWindow(QWidget* const parent)
 
 	set_pattern_load_cues_enabled();
 
+	///////////////////
+	// Menubar: Help //
+	///////////////////
+
+	connect(ui->actionAbout, &QAction::triggered, &about, &QDialog::show);
+
 	////////////////////////
 	// Menubar Activation //
 	////////////////////////

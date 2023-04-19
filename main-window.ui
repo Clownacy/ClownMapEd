@@ -234,10 +234,17 @@
     </widget>
     <addaction name="menuScroll"/>
    </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionAbout"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menu_View"/>
    <addaction name="menu_Settings"/>
+   <addaction name="menuHelp"/>
   </widget>
   <action name="actionLoad_Primary_Palette">
    <property name="text">
@@ -938,6 +945,11 @@
    </property>
    <property name="text">
     <string>Pattern Load Cues</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
    </property>
   </action>
  </widget>

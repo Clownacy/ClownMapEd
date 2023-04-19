@@ -18,6 +18,10 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 set(PROJECT_SOURCES
 	"ClownMapEd.rc"
+	"icon.qrc"
+	"about.cpp"
+	"about.h"
+	"about.ui"
 	"colour-button.cpp"
 	"colour-button.h"
 	"data-stream.h"
