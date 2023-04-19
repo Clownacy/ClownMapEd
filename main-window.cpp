@@ -159,12 +159,13 @@ MainWindow::MainWindow(QWidget* const parent)
 			return " | " + string + (index == -1 ? "s: " : (" " + QString::number(index, 0x10).toUpper() + "/")) + QString::number(total, 0x10).toUpper();
 		};
 
+		const QString format_string = game_format == SpritePiece::Format::SONIC_1 ? "S1" : game_format == SpritePiece::Format::SONIC_2 ? "S2" : "S3K";
 		const QString frame_string = do_string_thingy("Frame", sprite_viewer.selected_sprite_index(), sprite_mappings->frames.size());
 		const QString piece_string = sprite_viewer.selected_sprite_index() == -1 ? "" : do_string_thingy("Piece", sprite_viewer.selected_piece_index(), sprite_mappings->frames[sprite_viewer.selected_sprite_index()].pieces.size());
 		const QString tile_string = do_string_thingy("Tile", tile_viewer.selection().indexOf(true), tile_manager.total_tiles());
 		const QString dplc_string = ui->actionPattern_Load_Cues->isChecked() ? " | Cues On" : "";
 
-		setWindowTitle("ClownMapEd" + frame_string + piece_string + tile_string + dplc_string);
+		setWindowTitle(format_string + "MapEd" + frame_string + piece_string + tile_string + dplc_string);
 	};
 
 	connect(&sprite_viewer, &SpriteViewer::selectedSpriteChanged, this, update_title);
@@ -1513,13 +1514,15 @@ MainWindow::MainWindow(QWidget* const parent)
 	// Menubar: Settings/Game Format //
 	///////////////////////////////////
 
-	const auto set_game_format = [this](const SpritePiece::Format format)
+	const auto set_game_format = [this, update_title](const SpritePiece::Format format)
 	{
 		game_format = format;
 
 		ui->actionSonic_1->setChecked(format == SpritePiece::Format::SONIC_1);
 		ui->actionSonic_2->setChecked(format == SpritePiece::Format::SONIC_2);
 		ui->actionSonic_3_Knuckles->setChecked(format == SpritePiece::Format::SONIC_3_AND_KNUCKLES);
+
+		update_title();
 	};
 
 	connect(ui->actionSonic_1, &QAction::triggered, this, [set_game_format](){set_game_format(SpritePiece::Format::SONIC_1);});
