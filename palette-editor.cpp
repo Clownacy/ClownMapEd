@@ -40,7 +40,7 @@ PaletteEditor::PaletteEditor(SignalWrapper<Palette> &palette)
 
 			button.setColour(palette->lines[line].colours[index].toQColor224());
 
-			button.setFixedSize(20, 20);
+			button.setFixedSize(13, 13);
 
 			grid_layout.addWidget(&button, index, line);
 		}

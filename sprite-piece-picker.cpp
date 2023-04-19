@@ -11,7 +11,7 @@ SpritePiecePicker::SpritePiecePicker(TileManager &tile_manager)
 {
 	setLayout(&grid_layout);
 	setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
-	grid_layout.setSpacing(24);
+	grid_layout.setSpacing(16);
 
 	for (int y = 0; y < MAX_PIECE_HEIGHT; ++y)
 		for (int x = 0; x < MAX_PIECE_WIDTH; ++x)

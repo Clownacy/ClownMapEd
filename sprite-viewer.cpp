@@ -37,7 +37,7 @@ void SpriteViewer::paintEvent(QPaintEvent* const event)
 	QTransform transform;
 	transform.translate(width() / 2, height() / 2); // Centre origin.
 	transform.scale(dpi_scale.width(), dpi_scale.height()); // Apply DPI scale.
-	transform.scale(1.5, 1.5); // Apply general scale.
+	transform.scale(2, 2); // Apply general scale.
 	painter.setTransform(transform);
 
 	const QVector<SpriteFrame> &frames = sprite_mappings.frames;

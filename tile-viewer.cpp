@@ -8,8 +8,8 @@
 
 #include "utilities.h"
 
-static constexpr int TILE_WIDTH_SCALED = TileManager::TILE_WIDTH * 3;
-static constexpr int TILE_HEIGHT_SCALED = TileManager::TILE_HEIGHT * 3;
+static constexpr int TILE_WIDTH_SCALED = TileManager::TILE_WIDTH * 2;
+static constexpr int TILE_HEIGHT_SCALED = TileManager::TILE_HEIGHT * 2;
 
 TileViewer::TileViewer(const TileManager &tile_manager)
 	: tile_manager(tile_manager)

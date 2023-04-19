@@ -16,7 +16,7 @@ void SpritePieceButton::setSpritePiece(const SpritePiece &sprite_piece)
 {
 	const QSizeF dpi_scale = Utilities::GetDPIScale(this);
 	m_sprite_piece = sprite_piece;
-	setFixedSize(sprite_piece.width * TileManager::TILE_WIDTH * 1.5 * dpi_scale.width(), sprite_piece.height * TileManager::TILE_HEIGHT * 1.5 * dpi_scale.height());
+	setFixedSize(sprite_piece.width * TileManager::TILE_WIDTH * 2 * dpi_scale.width(), sprite_piece.height * TileManager::TILE_HEIGHT * 2 * dpi_scale.height());
 	update();
 }
 
