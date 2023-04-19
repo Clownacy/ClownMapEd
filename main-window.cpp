@@ -303,7 +303,7 @@ MainWindow::MainWindow(QWidget* const parent)
 		{
 			if (!assemble_file(file_path.toStdString().c_str(), temporary_filename))
 			{
-				QMessageBox::critical(this, "Error", "Failed to load mappings: file could not be assembled.");
+				QMessageBox::critical(this, "Error", "Failed to load file: data could not be assembled.");
 				return;
 			}
 
@@ -591,7 +591,7 @@ MainWindow::MainWindow(QWidget* const parent)
 		}
 	);
 
-	const auto save_asm_or_bin_file = [assemble_file, is_assembly_file_path, temporary_filename](const QString &file_path, const std::function<void(const QString &file_path)> &callback)
+	const auto save_asm_or_bin_file = [this, assemble_file, is_assembly_file_path, temporary_filename](const QString &file_path, const std::function<void(const QString &file_path)> &callback)
 	{
 		if (file_path.isNull())
 			return;
@@ -603,7 +603,14 @@ MainWindow::MainWindow(QWidget* const parent)
 		else
 		{
 			callback(temporary_filename);
-			assemble_file(temporary_filename, file_path.toStdString().c_str());
+
+			if (!assemble_file(temporary_filename, file_path.toStdString().c_str()))
+			{
+				QMessageBox::critical(this, "Error", "Failed to save file: data could not be assembled.");
+				return;
+			}
+
+			remove(temporary_filename);
 		}
 	};
 
