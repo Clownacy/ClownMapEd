@@ -4,6 +4,7 @@
 
 int main(int argc, char *argv[])
 {
+	QApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
 	QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
 	QApplication a(argc, argv);
