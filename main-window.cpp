@@ -342,10 +342,17 @@ MainWindow::MainWindow(QWidget* const parent)
 					return;
 				}
 
+				SpriteMappings sprite_mappings_copy = *sprite_mappings;
+				if (!sprite_mappings_copy.applyDPLCs(DynamicPatternLoadCues(file, game_format == SpritePiece::Format::SONIC_1 ? DynamicPatternLoadCues::Format::SONIC_1 : DynamicPatternLoadCues::Format::SONIC_2_AND_3_AND_KNUCKLES_AND_CD)))
+				{
+					QMessageBox::critical(this, "Error", "Failed to load file: these cues are not compatible with the loaded mappings.");
+					return;
+				}
+
 				sprite_mappings.modify(
-					[this, &file](SpriteMappings &mappings)
+					[&sprite_mappings_copy](SpriteMappings &mappings)
 					{
-						mappings.applyDPLCs(DynamicPatternLoadCues(file, game_format == SpritePiece::Format::SONIC_1 ? DynamicPatternLoadCues::Format::SONIC_1 : DynamicPatternLoadCues::Format::SONIC_2_AND_3_AND_KNUCKLES_AND_CD));
+						mappings = sprite_mappings_copy;
 					}
 				);
 			}
