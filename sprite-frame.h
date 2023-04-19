@@ -8,6 +8,7 @@
 
 #include <QImage>
 #include <QRect>
+#include <QSet>
 #include <QTextStream>
 #include <QVector>
 
@@ -23,20 +24,28 @@ struct SpriteFrame
 	void draw(QPainter &painter, bool hide_duplicate_tiles, const TileManager &tile_manager, TileManager::PixmapType effect, int starting_palette_line = 0, int x_offset = 0, int y_offset = 0, const std::optional<std::pair<int, TileManager::PixmapType>> &selected_piece = std::nullopt) const;
 	QRect rect() const;
 
-	void getUniqueTiles(QVector<SpritePiece::Tile> &tiles) const
-	{
-		iteratePieces(
-			[&tiles](const SpritePiece &piece)
-			{
-				piece.getUniqueTiles(tiles);
-			}
-		);
-	}
-
 	QVector<SpritePiece::Tile> getUniqueTiles() const
 	{
 		QVector<SpritePiece::Tile> tiles;
-		getUniqueTiles(tiles);
+		QSet<int> recorded_tiles;
+
+		iteratePieces(
+			[&recorded_tiles, &tiles](const SpritePiece &piece)
+			{
+				piece.iterateTiles(
+					[&recorded_tiles, &tiles](const SpritePiece::Tile &tile)
+					{
+						if (recorded_tiles.contains(tile.index))
+							return;
+
+						recorded_tiles.insert(tile.index);
+
+						tiles.append(tile);
+					}
+				);
+			}
+		);
+
 		return tiles;
 	}
 

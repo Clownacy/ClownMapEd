@@ -144,7 +144,7 @@ void SpriteViewer::paintEvent(QPaintEvent* const event)
 	if (m_selected_piece_index == -1)
 		selected_sprite.draw(painter, m_hide_duplicate_tiles, tile_manager, TileManager::PixmapType::NO_BACKGROUND, m_starting_palette_line);
 	else
-            selected_sprite.draw(painter, m_hide_duplicate_tiles, tile_manager, TileManager::PixmapType::TRANSPARENT, m_starting_palette_line, 0, 0, std::make_pair(m_selected_piece_index, TileManager::PixmapType::NO_BACKGROUND));
+		selected_sprite.draw(painter, m_hide_duplicate_tiles, tile_manager, TileManager::PixmapType::TRANSPARENT, m_starting_palette_line, 0, 0, std::make_pair(m_selected_piece_index, TileManager::PixmapType::NO_BACKGROUND));
 
 	int x_offset;
 

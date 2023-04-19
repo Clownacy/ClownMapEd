@@ -9,3 +9,4 @@
 - Remember current sprites across restarts.
 - Make tile viewer selection XOR with the background colour too.
 - Dragging and dropping palette colours.
+- Proper error handling for encountering the end of a mappings file unexpectedly.

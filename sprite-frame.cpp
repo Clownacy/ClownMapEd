@@ -2,6 +2,8 @@
 
 #include <climits>
 
+#include <QSet>
+
 void SpriteFrame::fromDataStream(DataStream &stream, const SpritePiece::Format format)
 {
 	const auto original_byte_order = stream.byteOrder();
@@ -30,28 +32,7 @@ void SpriteFrame::toQTextStream(QTextStream &stream, const SpritePiece::Format f
 
 void SpriteFrame::draw(QPainter &painter, bool hide_duplicate_tiles, const TileManager &tile_manager, const TileManager::PixmapType effect, const int starting_palette_line, const int x_offset, const int y_offset, const std::optional<std::pair<int, TileManager::PixmapType>> &selected_piece) const
 {
-	QVector<SpritePiece::Tile> tiles;
-
-	if (hide_duplicate_tiles)
-	{
-		iteratePieces(
-			[&tiles](const SpritePiece &piece)
-			{
-				piece.getUniqueTiles(tiles);
-			}
-		);
-	}
-	else
-	{
-		iteratePieces(
-			[&tiles](const SpritePiece &piece)
-			{
-				piece.getTiles(tiles);
-			}
-		);
-	}
-
-	for (const auto &tile : qAsConst(tiles))
+	const auto draw_tile = [&painter, &tile_manager, starting_palette_line, x_offset, y_offset](const SpritePiece::Tile tile, const TileManager::PixmapType effect)
 	{
 		SpritePiece::Tile adjusted_tile = tile;
 
@@ -61,7 +42,31 @@ void SpriteFrame::draw(QPainter &painter, bool hide_duplicate_tiles, const TileM
 		adjusted_tile.palette_line %= Palette::TOTAL_LINES;
 
 		adjusted_tile.draw(painter, tile_manager, effect);
-	}
+	};
+
+	QSet<int> recorded_tiles;
+
+	iteratePieces(
+		[this, &draw_tile, &recorded_tiles, effect, hide_duplicate_tiles, &selected_piece](const SpritePiece &piece)
+		{
+			const bool is_selected_piece = selected_piece && &piece - pieces.data() == selected_piece->first;
+
+			piece.iterateTiles(
+				[&draw_tile, &recorded_tiles, effect, hide_duplicate_tiles, &selected_piece, is_selected_piece](const SpritePiece::Tile &tile)
+				{
+					if (hide_duplicate_tiles)
+					{
+						if (recorded_tiles.contains(tile.index))
+							return;
+
+						recorded_tiles.insert(tile.index);
+					}
+
+					draw_tile(tile, is_selected_piece ? selected_piece->second : effect);
+				}
+			);
+		}
+	);
 }
 
 QRect SpriteFrame::rect() const

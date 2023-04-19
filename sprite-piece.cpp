@@ -64,30 +64,6 @@ void SpritePiece::toQTextStream(QTextStream &stream, const Format format) const
 	}
 }
 
-void SpritePiece::getTiles(QVector<SpritePiece::Tile> &tiles) const
-{
-	iterateTiles(
-		[&tiles](const SpritePiece::Tile &tile)
-		{
-			tiles.push_back(tile);
-		}
-	);
-}
-
-void SpritePiece::getUniqueTiles(QVector<SpritePiece::Tile> &tiles) const
-{
-	iterateTiles(
-		[&tiles](const SpritePiece::Tile &new_tile)
-		{
-			for (const auto &tile : qAsConst(tiles))
-				if (tile.index == new_tile.index)
-					return;
-
-			tiles.push_back(new_tile);
-		}
-	);
-}
-
 void SpritePiece::iterateTiles(const std::function<void(const SpritePiece::Tile&)> &callback) const
 {
 	int current_tile_index = tile_index;

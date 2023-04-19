@@ -6,7 +6,6 @@
 #include <QPainter>
 #include <QRect>
 #include <QTextStream>
-#include <QVector>
 
 #include "data-stream.h"
 #include "tile-manager.h"
@@ -40,21 +39,7 @@ struct SpritePiece
 		return QRect(x, y, width * TileManager::TILE_WIDTH, height * TileManager::TILE_HEIGHT);
 	}
 
-	void getTiles(QVector<SpritePiece::Tile> &tiles) const;
-	QVector<SpritePiece::Tile> getTiles() const
-	{
-		QVector<SpritePiece::Tile> tiles;
-		getTiles(tiles);
-		return tiles;
-	}
-
-	void getUniqueTiles(QVector<SpritePiece::Tile> &tiles) const;
-	QVector<SpritePiece::Tile> getUniqueTiles() const
-	{
-		QVector<SpritePiece::Tile> tiles;
-		getUniqueTiles(tiles);
-		return tiles;
-	}
+	void iterateTiles(const std::function<void(const SpritePiece::Tile&)> &callback) const;
 
 	void draw(QPainter &painter, const TileManager &tile_manager, const TileManager::PixmapType effect) const
 	{
@@ -75,9 +60,6 @@ struct SpritePiece
 	bool y_flip;
 	bool x_flip;
 	int tile_index;
-
-private:
-	void iterateTiles(const std::function<void(const SpritePiece::Tile&)> &callback) const;
 };
 
 #endif // SPRITE_PIECE_H
