@@ -134,6 +134,6 @@ void DynamicPatternLoadCues::Frame::Copy::toQTextStream(QTextStream &stream) con
 		const int segment_start = start + 0x10 * i;
 		const int segment_length = qMin(0x10, length - 0x10 * i);
 
-		stream << "\tdc.w\t$" << QString::number((segment_length - 1) << 12 | (segment_start & 0xFFF), 0x10).toUpper() << '\n';
+		stream << "\tdc.w\t$" << Utilities::IntegerToZeroPaddedHexQString(static_cast<quint16>((segment_length - 1) << 12 | (segment_start & 0xFFF))) << '\n';
 	}
 }
