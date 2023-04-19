@@ -277,7 +277,7 @@ MainWindow::MainWindow(QWidget* const parent)
 
 		const int extension_position = file_path.lastIndexOf('.');
 
-		if (extension_position != -1 && QStringView(file_path.data() + extension_position) == QString(".asm"))
+		if (extension_position != -1 && QStringView(file_path.data() + extension_position) == QStringLiteral(".asm"))
 		{
 			const char* const temporary_filename = "clownmaped-temporary";
 
@@ -324,10 +324,10 @@ MainWindow::MainWindow(QWidget* const parent)
 						mappings.fromFile(file, game_format);
 					}
 				);
+
+				sprite_viewer.setSelectedSprite(0);
 			}
 		);
-
-		sprite_viewer.setSelectedSprite(0);
 	};
 
 	const auto load_dynamic_pattern_load_cue_file = [this, &load_asm_or_bin_file](const QString &file_path)
@@ -355,10 +355,10 @@ MainWindow::MainWindow(QWidget* const parent)
 						mappings = sprite_mappings_copy;
 					}
 				);
+
+				ui->actionPattern_Load_Cues->setChecked(true);
 			}
 		);
-
-		ui->actionPattern_Load_Cues->setChecked(true);
 	};
 
 	connect(ui->actionLoad_Tiles_Uncompressed, &QAction::triggered, this,
