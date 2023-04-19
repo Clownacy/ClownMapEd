@@ -59,7 +59,7 @@ void SpritePiece::toQTextStream(QTextStream &stream, const Format format) const
 			stream << "\tdc.w\t$" << Utilities::IntegerToZeroPaddedHexQString(static_cast<quint16>(art_tile_upper_bits | static_cast<uint>(tile_index) / 2)) << "\n";
 			// Fallthrough
 		case Format::SONIC_3_AND_KNUCKLES:
-			stream << "\tdc.w\t" << y << "\n";
+			stream << "\tdc.w\t" << x << "\n";
 			break;
 	}
 }
