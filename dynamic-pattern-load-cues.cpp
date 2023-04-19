@@ -1,6 +1,6 @@
 #include "dynamic-pattern-load-cues.h"
 
-#include <QCryptographicHash>
+#include <QRandomGenerator>
 
 #include "data-stream.h"
 #include "utilities.h"
@@ -52,11 +52,8 @@ DynamicPatternLoadCues::DynamicPatternLoadCues(QFile &file, const Format format)
 
 void DynamicPatternLoadCues::toQTextStream(QTextStream &stream) const
 {
-	QCryptographicHash hasher(QCryptographicHash::Algorithm::Md5);
-	hasher.addData(reinterpret_cast<const char*>(this), sizeof(*this));
-	const auto hash = hasher.result();
-
-	const QString label = "CME_" + Utilities::IntegerToZeroPaddedHexQString(hash[0]) + Utilities::IntegerToZeroPaddedHexQString(hash[1]) + Utilities::IntegerToZeroPaddedHexQString(hash[2]) + Utilities::IntegerToZeroPaddedHexQString(hash[3]);
+	const auto unique_number = QRandomGenerator::global()->generate();
+	const QString label = "CME_" + Utilities::IntegerToZeroPaddedHexQString(unique_number);
 
 	stream << label << ":\n";
 
