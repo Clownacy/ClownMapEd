@@ -1,7 +1,4 @@
-- Support for alternative DPIs.
-- Support for assembly mappings/DPLCs.
-- Support for Sonic 1 mappings/DPLCs.
-- Support for Sonic 3 & Knuckles mappings/DPLCs.
+- Support for Sonic 3 & Knuckles' unique DPLC format (used by non-player objects).
 - Sprite spacing (figure out what algorithm SonMapEd uses).
 - Add scrollbar to tile viewer.
 - Don't bother drawing sprites that are off-screen.
