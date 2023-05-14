@@ -398,70 +398,70 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionLoad_Tiles_Uncompressed, &QAction::triggered, this,
 		[this, load_uncompressed_tile_file]()
 		{
-			load_uncompressed_tile_file(QFileDialog::getOpenFileName(this, "Open Tile Graphics File", QString(), "Tile Graphics Files (*.bin)"));
+			load_uncompressed_tile_file(QFileDialog::getOpenFileName(this, "Open Tile Graphics File", QString(), "Uncompressed Tile Graphics Files (*.bin *.unc);;All Files (*.*)"));
 		}
 	);
 
 	connect(ui->actionLoad_Tiles_Nemesis, &QAction::triggered, this,
 		[this, load_nemesis_tile_file]()
 		{
-			load_nemesis_tile_file(QFileDialog::getOpenFileName(this, "Open Nemesis-Compressed Tile Graphics File", QString(), "Tile Graphics Files (*.bin)"));
+			load_nemesis_tile_file(QFileDialog::getOpenFileName(this, "Open Nemesis-Compressed Tile Graphics File", QString(), "Nemesis-Compressed Tile Graphics Files (*.bin *.nem);;All Files (*.*)"));
 		}
 	);
 
 	connect(ui->actionLoad_Tiles_Kosinski, &QAction::triggered, this,
 		[this, load_kosinski_tile_file]()
 		{
-			load_kosinski_tile_file(QFileDialog::getOpenFileName(this, "Open Kosinski-Compressed Tile Graphics File", QString(), "Tile Graphics Files (*.bin)"));
+			load_kosinski_tile_file(QFileDialog::getOpenFileName(this, "Open Kosinski-Compressed Tile Graphics File", QString(), "Kosinski-Compressed Tile Graphics Files (*.bin *.kos);;All Files (*.*)"));
 		}
 	);
 
 	connect(ui->actionLoad_Tiles_Moduled_Kosinski, &QAction::triggered, this,
 		[this, load_moduled_kosinski_tile_file]()
 		{
-			load_moduled_kosinski_tile_file(QFileDialog::getOpenFileName(this, "Open Moduled Kosinski-Compressed Tile Graphics File", QString(), "Tile Graphics Files (*.bin)"));
+			load_moduled_kosinski_tile_file(QFileDialog::getOpenFileName(this, "Open Moduled Kosinski-Compressed Tile Graphics File", QString(), "Moduled Kosinski-Compressed Tile Graphics Files (*.bin *.kosm);;All Files (*.*)"));
 		}
 	);
 
 	connect(ui->actionLoad_Tiles_Kosinski_Plus, &QAction::triggered, this,
 		[this, load_kosinski_plus_tile_file]()
 		{
-			load_kosinski_plus_tile_file(QFileDialog::getOpenFileName(this, "Open Kosinski+-Compressed Tile Graphics File", QString(), "Tile Graphics Files (*.bin)"));
+			load_kosinski_plus_tile_file(QFileDialog::getOpenFileName(this, "Open Kosinski+-Compressed Tile Graphics File", QString(), "Kosinski+-Compressed Tile Graphics Files (*.bin *.kosp);;All Files (*.*)"));
 		}
 	);
 
 	connect(ui->actionLoad_Tiles_Moduled_Kosinski_Plus, &QAction::triggered, this,
 		[this, load_moduled_kosinski_plus_tile_file]()
 		{
-			load_moduled_kosinski_plus_tile_file(QFileDialog::getOpenFileName(this, "Open Moduled Kosinski+-Compressed Tile Graphics File", QString(), "Tile Graphics Files (*.bin)"));
+			load_moduled_kosinski_plus_tile_file(QFileDialog::getOpenFileName(this, "Open Moduled Kosinski+-Compressed Tile Graphics File", QString(), "Moduled Kosinski+-Compressed Tile Graphics Files (*.bin *.kospm);;All Files (*.*)"));
 		}
 	);
 
 	connect(ui->actionLoad_Tiles_Comper, &QAction::triggered, this,
 		[this, load_comper_tile_file]()
 		{
-			load_comper_tile_file(QFileDialog::getOpenFileName(this, "Open Comper-Compressed Tile Graphics File", QString(), "Tile Graphics Files (*.bin)"));
+			load_comper_tile_file(QFileDialog::getOpenFileName(this, "Open Comper-Compressed Tile Graphics File", QString(), "Comper-Compressed Tile Graphics Files (*.bin *.comp);;All Files (*.*)"));
 		}
 	);
 
 	connect(ui->actionLoad_Primary_Palette, &QAction::triggered, this,
 		[this, load_palette_file]()
 		{
-			load_palette_file(QFileDialog::getOpenFileName(this, "Open Palette File", QString(), "Palette Files (*.bin)"), 0);
+			load_palette_file(QFileDialog::getOpenFileName(this, "Open Palette File", QString(), "Palette Files (*.bin);;All Files (*.*)"), 0);
 		}
 	);
 
 	connect(ui->actionLoad_Secondary_Palette_Lines, &QAction::triggered, this,
 		[this, load_palette_file]()
 		{
-			load_palette_file(QFileDialog::getOpenFileName(this, "Open Palette File", QString(), "Palette Files (*.bin)"), 1);
+			load_palette_file(QFileDialog::getOpenFileName(this, "Open Palette File", QString(), "Palette Files (*.bin);;All Files (*.*)"), 1);
 		}
 	);
 
 	connect(ui->actionLoad_Mappings, &QAction::triggered, this,
 		[this, load_sprite_mappings_file]()
 		{
-			load_sprite_mappings_file(QFileDialog::getOpenFileName(this, "Open Sprite Mappings File", QString(), "Sprite Mapping Files (*.bin *.asm)"));
+			load_sprite_mappings_file(QFileDialog::getOpenFileName(this, "Open Sprite Mappings File", QString(), "Sprite Mapping Files (*.bin *.asm);;All Files (*.*)"));
 		}
 	);
 
@@ -469,7 +469,7 @@ MainWindow::MainWindow(QWidget* const parent)
 		[this, load_dynamic_pattern_load_cue_file]()
 		{
 			// TODO: Filters.
-			load_dynamic_pattern_load_cue_file(QFileDialog::getOpenFileName(this, "Open Dynamic Pattern Loading Cue File", QString(), "Pattern Cue Files (*.bin *.asm)"));
+			load_dynamic_pattern_load_cue_file(QFileDialog::getOpenFileName(this, "Open Dynamic Pattern Loading Cue File", QString(), "Pattern Cue Files (*.bin *.asm);;All Files (*.*)"));
 		}
 	);
 
@@ -479,9 +479,9 @@ MainWindow::MainWindow(QWidget* const parent)
 	// Menubar: File/Save Data File //
 	//////////////////////////////////
 
-	const auto save_tile_file = [this](const QString &prompt, bool (* const callback)(std::istream &in, std::ostream &out))
+	const auto save_tile_file = [this](const QString &prompt, const QString &filter, bool (* const callback)(std::istream &in, std::ostream &out))
 	{
-		const QString file_path = QFileDialog::getSaveFileName(this, prompt, QString(), "Tile Graphics Files (*.bin)");
+		const QString file_path = QFileDialog::getSaveFileName(this, prompt, QString(), filter + ";;All Files (*.*)");
 
 		if (file_path.isNull())
 			return;
@@ -511,7 +511,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionUncompressed, &QAction::triggered, this,
 		[save_tile_file]()
 		{
-			save_tile_file("Save Tile Graphics File",
+			save_tile_file("Save Tile Graphics File", "Uncompressed Tile Graphics Files (*.bin *.unc)",
 				[](std::istream &in, std::ostream &out)
 				{
 					out << in.rdbuf();
@@ -525,14 +525,14 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionNemesis, &QAction::triggered, this,
 		[save_tile_file]()
 		{
-			save_tile_file("Save Nemesis-Compressed Tile Graphics File", nemesis::encode);
+			save_tile_file("Save Nemesis-Compressed Tile Graphics File", "Nemesis-Compressed Tile Graphics Files (*.bin *.nem)", nemesis::encode);
 		}
 	);
 
 	connect(ui->actionKosinski, &QAction::triggered, this,
 		[save_tile_file]()
 		{
-			save_tile_file("Save Kosinski-Compressed Tile Graphics File", kosinski::encode);
+			save_tile_file("Save Kosinski-Compressed Tile Graphics File", "Kosinski-Compressed Tile Graphics Files (*.bin *.kos)", kosinski::encode);
 		}
 	);
 
@@ -545,14 +545,14 @@ MainWindow::MainWindow(QWidget* const parent)
 				return;
 			}
 
-			save_tile_file("Save Moduled Kosinski-Compressed Tile Graphics File", [](std::istream &in, std::ostream &out){return kosinski::moduled_encode(in, out);});
+			save_tile_file("Save Moduled Kosinski-Compressed Tile Graphics File", "Moduled Kosinski-Compressed Tile Graphics Files (*.bin *.kosm)", [](std::istream &in, std::ostream &out){return kosinski::moduled_encode(in, out);});
 		}
 	);
 
 	connect(ui->actionKosinski_2, &QAction::triggered, this,
 		[save_tile_file]()
 		{
-			save_tile_file("Save Kosinski+-Compressed Tile Graphics File", kosplus::encode);
+			save_tile_file("Save Kosinski+-Compressed Tile Graphics File", "Kosinski+-Compressed Tile Graphics Files (*.bin *.kosp)", kosplus::encode);
 		}
 	);
 
@@ -565,20 +565,20 @@ MainWindow::MainWindow(QWidget* const parent)
 				return;
 			}
 
-			save_tile_file("Save Moduled Kosinski+-Compressed Tile Graphics File", [](std::istream &in, std::ostream &out){return kosplus::moduled_encode(in, out);});
+			save_tile_file("Save Moduled Kosinski+-Compressed Tile Graphics File", "Moduled Kosinski+-Compressed Tile Graphics Files (*.bin *.kospm)", [](std::istream &in, std::ostream &out){return kosplus::moduled_encode(in, out);});
 		}
 	);
 
 	connect(ui->actionComper, &QAction::triggered, this,
 		[save_tile_file]()
 		{
-			save_tile_file("Save Comper-Compressed Tile Graphics File", comper::encode);
+			save_tile_file("Save Comper-Compressed Tile Graphics File", "Comper-Compressed Tile Graphics Files (*.bin *.comp)", comper::encode);
 		}
 	);
 
 	const auto save_palette_file = [this](const int starting_palette_line, const int ending_palette_line)
 	{
-		const QString file_path = QFileDialog::getSaveFileName(this, "Save Palette File", QString(), "Palette Files (*.bin)");
+		const QString file_path = QFileDialog::getSaveFileName(this, "Save Palette File", QString(), "Palette Files (*.bin);;All Files (*.*)");
 
 		if (file_path.isNull())
 			return;
@@ -640,7 +640,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionSave_Mappings, &QAction::triggered, this,
 		[this, save_asm_or_bin_file]()
 		{
-			save_asm_or_bin_file(QFileDialog::getSaveFileName(this, "Save Sprite Mappings File", QString(), "Sprite Mapping Files (*.bin *.asm)"),
+			save_asm_or_bin_file(QFileDialog::getSaveFileName(this, "Save Sprite Mappings File", QString(), "Sprite Mapping Files (*.bin *.asm);;All Files (*.*)"),
 				[this](const QString &file_path)
 				{
 					QFile file(file_path);
@@ -667,7 +667,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionSave_Pattern_Cues, &QAction::triggered, this,
 		[this, save_asm_or_bin_file]()
 		{
-			save_asm_or_bin_file(QFileDialog::getSaveFileName(this, "Save Dynamic Pattern Loading Cue File", QString(), "Pattern Cue Files (*.bin *.asm)"),
+			save_asm_or_bin_file(QFileDialog::getSaveFileName(this, "Save Dynamic Pattern Loading Cue File", QString(), "Pattern Cue Files (*.bin *.asm);;All Files (*.*)"),
 				[this](const QString &file_path)
 				{
 					// TODO: This file-opening code is repeated a few times, so see if I can move it to a function.
