@@ -11,4 +11,6 @@
 - Dragging and dropping palette colours.
 - Proper error handling for encountering the end of a mappings file unexpectedly.
 - SonMapEd doesn't ask to overwrite files.
-- Add a licence window, for viewing the project's licence(s).
+- Add licence information to each source file.
+- See suggestions in the Sonic Retro thread.
+  - Orient tiles vertically.

@@ -55,6 +55,29 @@ MainWindow::MainWindow(QWidget* const parent)
 	horizontal_layout.setMargin(vertical_layout.margin());
 	vertical_layout.setMargin(0);
 
+	//////////////////////////
+	// Additional Shortcuts //
+	//////////////////////////
+
+	/* I would use 7,8/9,0 instead of 6,7/8,9, but Windows has this dumbass anti-feature that disallows to Shift+0 ever be used. */
+	ui->actionPrevious_Sprite->setShortcuts({QKeySequence("8"), QKeySequence("[")});
+	ui->actionNext_Sprite->setShortcuts({QKeySequence("9"), QKeySequence("]")});
+
+	ui->actionSwap_Sprite_with_Previous->setShortcuts({QKeySequence("Ctrl+8"), QKeySequence("Ctrl+[")});
+	ui->actionSwap_Sprite_with_Next->setShortcuts({QKeySequence("Ctrl+9"), QKeySequence("Ctrl+]")});
+
+	ui->actionPrevious_Sprite_Piece->setShortcuts({QKeySequence("6"), QKeySequence("Shift+8"), QKeySequence(";"), QKeySequence("Shift+[")});
+	ui->actionNext_Sprite_Piece->setShortcuts({QKeySequence("7"), QKeySequence("Shift+9"), QKeySequence("'"), QKeySequence("Shift+]")});
+
+	ui->actionMove_Piece_into_Previous_Sprite->setShortcuts({QKeySequence("Ctrl+Shift+8"), QKeySequence("Ctrl+Shift+[")});
+	ui->actionMove_Piece_into_Next_Sprite->setShortcuts({QKeySequence("Ctrl+Shift+9"), QKeySequence("Ctrl+Shift+]")});
+
+	ui->actionMove_Piece_toward_Back->setShortcuts({QKeySequence("Ctrl+6"), QKeySequence("Ctrl+;")});
+	ui->actionMove_Piece_toward_Front->setShortcuts({QKeySequence("Ctrl+7"), QKeySequence("Ctrl+'")});
+
+	ui->actionMove_Piece_Behind_Others->setShortcuts({QKeySequence("Ctrl+Alt+Shift+6"), QKeySequence("Ctrl+Alt+Shift+;")});
+	ui->actionMove_Piece_in_Front_of_Others->setShortcuts({QKeySequence("Ctrl+Alt+Shift+7"), QKeySequence("Ctrl+Alt+Shift+'")});
+
 	///////////////////////
 	// Background Colour //
 	///////////////////////
