@@ -14,3 +14,5 @@
 - Add licence information to each source file.
 - See suggestions in the Sonic Retro thread.
   - Orient tiles vertically.
+- Make duplicate sprites and DPLCs share data (make offset table entries point to the same data).
+
