@@ -147,7 +147,6 @@ MainWindow::MainWindow(QWidget* const parent)
 	};
 
 	connect(&sprite_viewer, &SpriteViewer::selectedSpriteChanged, this, tile_viewer_select_sprite);
-	connect(&sprite_mappings, &SignalWrapper<SpriteMappings>::modified, this, tile_viewer_select_sprite);
 
 	connect(&sprite_piece_picker, &SpritePiecePicker::pieceSelected, this,
 		[this](const int width, const int height)
@@ -164,7 +163,6 @@ MainWindow::MainWindow(QWidget* const parent)
 					auto &pieces = mappings.frames[sprite_viewer.selected_sprite_index()].pieces;
 					pieces.append(SpritePiece{0, 0, width, height, false, 0, false, false, sprite_piece_picker.selected_tile()});
 					sprite_viewer.setSelectedPiece(pieces.size() - 1);
-
 					sprite_piece_picker.setSelectedTile(sprite_piece_picker.selected_tile() + width * height);
 				}
 			);
@@ -389,6 +387,8 @@ MainWindow::MainWindow(QWidget* const parent)
 						mappings = sprite_mappings_copy;
 					}
 				);
+
+				sprite_viewer.setSelectedSprite(sprite_viewer.selected_sprite_index());
 
 				ui->actionPattern_Load_Cues->setChecked(true);
 			}
@@ -721,6 +721,7 @@ MainWindow::MainWindow(QWidget* const parent)
 				}
 			);
 
+			sprite_viewer.setSelectedSprite(sprite_viewer.selected_sprite_index());
 			ui->actionPattern_Load_Cues->setChecked(false);
 		}
 	);
@@ -917,7 +918,9 @@ MainWindow::MainWindow(QWidget* const parent)
 					sprite_viewer.setSelectedSprite(selected_sprite_index + 1);
 				}
 			);
-		}
+
+			sprite_viewer.setSelectedSprite(sprite_viewer.selected_sprite_index());
+	}
 	);
 
 	connect(ui->actionSwap_Sprite_with_Previous, &QAction::triggered, this,
@@ -933,6 +936,8 @@ MainWindow::MainWindow(QWidget* const parent)
 					sprite_viewer.setSelectedSprite(selected_sprite_index - 1);
 				}
 			);
+
+			sprite_viewer.setSelectedSprite(sprite_viewer.selected_sprite_index());
 		}
 	);
 
@@ -989,6 +994,8 @@ MainWindow::MainWindow(QWidget* const parent)
 					mappings.frames.remove(sprite_viewer.selected_sprite_index());
 				}
 			);
+
+			sprite_viewer.setSelectedSprite(sprite_viewer.selected_sprite_index());
 		}
 	);
 
@@ -1341,6 +1348,8 @@ MainWindow::MainWindow(QWidget* const parent)
 					);
 				}
 			);
+
+			sprite_viewer.setSelectedSprite(sprite_viewer.selected_sprite_index());
 		}
 	);
 
@@ -1418,7 +1427,9 @@ MainWindow::MainWindow(QWidget* const parent)
 							}
 						}
 					);
-				}
+
+					sprite_viewer.setSelectedSprite(sprite_viewer.selected_sprite_index());
+			}
 			);
 
 			tile_viewer.clearSelection();
