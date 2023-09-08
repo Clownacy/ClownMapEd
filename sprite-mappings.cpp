@@ -1,9 +1,6 @@
 #include "sprite-mappings.h"
 
-#include <QRandomGenerator>
-
 #include "data-stream.h"
-#include "utilities.h"
 
 void SpriteMappings::fromFile(QFile &file, const SpritePiece::Format format)
 {
@@ -51,10 +48,9 @@ void SpriteMappings::toQTextStream(QTextStream &stream, const SpritePiece::Forma
 	                         "; --------------------------------------------------------------------------------\n\n"
 	                        ).arg(format == SpritePiece::Format::SONIC_1 ? QStringLiteral("Sonic 1/CD") : format == SpritePiece::Format::SONIC_2 ? QStringLiteral("Sonic 2") : format == SpritePiece::Format::SONIC_3_AND_KNUCKLES ? QStringLiteral("Sonic 3 & Knuckles") : QStringLiteral("MapMacros"));
 
-	const auto unique_number = QRandomGenerator::global()->generate();
-	const QString mappings_label = "CME_" + Utilities::IntegerToZeroPaddedHexQString(unique_number);
+	const QString table_label = ".offsets";
 
-	stream << mappings_label << ":";
+	stream << table_label << ":";
 
 	if (format == SpritePiece::Format::MAPMACROS)
 		stream << "\tmappingsTable";
@@ -63,19 +59,19 @@ void SpriteMappings::toQTextStream(QTextStream &stream, const SpritePiece::Forma
 
 	for (const auto &frame : qAsConst(frames))
 	{
-		const QString frame_label = mappings_label + "_" + QString::number(&frame - frames.data(), 0x10).toUpper();
+		const QString frame_label = ".frame" + QString::number(&frame - frames.data());
 
 		if (format == SpritePiece::Format::MAPMACROS)
 			stream << "\tmappingsTableEntry.w\t" << frame_label << "\n";
 		else
-			stream << "\tdc.w\t" << frame_label << "-" << mappings_label << "\n";
+			stream << "\tdc.w\t" << frame_label << "-" << table_label << "\n";
 	}
 
 	stream << "\n";
 
 	for (const auto &frame : qAsConst(frames))
 	{
-		const QString frame_label = mappings_label + "_" + QString::number(&frame - frames.data(), 0x10).toUpper();
+		const QString frame_label = ".frame" + QString::number(&frame - frames.data());
 		stream << frame_label << ":";
 
 		if (format == SpritePiece::Format::MAPMACROS)
@@ -85,7 +81,7 @@ void SpriteMappings::toQTextStream(QTextStream &stream, const SpritePiece::Forma
 		frame.toQTextStream(stream, format);
 
 		if (format == SpritePiece::Format::MAPMACROS)
-			stream << frame_label << "_End\n";
+			stream << frame_label << "_End\n\n";
 	}
 
 	stream << "\teven\n";
