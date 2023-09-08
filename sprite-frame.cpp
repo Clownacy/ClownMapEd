@@ -20,8 +20,11 @@ void SpriteFrame::fromDataStream(DataStream &stream, const SpritePiece::Format f
 
 void SpriteFrame::toQTextStream(QTextStream &stream, const SpritePiece::Format format) const
 {
-	// TODO: Report to the user when this is truncated!
-	stream << "\tdc." << (format == SpritePiece::Format::SONIC_1 ? "b" : "w") << "\t" << pieces.size() << "\n\n";
+	if (format != SpritePiece::Format::MAPMACROS)
+	{
+		// TODO: Report to the user when this is truncated!
+		stream << "\tdc." << (format == SpritePiece::Format::SONIC_1 ? "b" : "w") << "\t" << pieces.size() << "\n\n";
+	}
 
 	for (const auto &piece : pieces)
 	{

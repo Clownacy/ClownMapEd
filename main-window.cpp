@@ -313,24 +313,122 @@ MainWindow::MainWindow(QWidget* const parent)
 		return extension_position != -1 && QStringView(file_path.data() + extension_position) == QStringLiteral(".asm");
 	};
 
-	const char* const temporary_filename = "clownmaped-temporary";
+	const char* const temporary_binary_filename = "clownmaped-temporary.bin";
 
-	const auto load_asm_or_bin_file = [this, assemble_file, is_assembly_file_path, temporary_filename](const QString &file_path, const std::function<void(const QString &file_path)> &callback)
+	const auto load_asm_or_bin_file = [this, assemble_file, is_assembly_file_path, temporary_binary_filename](const QString &file_path, const std::function<void(const QString &file_path)> &callback)
 	{
 		if (file_path.isNull())
 			return;
 
 		if (is_assembly_file_path(file_path))
 		{
-			if (!assemble_file(file_path.toStdString().c_str(), temporary_filename))
+			const char* const temporary_assembly_filename = "clownmaped-temporary.asm";
+
+			// In case this file uses MapMacros, we'll generate a wrapper file to define the relevant macros.
+			QFile file(temporary_assembly_filename);
+			if (!file.open(QFile::OpenModeFlag::WriteOnly))
+				QMessageBox::critical(this, "Error", "Failed to save file: file could not be opened for writing.");
+
+			QTextStream stream(&file);
+
+			stream << "SonicMappingsVer = ";
+
+			switch(game_format)
+			{
+				case SpritePiece::Format::MAPMACROS:
+					Q_ASSERT(false);
+					// Fallthrough
+				case SpritePiece::Format::SONIC_1:
+					stream << "1";
+					break;
+
+				case SpritePiece::Format::SONIC_2:
+					stream << "2";
+					break;
+
+				case SpritePiece::Format::SONIC_3_AND_KNUCKLES:
+					stream << "3";
+					break;
+			}
+
+			stream << "\n";
+			stream << R"(
+mappingsTable macro
+currentMappingsTable set *
+	endm
+
+mappingsTableEntry macro label
+	dc.\0	label-currentMappingsTable
+	endm
+
+spriteHeader macro *
+\* equ *
+	if SonicMappingsVer=1
+		dc.b	(\*_End-\*_Begin)/5
+	elseif SonicMappingsVer=2
+		dc.w	(\*_End-\*_Begin)/8
+	elseif SonicMappingsVer=3
+		dc.w	(\*_End-\*_Begin)/6
+	endif
+\*_Begin equ *
+	endm
+
+spritePiece macro xOffset, yOffset, width, height, tileIndex, xFlip, yFlip, palette, priority
+	dc.b	yOffset
+	dc.b	((width-1)<<2)|((height-1)<<0)
+	dc.w	(priority<<15)|(palette<<13)|(yFlip<<12)|(xFlip<<11)|(tileIndex<<0)
+	if SonicMappingsVer=2
+		dc.w	(priority<<15)|(palette<<13)|(yFlip<<12)|(xFlip<<11)|((tileIndex/2)<<0)
+	endif
+	if SonicMappingsVer=1
+		dc.b	xOffset
+	else
+		dc.w	xOffset
+	endif
+	endm
+
+dplcHeader macro *
+\* equ *
+	if SonicMappingsVer=1
+		dc.b	(\*_End-\*_Begin)/2
+	elseif SonicMappingsVer=2
+		dc.w	(\*_End-\*_Begin)/2
+	elseif SonicMappingsVer=3
+		dc.w	((\*_End-\*_Begin)/2)-1
+	endif
+\*_Begin equ *
+	endm
+
+dplcEntry macro totalTiles, tileIndex
+	if SonicMappingsVer=3
+		dc.w	(tileIndex<<4)|((totalTiles-1)<<0)
+	else
+		dc.w	((totalTiles-1)<<12)|(tileIndex<<0)
+	endif
+	endm
+
+s3kPlayerDplcHeader macro *
+	dplcHeader \*
+	endm
+
+s3kPlayerDplcEntry macro totalTiles, tileIndex
+	dplcEntry \*
+	endm
+)";
+
+			stream << "\n\tinclude \"" << file_path << "\"\n";
+
+			file.close();
+
+			if (!assemble_file(temporary_assembly_filename, temporary_binary_filename))
 			{
 				QMessageBox::critical(this, "Error", "Failed to load file: file could not be assembled.");
 				return;
 			}
 
-			callback(temporary_filename);
+			callback(temporary_binary_filename);
 
-			remove(temporary_filename);
+			remove(temporary_binary_filename);
 		}
 		else
 		{
@@ -614,7 +712,7 @@ MainWindow::MainWindow(QWidget* const parent)
 		}
 	);
 
-	const auto save_asm_or_bin_file = [this, assemble_file, is_assembly_file_path, temporary_filename](const QString &file_path, const std::function<void(const QString &file_path)> &callback)
+	const auto save_asm_or_bin_file = [this, assemble_file, is_assembly_file_path, temporary_binary_filename](const QString &file_path, const std::function<void(const QString &file_path)> &callback)
 	{
 		if (file_path.isNull())
 			return;
@@ -625,15 +723,15 @@ MainWindow::MainWindow(QWidget* const parent)
 		}
 		else
 		{
-			callback(temporary_filename);
+			callback(temporary_binary_filename);
 
-			if (!assemble_file(temporary_filename, file_path.toStdString().c_str()))
+			if (!assemble_file(temporary_binary_filename, file_path.toStdString().c_str()))
 			{
 				QMessageBox::critical(this, "Error", "Failed to save file: data could not be assembled.");
 				return;
 			}
 
-			remove(temporary_filename);
+			remove(temporary_binary_filename);
 		}
 	};
 
@@ -653,11 +751,11 @@ MainWindow::MainWindow(QWidget* const parent)
 					{
 						auto sprite_mappings_copy = *sprite_mappings;
 						sprite_mappings_copy.removeDPLCs();
-						sprite_mappings_copy.toQTextStream(stream, game_format);
+						sprite_mappings_copy.toQTextStream(stream, ui->actionMapMacros->isChecked() ? SpritePiece::Format::MAPMACROS : game_format);
 					}
 					else
 					{
-						sprite_mappings->toQTextStream(stream, game_format);
+						sprite_mappings->toQTextStream(stream, ui->actionMapMacros->isChecked() ? SpritePiece::Format::MAPMACROS : game_format);
 					}
 				}
 			);
@@ -678,7 +776,7 @@ MainWindow::MainWindow(QWidget* const parent)
 					QTextStream stream(&file);
 
 					auto sprite_mappings_copy = *sprite_mappings;
-					sprite_mappings_copy.removeDPLCs().toQTextStream(stream, game_format == SpritePiece::Format::SONIC_1 ? DynamicPatternLoadCues::Format::SONIC_1 : DynamicPatternLoadCues::Format::SONIC_2_AND_3_AND_KNUCKLES_AND_CD);
+					sprite_mappings_copy.removeDPLCs().toQTextStream(stream, ui->actionMapMacros->isChecked() ? DynamicPatternLoadCues::Format::MAPMACROS : game_format == SpritePiece::Format::SONIC_1 ? DynamicPatternLoadCues::Format::SONIC_1 : DynamicPatternLoadCues::Format::SONIC_2_AND_3_AND_KNUCKLES_AND_CD);
 				}
 			);
 		}

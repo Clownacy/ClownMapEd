@@ -12,7 +12,8 @@ struct DynamicPatternLoadCues
 	enum class Format
 	{
 		SONIC_1,
-		SONIC_2_AND_3_AND_KNUCKLES_AND_CD
+		SONIC_2_AND_3_AND_KNUCKLES_AND_CD,
+		MAPMACROS
 	};
 
 	struct Frame
@@ -24,7 +25,7 @@ struct DynamicPatternLoadCues
 
 			int size_encoded() const;
 			int total_segments() const;
-			void toQTextStream(QTextStream &stream) const;
+			void toQTextStream(QTextStream &stream, Format format) const;
 		};
 
 		QVector<Copy> copies;

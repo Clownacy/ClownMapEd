@@ -55,26 +55,48 @@ void DynamicPatternLoadCues::toQTextStream(QTextStream &stream, const Format for
 	stream << QStringLiteral("; --------------------------------------------------------------------------------\n"
 	                         "; Dynamic Pattern Loading Cues - output from ClownMapEd - %1 format\n"
 	                         "; --------------------------------------------------------------------------------\n\n"
-	                        ).arg(format == Format::SONIC_1 ? QStringLiteral("Sonic 1") : QStringLiteral("Sonic 2/3&K/CD"));
+	                        ).arg(format == Format::SONIC_1 ? QStringLiteral("Sonic 1") : format == Format::SONIC_2_AND_3_AND_KNUCKLES_AND_CD ? QStringLiteral("Sonic 2/3&K/CD") : QStringLiteral("MapMacros"));
 
 	const auto unique_number = QRandomGenerator::global()->generate();
-	const QString label = "CME_" + Utilities::IntegerToZeroPaddedHexQString(unique_number);
+	const QString dplc_label = "CME_" + Utilities::IntegerToZeroPaddedHexQString(unique_number);
 
-	stream << label << ":\n";
+	stream << dplc_label << ":";
 
-	for (const auto &frame : qAsConst(frames))
-		stream << "	dc.w	" << label << "_" << QString::number(&frame - frames.data(), 0x10).toUpper() << "-" << label << "\n";
+	if (format == DynamicPatternLoadCues::Format::MAPMACROS)
+		stream << "\tmappingsTable";
 
 	stream << "\n";
 
 	for (const auto &frame : qAsConst(frames))
 	{
-		stream << label << "_" << QString::number(&frame - frames.data(), 0x10).toUpper() << ":\n";
+		const QString frame_label = dplc_label + "_" + QString::number(&frame - frames.data(), 0x10).toUpper();
+
+		if (format == Format::MAPMACROS)
+			stream << "\tmappingsTableEntry.w\t" << frame_label << "\n";
+		else
+			stream << "\tdc.w\t" << frame_label << "-" << dplc_label << "\n";
+	}
+
+	stream << "\n";
+
+	for (const auto &frame : qAsConst(frames))
+	{
+		const QString frame_label = dplc_label + "_" + QString::number(&frame - frames.data(), 0x10).toUpper();
+		stream << frame_label << ":";
+
+		if (format == DynamicPatternLoadCues::Format::MAPMACROS)
+			stream << "\tdplcHeader";
+
+		stream << "\n";
 		frame.toQTextStream(stream, format);
+
+		if (format == DynamicPatternLoadCues::Format::MAPMACROS)
+			stream << frame_label << "_End\n";
+
 		stream << "\n";
 	}
 
-	stream << "	even\n";
+	stream << "\teven\n";
 }
 
 int DynamicPatternLoadCues::Frame::getMappedTile(const int tile_index) const
@@ -110,10 +132,11 @@ int DynamicPatternLoadCues::Frame::total_segments() const
 
 void DynamicPatternLoadCues::Frame::toQTextStream(QTextStream &stream, const Format format) const
 {
-	stream << "\tdc." << (format == Format::SONIC_1 ? 'b' : 'w') << '\t' << total_segments() << '\n';
+	if (format != Format::MAPMACROS)
+		stream << "\tdc." << (format == Format::SONIC_1 ? 'b' : 'w') << '\t' << total_segments() << '\n';
 
 	for (const auto &copy : copies)
-		copy.toQTextStream(stream);
+		copy.toQTextStream(stream, format);
 }
 
 int DynamicPatternLoadCues::Frame::Copy::size_encoded() const
@@ -126,7 +149,7 @@ int DynamicPatternLoadCues::Frame::Copy::total_segments() const
 	return Utilities::DivideCeiling(length, 0x10);
 }
 
-void DynamicPatternLoadCues::Frame::Copy::toQTextStream(QTextStream &stream) const
+void DynamicPatternLoadCues::Frame::Copy::toQTextStream(QTextStream &stream, const Format format) const
 {
 	// TODO: Sanity checks (overflow).
 	for (int i = 0; i < total_segments(); ++i)
@@ -134,6 +157,9 @@ void DynamicPatternLoadCues::Frame::Copy::toQTextStream(QTextStream &stream) con
 		const int segment_start = start + 0x10 * i;
 		const int segment_length = qMin(0x10, length - 0x10 * i);
 
-		stream << "\tdc.w\t$" << Utilities::IntegerToZeroPaddedHexQString(static_cast<quint16>((segment_length - 1) << 12 | (segment_start & 0xFFF))) << '\n';
+		if (format == Format::MAPMACROS)
+			stream << "\tdplcEntry\t" << segment_length << ", " << segment_start << "\n";
+		else
+			stream << "\tdc.w\t$" << Utilities::IntegerToZeroPaddedHexQString(static_cast<quint16>((segment_length - 1) << 12 | (segment_start & 0xFFF))) << '\n';
 	}
 }

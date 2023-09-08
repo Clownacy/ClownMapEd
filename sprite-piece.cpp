@@ -21,6 +21,9 @@ void SpritePiece::fromDataStream(DataStream &stream, const Format format)
 
 	switch (format)
 	{
+		case Format::MAPMACROS:
+			Q_ASSERT(false);
+			// Fallthrough
 		case Format::SONIC_1:
 			x = stream.read<qint8>();
 			break;
@@ -38,29 +41,39 @@ void SpritePiece::fromDataStream(DataStream &stream, const Format format)
 
 void SpritePiece::toQTextStream(QTextStream &stream, const Format format) const
 {
-	// TODO: Report to the user when the coordinates are truncated!
-	stream << "\tdc.b\t" << y << "\n";
-	stream << "\tdc.b\t$" << Utilities::IntegerToZeroPaddedHexQString(static_cast<quint8>(((static_cast<uint>(width) - 1) << 2) | (static_cast<uint>(height) - 1))) << "\n";
-
-	const uint art_tile_upper_bits = static_cast<uint>(priority) << 15
-								   | static_cast<uint>(palette_line) << 13
-								   | static_cast<uint>(y_flip) << 12
-								   | static_cast<uint>(x_flip) << 11;
-
-	stream << "\tdc.w\t$" << Utilities::IntegerToZeroPaddedHexQString(static_cast<quint16>(art_tile_upper_bits | static_cast<uint>(tile_index))) << "\n";
-
-	switch (format)
+	if (format == Format::MAPMACROS)
 	{
-		case Format::SONIC_1:
-			stream << "\tdc.b\t" << x << "\n";
-			break;
+		stream << "\tspritePiece " << x << ", " << y << ", " << width << ", " << height << ", " << tile_index << ", " << x_flip << ", " << y_flip << ", " << palette_line << ", " << priority;
+	}
+	else
+	{
+		// TODO: Report to the user when the coordinates are truncated!
+		stream << "\tdc.b\t" << y << "\n";
+		stream << "\tdc.b\t$" << Utilities::IntegerToZeroPaddedHexQString(static_cast<quint8>(((static_cast<uint>(width) - 1) << 2) | (static_cast<uint>(height) - 1))) << "\n";
 
-		case Format::SONIC_2:
-			stream << "\tdc.w\t$" << Utilities::IntegerToZeroPaddedHexQString(static_cast<quint16>(art_tile_upper_bits | static_cast<uint>(tile_index) / 2)) << "\n";
-			// Fallthrough
-		case Format::SONIC_3_AND_KNUCKLES:
-			stream << "\tdc.w\t" << x << "\n";
-			break;
+		const uint art_tile_upper_bits = static_cast<uint>(priority) << 15
+									   | static_cast<uint>(palette_line) << 13
+									   | static_cast<uint>(y_flip) << 12
+									   | static_cast<uint>(x_flip) << 11;
+
+		stream << "\tdc.w\t$" << Utilities::IntegerToZeroPaddedHexQString(static_cast<quint16>(art_tile_upper_bits | static_cast<uint>(tile_index))) << "\n";
+
+		switch (format)
+		{
+			case Format::MAPMACROS:
+				Q_ASSERT(false);
+				// Fallthrough
+			case Format::SONIC_1:
+				stream << "\tdc.b\t" << x << "\n";
+				break;
+
+			case Format::SONIC_2:
+				stream << "\tdc.w\t$" << Utilities::IntegerToZeroPaddedHexQString(static_cast<quint16>(art_tile_upper_bits | static_cast<uint>(tile_index) / 2)) << "\n";
+				// Fallthrough
+			case Format::SONIC_3_AND_KNUCKLES:
+				stream << "\tdc.w\t" << x << "\n";
+				break;
+		}
 	}
 }
 

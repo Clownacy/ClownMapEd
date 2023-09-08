@@ -49,25 +49,46 @@ void SpriteMappings::toQTextStream(QTextStream &stream, const SpritePiece::Forma
 	stream << QStringLiteral("; --------------------------------------------------------------------------------\n"
 	                         "; Sprite mappings - output from ClownMapEd - %1 format\n"
 	                         "; --------------------------------------------------------------------------------\n\n"
-	                        ).arg(format == SpritePiece::Format::SONIC_1 ? QStringLiteral("Sonic 1/CD") : format == SpritePiece::Format::SONIC_2 ? QStringLiteral("Sonic 2") : QStringLiteral("Sonic 3 & Knuckles"));
+	                        ).arg(format == SpritePiece::Format::SONIC_1 ? QStringLiteral("Sonic 1/CD") : format == SpritePiece::Format::SONIC_2 ? QStringLiteral("Sonic 2") : format == SpritePiece::Format::SONIC_3_AND_KNUCKLES ? QStringLiteral("Sonic 3 & Knuckles") : QStringLiteral("MapMacros"));
 
 	const auto unique_number = QRandomGenerator::global()->generate();
-	const QString label = "CME_" + Utilities::IntegerToZeroPaddedHexQString(unique_number);
+	const QString mappings_label = "CME_" + Utilities::IntegerToZeroPaddedHexQString(unique_number);
 
-	stream << label << ":\n";
+	stream << mappings_label << ":";
 
-	for (const auto &frame : qAsConst(frames))
-		stream << "	dc.w	" << label << "_" << QString::number(&frame - frames.data(), 0x10).toUpper() << "-" << label << "\n";
+	if (format == SpritePiece::Format::MAPMACROS)
+		stream << "\tmappingsTable";
 
 	stream << "\n";
 
 	for (const auto &frame : qAsConst(frames))
 	{
-		stream << label << "_" << QString::number(&frame - frames.data(), 0x10).toUpper() << ":\n";
-		frame.toQTextStream(stream, format);
+		const QString frame_label = mappings_label + "_" + QString::number(&frame - frames.data(), 0x10).toUpper();
+
+		if (format == SpritePiece::Format::MAPMACROS)
+			stream << "\tmappingsTableEntry.w\t" << frame_label << "\n";
+		else
+			stream << "\tdc.w\t" << frame_label << "-" << mappings_label << "\n";
 	}
 
-	stream << "	even\n";
+	stream << "\n";
+
+	for (const auto &frame : qAsConst(frames))
+	{
+		const QString frame_label = mappings_label + "_" + QString::number(&frame - frames.data(), 0x10).toUpper();
+		stream << frame_label << ":";
+
+		if (format == SpritePiece::Format::MAPMACROS)
+			stream << "\tspriteHeader";
+
+		stream << "\n";
+		frame.toQTextStream(stream, format);
+
+		if (format == SpritePiece::Format::MAPMACROS)
+			stream << frame_label << "_End\n";
+	}
+
+	stream << "\teven\n";
 }
 
 bool SpriteMappings::applyDPLCs(const DynamicPatternLoadCues &dplcs)

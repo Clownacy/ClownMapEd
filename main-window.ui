@@ -212,6 +212,7 @@
     <addaction name="menuGame_Format"/>
     <addaction name="menuTile_Rendering"/>
     <addaction name="actionPattern_Load_Cues"/>
+    <addaction name="actionMapMacros"/>
    </widget>
    <widget class="QMenu" name="menu_View">
     <property name="title">
@@ -956,6 +957,25 @@
   <action name="actionLicences">
    <property name="text">
     <string>Licences</string>
+   </property>
+  </action>
+  <action name="actionSave_in_MapMacro_Format">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Save in MapMacro Format</string>
+   </property>
+  </action>
+  <action name="actionMapMacros">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>MapMacros</string>
+   </property>
+   <property name="toolTip">
+    <string>Save assembly mappings and DPLCs in the MapMacros format</string>
    </property>
   </action>
  </widget>

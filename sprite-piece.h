@@ -16,7 +16,8 @@ struct SpritePiece
 	{
 		SONIC_1,
 		SONIC_2,
-		SONIC_3_AND_KNUCKLES
+		SONIC_3_AND_KNUCKLES,
+		MAPMACROS
 	};
 
 	struct Tile
