@@ -959,14 +959,6 @@
     <string>Licences</string>
    </property>
   </action>
-  <action name="actionSave_in_MapMacro_Format">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Save in MapMacro Format</string>
-   </property>
-  </action>
   <action name="actionMapMacros">
    <property name="checkable">
     <bool>true</bool>
