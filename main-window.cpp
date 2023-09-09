@@ -313,45 +313,30 @@ MainWindow::MainWindow(QWidget* const parent)
 		return extension_position != -1 && QStringView(file_path.data() + extension_position) == QStringLiteral(".asm");
 	};
 
-	const char* const temporary_assembly_filename = "clownmaped-temporary.asm";
-	const char* const temporary_binary_filename = "clownmaped-temporary.bin";
-
-	const auto load_asm_or_bin_file = [this, assemble_file, is_assembly_file_path, temporary_assembly_filename, temporary_binary_filename](const QString &file_path, const std::function<void(const QString &file_path)> &callback)
+	const auto emit_mapmacros = [this](QTextStream &stream)
 	{
-		if (file_path.isNull())
-			return;
+		stream << "SonicMappingsVer = ";
 
-		if (is_assembly_file_path(file_path))
+		switch(game_format)
 		{
-			// In case this file uses MapMacros, we'll generate a wrapper file to define the relevant macros.
-			QFile file(temporary_assembly_filename);
-			if (!file.open(QFile::OpenModeFlag::WriteOnly))
-				QMessageBox::critical(this, "Error", "Failed to save file: file could not be opened for writing.");
+			case SpritePiece::Format::MAPMACROS:
+				Q_ASSERT(false);
+				// Fallthrough
+			case SpritePiece::Format::SONIC_1:
+				stream << "1";
+				break;
 
-			QTextStream stream(&file);
+			case SpritePiece::Format::SONIC_2:
+				stream << "2";
+				break;
 
-			stream << "SonicMappingsVer = ";
+			case SpritePiece::Format::SONIC_3_AND_KNUCKLES:
+				stream << "3";
+				break;
+		}
 
-			switch(game_format)
-			{
-				case SpritePiece::Format::MAPMACROS:
-					Q_ASSERT(false);
-					// Fallthrough
-				case SpritePiece::Format::SONIC_1:
-					stream << "1";
-					break;
-
-				case SpritePiece::Format::SONIC_2:
-					stream << "2";
-					break;
-
-				case SpritePiece::Format::SONIC_3_AND_KNUCKLES:
-					stream << "3";
-					break;
-			}
-
-			stream << "\n";
-			stream << R"(
+		stream << "\n";
+		stream << R"(
 mappingsTable macro
 currentMappingsTable set *
 	endm
@@ -414,6 +399,26 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 	dplcEntry \*
 	endm
 )";
+	};
+
+	const char* const temporary_assembly_filename = "clownmaped-temporary.asm";
+	const char* const temporary_binary_filename = "clownmaped-temporary.bin";
+
+	const auto load_asm_or_bin_file = [this, assemble_file, is_assembly_file_path, emit_mapmacros, temporary_assembly_filename, temporary_binary_filename](const QString &file_path, const std::function<void(const QString &file_path)> &callback)
+	{
+		if (file_path.isNull())
+			return;
+
+		if (is_assembly_file_path(file_path))
+		{
+			// In case this file uses MapMacros, we'll generate a wrapper file to define the relevant macros.
+			QFile file(temporary_assembly_filename);
+			if (!file.open(QFile::OpenModeFlag::WriteOnly))
+				QMessageBox::critical(this, "Error", "Failed to save file: file could not be opened for writing.");
+
+			QTextStream stream(&file);
+
+			emit_mapmacros(stream);
 
 			stream << "\n\tinclude \"" << file_path << "\"\n";
 
@@ -713,18 +718,30 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 		}
 	);
 
-	const auto save_asm_or_bin_file = [this, assemble_file, is_assembly_file_path, temporary_assembly_filename](const QString &file_path, const std::function<void(const QString &file_path)> &callback)
+	const auto save_asm_or_bin_file = [this, assemble_file, is_assembly_file_path, emit_mapmacros, temporary_assembly_filename](const QString &file_path, const std::function<void(QTextStream &stream)> &callback)
 	{
 		if (file_path.isNull())
 			return;
 
-		if (is_assembly_file_path(file_path))
+		const bool saving_assembly = is_assembly_file_path(file_path);
+
+		QFile file(saving_assembly ? file_path : temporary_assembly_filename);
+		if (!file.open(QFile::OpenModeFlag::WriteOnly))
+			QMessageBox::critical(this, "Error", "Failed to save file: file could not be opened for writing.");
+
+		QTextStream stream(&file);
+
+		if (saving_assembly)
 		{
-			callback(file_path);
+			callback(stream);
 		}
 		else
 		{
-			callback(temporary_assembly_filename);
+			emit_mapmacros(stream);
+
+			callback(stream);
+
+			file.close();
 
 			if (!assemble_file(temporary_assembly_filename, file_path.toStdString().c_str()))
 			{
@@ -740,14 +757,8 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 		[this, save_asm_or_bin_file]()
 		{
 			save_asm_or_bin_file(QFileDialog::getSaveFileName(this, "Save Sprite Mappings File", QString(), "Sprite Mapping Files (*.bin *.asm);;All Files (*.*)"),
-				[this](const QString &file_path)
+				[this](QTextStream &stream)
 				{
-					QFile file(file_path);
-					if (!file.open(QFile::OpenModeFlag::WriteOnly))
-						QMessageBox::critical(this, "Error", "Failed to save file: file could not be opened for writing.");
-
-					QTextStream stream(&file);
-
 					if (ui->actionPattern_Load_Cues->isChecked())
 					{
 						auto sprite_mappings_copy = *sprite_mappings;
@@ -767,15 +778,8 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 		[this, save_asm_or_bin_file]()
 		{
 			save_asm_or_bin_file(QFileDialog::getSaveFileName(this, "Save Dynamic Pattern Loading Cue File", QString(), "Pattern Cue Files (*.bin *.asm);;All Files (*.*)"),
-				[this](const QString &file_path)
+				[this](QTextStream &stream)
 				{
-					// TODO: This file-opening code is repeated a few times, so see if I can move it to a function.
-					QFile file(file_path);
-					if (!file.open(QFile::OpenModeFlag::WriteOnly))
-						QMessageBox::critical(this, "Error", "Failed to save file: file could not be opened for writing.");
-
-					QTextStream stream(&file);
-
 					auto sprite_mappings_copy = *sprite_mappings;
 					sprite_mappings_copy.removeDPLCs().toQTextStream(stream, ui->actionMapMacros->isChecked() ? DynamicPatternLoadCues::Format::MAPMACROS : game_format == SpritePiece::Format::SONIC_1 ? DynamicPatternLoadCues::Format::SONIC_1 : DynamicPatternLoadCues::Format::SONIC_2_AND_3_AND_KNUCKLES_AND_CD);
 				}
