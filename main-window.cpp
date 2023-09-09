@@ -42,6 +42,9 @@ MainWindow::MainWindow(QWidget* const parent)
 		}
 	);
 
+	// Enable MapMacros by default. The future is now, old man!
+	ui->actionMapMacros->setChecked(true);
+
 	horizontal_layout.addWidget(&sprite_piece_picker);
 	horizontal_layout.addWidget(&palette_editor);
 	horizontal_layout.addWidget(&sprite_viewer);
