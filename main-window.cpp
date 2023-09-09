@@ -313,17 +313,16 @@ MainWindow::MainWindow(QWidget* const parent)
 		return extension_position != -1 && QStringView(file_path.data() + extension_position) == QStringLiteral(".asm");
 	};
 
+	const char* const temporary_assembly_filename = "clownmaped-temporary.asm";
 	const char* const temporary_binary_filename = "clownmaped-temporary.bin";
 
-	const auto load_asm_or_bin_file = [this, assemble_file, is_assembly_file_path, temporary_binary_filename](const QString &file_path, const std::function<void(const QString &file_path)> &callback)
+	const auto load_asm_or_bin_file = [this, assemble_file, is_assembly_file_path, temporary_assembly_filename, temporary_binary_filename](const QString &file_path, const std::function<void(const QString &file_path)> &callback)
 	{
 		if (file_path.isNull())
 			return;
 
 		if (is_assembly_file_path(file_path))
 		{
-			const char* const temporary_assembly_filename = "clownmaped-temporary.asm";
-
 			// In case this file uses MapMacros, we'll generate a wrapper file to define the relevant macros.
 			QFile file(temporary_assembly_filename);
 			if (!file.open(QFile::OpenModeFlag::WriteOnly))
@@ -425,6 +424,8 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 				QMessageBox::critical(this, "Error", "Failed to load file: file could not be assembled.");
 				return;
 			}
+
+			remove(temporary_assembly_filename);
 
 			callback(temporary_binary_filename);
 
@@ -712,7 +713,7 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 		}
 	);
 
-	const auto save_asm_or_bin_file = [this, assemble_file, is_assembly_file_path, temporary_binary_filename](const QString &file_path, const std::function<void(const QString &file_path)> &callback)
+	const auto save_asm_or_bin_file = [this, assemble_file, is_assembly_file_path, temporary_assembly_filename](const QString &file_path, const std::function<void(const QString &file_path)> &callback)
 	{
 		if (file_path.isNull())
 			return;
@@ -723,15 +724,15 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 		}
 		else
 		{
-			callback(temporary_binary_filename);
+			callback(temporary_assembly_filename);
 
-			if (!assemble_file(temporary_binary_filename, file_path.toStdString().c_str()))
+			if (!assemble_file(temporary_assembly_filename, file_path.toStdString().c_str()))
 			{
 				QMessageBox::critical(this, "Error", "Failed to save file: data could not be assembled.");
 				return;
 			}
 
-			remove(temporary_binary_filename);
+			remove(temporary_assembly_filename);
 		}
 	};
 
