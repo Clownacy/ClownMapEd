@@ -42,9 +42,6 @@ MainWindow::MainWindow(QWidget* const parent)
 		}
 	);
 
-	// Enable MapMacros by default. The future is now, old man!
-	ui->actionMapMacros->setChecked(true);
-
 	horizontal_layout.addWidget(&sprite_piece_picker);
 	horizontal_layout.addWidget(&palette_editor);
 	horizontal_layout.addWidget(&sprite_viewer);
@@ -766,11 +763,11 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 					{
 						auto sprite_mappings_copy = *sprite_mappings;
 						sprite_mappings_copy.removeDPLCs();
-						sprite_mappings_copy.toQTextStream(stream, ui->actionMapMacros->isChecked() ? SpritePiece::Format::MAPMACROS : game_format);
+						sprite_mappings_copy.toQTextStream(stream, ui->actionLegacyFormats->isChecked() ? game_format : SpritePiece::Format::MAPMACROS);
 					}
 					else
 					{
-						sprite_mappings->toQTextStream(stream, ui->actionMapMacros->isChecked() ? SpritePiece::Format::MAPMACROS : game_format);
+						sprite_mappings->toQTextStream(stream, ui->actionLegacyFormats->isChecked() ? game_format : SpritePiece::Format::MAPMACROS);
 					}
 				}
 			);
@@ -784,7 +781,7 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 				[this](QTextStream &stream)
 				{
 					auto sprite_mappings_copy = *sprite_mappings;
-					sprite_mappings_copy.removeDPLCs().toQTextStream(stream, ui->actionMapMacros->isChecked() ? DynamicPatternLoadCues::Format::MAPMACROS : game_format == SpritePiece::Format::SONIC_1 ? DynamicPatternLoadCues::Format::SONIC_1 : DynamicPatternLoadCues::Format::SONIC_2_AND_3_AND_KNUCKLES_AND_CD);
+					sprite_mappings_copy.removeDPLCs().toQTextStream(stream, !ui->actionLegacyFormats->isChecked() ? DynamicPatternLoadCues::Format::MAPMACROS : game_format == SpritePiece::Format::SONIC_1 ? DynamicPatternLoadCues::Format::SONIC_1 : DynamicPatternLoadCues::Format::SONIC_2_AND_3_AND_KNUCKLES_AND_CD);
 				}
 			);
 		}

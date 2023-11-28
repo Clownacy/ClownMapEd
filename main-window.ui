@@ -212,7 +212,7 @@
     <addaction name="menuGame_Format"/>
     <addaction name="menuTile_Rendering"/>
     <addaction name="actionPattern_Load_Cues"/>
-    <addaction name="actionMapMacros"/>
+    <addaction name="actionLegacyFormats"/>
    </widget>
    <widget class="QMenu" name="menu_View">
     <property name="title">
@@ -959,15 +959,15 @@
     <string>Licences</string>
    </property>
   </action>
-  <action name="actionMapMacros">
+  <action name="actionLegacyFormats">
    <property name="checkable">
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>MapMacros</string>
+    <string>Legacy Assembly Formats</string>
    </property>
    <property name="toolTip">
-    <string>Save assembly mappings and DPLCs in the MapMacros format</string>
+    <string>Create mappings and DPLCs without macros nor local labels, for compatibility with old disassemblies</string>
    </property>
   </action>
  </widget>
