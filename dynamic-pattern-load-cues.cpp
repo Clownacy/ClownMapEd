@@ -1,5 +1,7 @@
 #include "dynamic-pattern-load-cues.h"
 
+#include <QRandomGenerator>
+
 #include "data-stream.h"
 #include "utilities.h"
 
@@ -55,7 +57,7 @@ void DynamicPatternLoadCues::toQTextStream(QTextStream &stream, const Format for
 	                         "; --------------------------------------------------------------------------------\n\n"
 	                        ).arg(format == Format::SONIC_1 ? QStringLiteral("Sonic 1") : format == Format::SONIC_2_AND_3_AND_KNUCKLES_AND_CD ? QStringLiteral("Sonic 2/3&K/CD") : QStringLiteral("MapMacros"));
 
-	const QString table_label = ".offsets";
+	const QString table_label = format == Format::MAPMACROS ? ".offsets" : "CME_" + Utilities::IntegerToZeroPaddedHexQString(QRandomGenerator::global()->generate());
 
 	stream << table_label << ":";
 
@@ -66,7 +68,7 @@ void DynamicPatternLoadCues::toQTextStream(QTextStream &stream, const Format for
 
 	for (const auto &frame : qAsConst(frames))
 	{
-		const QString frame_label = ".frame" + QString::number(&frame - frames.data());
+		const QString frame_label = format == Format::MAPMACROS ? ".frame" + QString::number(&frame - frames.data()) : table_label + "_" + QString::number(&frame - frames.data(), 0x10).toUpper();
 
 		if (format == Format::MAPMACROS)
 			stream << "\tmappingsTableEntry.w\t" << frame_label << "\n";
@@ -78,7 +80,7 @@ void DynamicPatternLoadCues::toQTextStream(QTextStream &stream, const Format for
 
 	for (const auto &frame : qAsConst(frames))
 	{
-		const QString frame_label = ".frame" + QString::number(&frame - frames.data());
+		const QString frame_label = format == Format::MAPMACROS ? ".frame" + QString::number(&frame - frames.data()) : table_label + "_" + QString::number(&frame - frames.data(), 0x10).toUpper();
 		stream << frame_label << ":";
 
 		if (format == DynamicPatternLoadCues::Format::MAPMACROS)

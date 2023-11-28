@@ -1,6 +1,9 @@
 #include "sprite-mappings.h"
 
+#include <QRandomGenerator>
+
 #include "data-stream.h"
+#include "utilities.h"
 
 void SpriteMappings::fromFile(QFile &file, const SpritePiece::Format format)
 {
@@ -48,7 +51,7 @@ void SpriteMappings::toQTextStream(QTextStream &stream, const SpritePiece::Forma
 	                         "; --------------------------------------------------------------------------------\n\n"
 	                        ).arg(format == SpritePiece::Format::SONIC_1 ? QStringLiteral("Sonic 1/CD") : format == SpritePiece::Format::SONIC_2 ? QStringLiteral("Sonic 2") : format == SpritePiece::Format::SONIC_3_AND_KNUCKLES ? QStringLiteral("Sonic 3 & Knuckles") : QStringLiteral("MapMacros"));
 
-	const QString table_label = ".offsets";
+	const QString table_label = format == SpritePiece::Format::MAPMACROS ? ".offsets" : "CME_" + Utilities::IntegerToZeroPaddedHexQString(QRandomGenerator::global()->generate());
 
 	stream << table_label << ":";
 
@@ -59,7 +62,7 @@ void SpriteMappings::toQTextStream(QTextStream &stream, const SpritePiece::Forma
 
 	for (const auto &frame : qAsConst(frames))
 	{
-		const QString frame_label = ".frame" + QString::number(&frame - frames.data());
+		const QString frame_label = format == SpritePiece::Format::MAPMACROS ? ".frame" + QString::number(&frame - frames.data()) : table_label + "_" + QString::number(&frame - frames.data(), 0x10).toUpper();
 
 		if (format == SpritePiece::Format::MAPMACROS)
 			stream << "\tmappingsTableEntry.w\t" << frame_label << "\n";
@@ -71,7 +74,7 @@ void SpriteMappings::toQTextStream(QTextStream &stream, const SpritePiece::Forma
 
 	for (const auto &frame : qAsConst(frames))
 	{
-		const QString frame_label = ".frame" + QString::number(&frame - frames.data());
+		const QString frame_label = format == SpritePiece::Format::MAPMACROS ? ".frame" + QString::number(&frame - frames.data()) : table_label + "_" + QString::number(&frame - frames.data(), 0x10).toUpper();
 		stream << frame_label << ":";
 
 		if (format == SpritePiece::Format::MAPMACROS)
