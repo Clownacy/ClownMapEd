@@ -583,9 +583,9 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 	// Menubar: File/Save Data File //
 	//////////////////////////////////
 
-	const auto save_tile_file = [this, is_assembly_file_path](const QString &prompt, const QString &filter, const QString compression_name, bool (* const callback)(std::istream &in, std::ostream &out))
+	const auto save_tile_file = [this, is_assembly_file_path](const QString &compression_name, const QString &file_extension, bool (* const callback)(std::istream &in, std::ostream &out))
 	{
-		const QString file_path = QFileDialog::getSaveFileName(this, prompt, QString(), filter + ";;All Files (*.*)", nullptr, QFileDialog::DontConfirmOverwrite);
+		const QString file_path = QFileDialog::getSaveFileName(this, "Save " + compression_name + " Tile Graphics File", QString(), compression_name + " Tile Graphics Files (*." + file_extension + " *.bin *.asm);;All Files (*.*)", nullptr, QFileDialog::DontConfirmOverwrite);
 
 		if (file_path.isNull())
 			return;
@@ -614,16 +614,17 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 			QTextStream stream(&file);
 
 			stream << QStringLiteral("; --------------------------------------------------------------------------------\n"
-			                         "; %1compressed tile graphics - output from ClownMapEd\n"
+			                         "; %1 tile graphics - output from ClownMapEd\n"
 			                         "; --------------------------------------------------------------------------------\n"
 			                         ).arg(compression_name);
 
+			const std::string::size_type bytes_per_line = 0x20;
 			const std::string &output_string = output_stream.str();
-			for (std::string::size_type i = 0; i < output_string.size(); i += 0x20)
+			for (std::string::size_type i = 0; i < output_string.size(); i += bytes_per_line)
 			{
 				stream << "\tdc.b ";
 
-				for (std::string::size_type j = 0; j < qMin(static_cast<std::string::size_type>(0x20), output_string.size() - i); ++j)
+				for (std::string::size_type j = 0; j < qMin(bytes_per_line, output_string.size() - i); ++j)
 				{
 					if (j != 0)
 						stream << ',';
@@ -657,7 +658,7 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 	connect(ui->actionUncompressed, &QAction::triggered, this,
 		[save_tile_file]()
 		{
-			save_tile_file("Save Tile Graphics File", "Uncompressed Tile Graphics Files (*.bin *.asm *.unc)", "Un",
+			save_tile_file("Uncompressed", "unc",
 				[](std::istream &in, std::ostream &out)
 				{
 					out << in.rdbuf();
@@ -671,14 +672,14 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 	connect(ui->actionNemesis, &QAction::triggered, this,
 		[save_tile_file]()
 		{
-			save_tile_file("Save Nemesis-Compressed Tile Graphics File", "Nemesis-Compressed Tile Graphics Files (*.bin *.asm *.nem)", "Nemesis-", nemesis::encode);
+			save_tile_file("Nemesis-Compressed", "nem", nemesis::encode);
 		}
 	);
 
 	connect(ui->actionKosinski, &QAction::triggered, this,
 		[save_tile_file]()
 		{
-			save_tile_file("Save Kosinski-Compressed Tile Graphics File", "Kosinski-Compressed Tile Graphics Files (*.bin *.asm *.kos)", "Kosinski-", kosinski::encode);
+			save_tile_file("Kosinski-Compressed", "kos", kosinski::encode);
 		}
 	);
 
@@ -691,14 +692,14 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 				return;
 			}
 
-			save_tile_file("Save Moduled Kosinski-Compressed Tile Graphics File", "Moduled Kosinski-Compressed Tile Graphics Files (*.bin *.asm *.kosm)", "Moduled Kosinski-", [](std::istream &in, std::ostream &out){return kosinski::moduled_encode(in, out);});
+			save_tile_file("Moduled Kosinski-Compressed", "kosm", [](std::istream &in, std::ostream &out){return kosinski::moduled_encode(in, out);});
 		}
 	);
 
 	connect(ui->actionKosinski_2, &QAction::triggered, this,
 		[save_tile_file]()
 		{
-			save_tile_file("Save Kosinski+-Compressed Tile Graphics File", "Kosinski+-Compressed Tile Graphics Files (*.bin *.asm *.kosp)", "Kosinski+-", kosplus::encode);
+			save_tile_file("Kosinski+-Compressed", "kosp", kosplus::encode);
 		}
 	);
 
@@ -711,14 +712,14 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 				return;
 			}
 
-			save_tile_file("Save Moduled Kosinski+-Compressed Tile Graphics File", "Moduled Kosinski+-Compressed Tile Graphics Files (*.bin *.asm *.kospm)", "Moduled Kosinski+-", [](std::istream &in, std::ostream &out){return kosplus::moduled_encode(in, out);});
+			save_tile_file("Moduled Kosinski+-Compressed", "kospm", [](std::istream &in, std::ostream &out){return kosplus::moduled_encode(in, out);});
 		}
 	);
 
 	connect(ui->actionComper, &QAction::triggered, this,
 		[save_tile_file]()
 		{
-			save_tile_file("Save Comper-Compressed Tile Graphics File", "Comper-Compressed Tile Graphics Files (*.bin *.asm *.comp)", "Comper-", comper::encode);
+			save_tile_file("Comper-Compressed", "comp", comper::encode);
 		}
 	);
 
