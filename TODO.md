@@ -8,7 +8,7 @@
 - Save states.
 - Remember current sprites across restarts.
 - Make tile viewer selection XOR with the background colour too.
-- Dragging and dropping palette colours.
+- Dragging and dropping palette colours (should affect the colours of sprites too? This would allow for converting sprites from one palette to another).
 - Proper error handling for encountering the end of a mappings file unexpectedly.
 - SonMapEd doesn't ask to overwrite files.
 - Add licence information to each source file.
