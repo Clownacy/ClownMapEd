@@ -585,7 +585,7 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 
 	const auto save_tile_file = [this](const QString &prompt, const QString &filter, bool (* const callback)(std::istream &in, std::ostream &out))
 	{
-		const QString file_path = QFileDialog::getSaveFileName(this, prompt, QString(), filter + ";;All Files (*.*)");
+		const QString file_path = QFileDialog::getSaveFileName(this, prompt, QString(), filter + ";;All Files (*.*)", nullptr, QFileDialog::DontConfirmOverwrite);
 
 		if (file_path.isNull())
 			return;
@@ -682,7 +682,7 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 
 	const auto save_palette_file = [this](const int starting_palette_line, const int ending_palette_line)
 	{
-		const QString file_path = QFileDialog::getSaveFileName(this, "Save Palette File", QString(), "Palette Files (*.bin);;All Files (*.*)");
+		const QString file_path = QFileDialog::getSaveFileName(this, "Save Palette File", QString(), "Palette Files (*.bin);;All Files (*.*)", nullptr, QFileDialog::DontConfirmOverwrite);
 
 		if (file_path.isNull())
 			return;
@@ -756,7 +756,7 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 	connect(ui->actionSave_Mappings, &QAction::triggered, this,
 		[this, save_asm_or_bin_file]()
 		{
-			save_asm_or_bin_file(QFileDialog::getSaveFileName(this, "Save Sprite Mappings File", QString(), "Sprite Mapping Files (*.bin *.asm);;All Files (*.*)"),
+			save_asm_or_bin_file(QFileDialog::getSaveFileName(this, "Save Sprite Mappings File", QString(), "Sprite Mapping Files (*.bin *.asm);;All Files (*.*)", nullptr, QFileDialog::DontConfirmOverwrite),
 				[this](QTextStream &stream)
 				{
 					if (ui->actionPattern_Load_Cues->isChecked())
@@ -777,7 +777,7 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 	connect(ui->actionSave_Pattern_Cues, &QAction::triggered, this,
 		[this, save_asm_or_bin_file]()
 		{
-			save_asm_or_bin_file(QFileDialog::getSaveFileName(this, "Save Dynamic Pattern Loading Cue File", QString(), "Pattern Cue Files (*.bin *.asm);;All Files (*.*)"),
+			save_asm_or_bin_file(QFileDialog::getSaveFileName(this, "Save Dynamic Pattern Loading Cue File", QString(), "Pattern Cue Files (*.bin *.asm);;All Files (*.*)", nullptr, QFileDialog::DontConfirmOverwrite),
 				[this](QTextStream &stream)
 				{
 					auto sprite_mappings_copy = *sprite_mappings;
