@@ -4,9 +4,11 @@
 
 int main(int argc, char *argv[])
 {
-	// TODO: I think Ewan told me that Qt6 does this by default, so ditch this code if/when we switch from Qt5 to that!
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+	// Qt6 does this by default
 	QApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
 	QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+#endif
 
 	QApplication a(argc, argv);
 	MainWindow w;

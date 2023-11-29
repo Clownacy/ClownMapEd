@@ -15,8 +15,13 @@ QSizeF GetDPIScale(const QWidget* const widget)
 
 std::array<qreal, 3> QColorTosRGB(const QColor &colour)
 {
+	// TODO: I only used qreal here because it's what colour.getRgbF() used in Qt5.
+	// Now that Qt6 doesn't use it for that, maybe I should switch to something
+	// else here...
 	std::array<qreal, 3> srgb;
-	colour.getRgbF(&srgb[0], &srgb[1], &srgb[2]);
+	srgb[0] = colour.redF();
+	srgb[1] = colour.greenF();
+	srgb[2] = colour.blueF();
 	return srgb;
 }
 

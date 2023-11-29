@@ -175,8 +175,13 @@ void TileViewer::mousePressEvent(QMouseEvent* const event)
 	int tiles_per_row, total_rows;
 	getGridDimensions(tiles_per_row, total_rows);
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 	const int tile_x = event->x() / TILE_WIDTH_SCALED;
 	const int tile_y = event->y() / TILE_HEIGHT_SCALED;
+#else
+	const int tile_x = event->position().x() / TILE_WIDTH_SCALED;
+	const int tile_y = event->position().y() / TILE_HEIGHT_SCALED;
+#endif
 
 	const int tile_index = m_scroll + tile_y * tiles_per_row + tile_x;
 

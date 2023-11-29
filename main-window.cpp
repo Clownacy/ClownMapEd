@@ -4,6 +4,7 @@
 #include <fstream>
 #include <functional>
 #include <limits>
+#include <utility>
 
 #include <QDataStream>
 #include <QFile>
@@ -52,8 +53,8 @@ MainWindow::MainWindow(QWidget* const parent)
 
 	centralWidget()->setLayout(&vertical_layout);
 
-	horizontal_layout.setMargin(vertical_layout.margin());
-	vertical_layout.setMargin(0);
+	horizontal_layout.setContentsMargins(vertical_layout.contentsMargins());
+	vertical_layout.setContentsMargins(0, 0, 0, 0);
 
 	//////////////////////////
 	// Additional Shortcuts //
@@ -1457,7 +1458,7 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 					for (auto &tile_selected : selected)
 						tile_selected = true;
 
-					for (const auto &frame : qAsConst(sprite_mappings->frames))
+					for (const auto &frame : std::as_const(sprite_mappings->frames))
 						for (const auto &piece : frame.pieces)
 							for (int i = 0; i < piece.width * piece.height; ++i)
 								selected[piece.tile_index + i] = false;
@@ -1613,7 +1614,7 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 			set_tile_selection_and_update_piece_picker(
 				[this](QVector<bool> &selected)
 				{
-					for (const auto &piece : qAsConst(sprite_mappings->frames[sprite_viewer.selected_sprite_index()].pieces))
+					for (const auto &piece : std::as_const(sprite_mappings->frames[sprite_viewer.selected_sprite_index()].pieces))
 						for (int i = 0; i < piece.width * piece.height; ++i)
 							selected[piece.tile_index + i] = true;
 				}

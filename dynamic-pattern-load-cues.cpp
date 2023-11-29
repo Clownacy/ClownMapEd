@@ -1,5 +1,7 @@
 #include "dynamic-pattern-load-cues.h"
 
+#include <utility>
+
 #include <QRandomGenerator>
 
 #include "data-stream.h"
@@ -66,7 +68,7 @@ void DynamicPatternLoadCues::toQTextStream(QTextStream &stream, const Format for
 
 	stream << "\n";
 
-	for (const auto &frame : qAsConst(frames))
+	for (const auto &frame : std::as_const(frames))
 	{
 		const QString frame_label = format == Format::MAPMACROS ? ".frame" + QString::number(&frame - frames.data()) : table_label + "_" + QString::number(&frame - frames.data(), 0x10).toUpper();
 
@@ -78,7 +80,7 @@ void DynamicPatternLoadCues::toQTextStream(QTextStream &stream, const Format for
 
 	stream << "\n";
 
-	for (const auto &frame : qAsConst(frames))
+	for (const auto &frame : std::as_const(frames))
 	{
 		const QString frame_label = format == Format::MAPMACROS ? ".frame" + QString::number(&frame - frames.data()) : table_label + "_" + QString::number(&frame - frames.data(), 0x10).toUpper();
 		stream << frame_label << ":";

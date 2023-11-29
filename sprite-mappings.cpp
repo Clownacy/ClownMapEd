@@ -1,5 +1,7 @@
 #include "sprite-mappings.h"
 
+#include <utility>
+
 #include <QRandomGenerator>
 
 #include "data-stream.h"
@@ -60,7 +62,7 @@ void SpriteMappings::toQTextStream(QTextStream &stream, const SpritePiece::Forma
 
 	stream << "\n";
 
-	for (const auto &frame : qAsConst(frames))
+	for (const auto &frame : std::as_const(frames))
 	{
 		const QString frame_label = format == SpritePiece::Format::MAPMACROS ? ".frame" + QString::number(&frame - frames.data()) : table_label + "_" + QString::number(&frame - frames.data(), 0x10).toUpper();
 
@@ -72,7 +74,7 @@ void SpriteMappings::toQTextStream(QTextStream &stream, const SpritePiece::Forma
 
 	stream << "\n";
 
-	for (const auto &frame : qAsConst(frames))
+	for (const auto &frame : std::as_const(frames))
 	{
 		const QString frame_label = format == SpritePiece::Format::MAPMACROS ? ".frame" + QString::number(&frame - frames.data()) : table_label + "_" + QString::number(&frame - frames.data(), 0x10).toUpper();
 		stream << frame_label << ":";
