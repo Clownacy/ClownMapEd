@@ -1,6 +1,7 @@
 #include "sprite-frame.h"
 
 #include <climits>
+#include <utility>
 
 #include <QSet>
 
@@ -71,6 +72,31 @@ QRect calculateRect(const SpriteFrame &frame)
 		y2 = 0;
 
 	return QRect(QPoint(x1, y1), QPoint(x2, y2));
+}
+
+QVector<SpritePiece::Tile> getUniqueTiles(const SpriteFrame &frame)
+{
+	QVector<SpritePiece::Tile> tiles;
+	QSet<int> recorded_tiles;
+
+	iteratePieces(frame,
+		[&recorded_tiles, &tiles](const SpritePiece &piece)
+		{
+			iterateTiles(piece,
+				[&recorded_tiles, &tiles](const SpritePiece::Tile &tile)
+				{
+					if (recorded_tiles.contains(tile.index))
+						return;
+
+					recorded_tiles.insert(tile.index);
+
+					tiles.append(tile);
+				}
+			);
+		}
+	);
+
+	return tiles;
 }
 
 void iteratePieces(const SpriteFrame &frame, const std::function<void(const SpritePiece&)> &callback)

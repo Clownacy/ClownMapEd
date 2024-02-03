@@ -30,3 +30,13 @@ void draw(const SpritePiece::Tile &tile, QPainter &painter, const TileManager &t
 
 	painter.drawPixmap(rect, tile_manager.pixmaps(tile.index, tile.palette_line, effect).transformed(QTransform::fromScale(tile.x_flip ? -1 : 1, tile.y_flip ? -1 : 1)), QRectF(0, 0, TileManager::TILE_WIDTH, TileManager::TILE_HEIGHT));
 }
+
+void draw(const SpritePiece &piece, QPainter &painter, const TileManager &tile_manager, const TileManager::PixmapType effect)
+{
+	iterateTiles(piece,
+		[&painter, &tile_manager, effect](const SpritePiece::Tile &tile)
+		{
+			draw(tile, painter, tile_manager, effect);
+		}
+	);
+}
