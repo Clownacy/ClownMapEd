@@ -30,7 +30,7 @@ void draw(const SpriteFrame &frame, QPainter &painter, bool hide_duplicate_tiles
 	QSet<int> recorded_tiles;
 
 	iteratePieces(frame,
-		[frame, &draw_tile, &recorded_tiles, effect, hide_duplicate_tiles, &selected_piece](const SpritePiece &piece)
+		[&frame, &draw_tile, &recorded_tiles, effect, hide_duplicate_tiles, &selected_piece](const SpritePiece &piece)
 		{
 			const bool is_selected_piece = selected_piece && &piece - frame.pieces.data() == selected_piece->first;
 
