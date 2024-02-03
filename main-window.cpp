@@ -457,13 +457,24 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 
 				// Gimme exceptions when IO errors occur.
 				// It's better than letting the program continue with mangled data.
-				// TODO: Actually handle these exceptions FFS.
 				stream.exceptions(std::ios::badbit | std::ios::eofbit | std::ios::failbit);
 
+				SpriteMappings new_mappings;
+
+				try
+				{
+					new_mappings.fromStream(stream, game_format);
+				}
+				catch (const std::ios::failure &e)
+				{
+					QMessageBox::critical(this, "Error", QString("Failed to load file. File is probably not a valid mappings file. Exception details: ") + e.what());
+					return;
+				}
+
 				sprite_mappings.modify(
-					[this, &stream](SpriteMappings &mappings)
+					[&new_mappings](SpriteMappings &mappings)
 					{
-						mappings.fromStream(stream, game_format);
+						mappings = std::move(new_mappings);
 					}
 				);
 
@@ -486,13 +497,20 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 
 				// Gimme exceptions when IO errors occur.
 				// It's better than letting the program continue with mangled data.
-				// TODO: Actually handle these exceptions FFS.
 				file.exceptions(std::ios::badbit | std::ios::eofbit | std::ios::failbit);
 
 				SpriteMappings sprite_mappings_copy = *sprite_mappings;
-				if (!sprite_mappings_copy.applyDPLCs(DynamicPatternLoadCues(file, game_format == SpritePiece::Format::SONIC_1 ? DynamicPatternLoadCues::Format::SONIC_1 : DynamicPatternLoadCues::Format::SONIC_2_AND_3_AND_KNUCKLES_AND_CD)))
+				try
 				{
-					QMessageBox::critical(this, "Error", "Failed to load file: these cues are not compatible with the loaded mappings.");
+					if (!sprite_mappings_copy.applyDPLCs(DynamicPatternLoadCues(file, game_format == SpritePiece::Format::SONIC_1 ? DynamicPatternLoadCues::Format::SONIC_1 : DynamicPatternLoadCues::Format::SONIC_2_AND_3_AND_KNUCKLES_AND_CD)))
+					{
+						QMessageBox::critical(this, "Error", "Failed to load file: these cues are not compatible with the loaded mappings.");
+						return;
+					}
+				}
+				catch (const std::ios::failure &e)
+				{
+					QMessageBox::critical(this, "Error", QString("Failed to load file. File is probably not a valid DPLC file. Exception details: ") + e.what());
 					return;
 				}
 
