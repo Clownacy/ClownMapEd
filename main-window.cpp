@@ -455,6 +455,11 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 					return;
 				}
 
+				// Gimme exceptions when IO errors occur.
+				// It's better than letting the program continue with mangled data.
+				// TODO: Actually handle these exceptions FFS.
+				stream.exceptions(std::ios::badbit | std::ios::eofbit | std::ios::failbit);
+
 				sprite_mappings.modify(
 					[this, &stream](SpriteMappings &mappings)
 					{
@@ -478,6 +483,11 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 					QMessageBox::critical(this, "Error", "Failed to load file: file could not be opened for reading.");
 					return;
 				}
+
+				// Gimme exceptions when IO errors occur.
+				// It's better than letting the program continue with mangled data.
+				// TODO: Actually handle these exceptions FFS.
+				file.exceptions(std::ios::badbit | std::ios::eofbit | std::ios::failbit);
 
 				SpriteMappings sprite_mappings_copy = *sprite_mappings;
 				if (!sprite_mappings_copy.applyDPLCs(DynamicPatternLoadCues(file, game_format == SpritePiece::Format::SONIC_1 ? DynamicPatternLoadCues::Format::SONIC_1 : DynamicPatternLoadCues::Format::SONIC_2_AND_3_AND_KNUCKLES_AND_CD)))
