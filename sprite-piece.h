@@ -5,17 +5,14 @@
 
 #include <QPainter>
 #include <QRect>
-#include <QTextStream>
-
-#include "tile-manager.h"
 
 #include "libsonassmd/sprite-piece.h"
+
+#include "tile-manager.h"
 
 typedef libsonassmd::SpritePiece SpritePiece;
 
 void draw(const SpritePiece::Tile &tile, QPainter &painter, const TileManager &tile_manager, TileManager::PixmapType effect);
-
-void toQTextStream(const SpritePiece &piece, QTextStream &stream, SpritePiece::Format format);
 
 inline QRect calculateRect(const SpritePiece &piece)
 {

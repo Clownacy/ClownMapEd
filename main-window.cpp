@@ -11,6 +11,7 @@
 #include <QFileDialog>
 #include <QKeyEvent>
 #include <QMessageBox>
+#include <QTextStream>
 #include <QtMath>
 
 #include "comper.h"
@@ -23,6 +24,7 @@
 #include "clownassembler/semantic.h"
 
 #include "dynamic-pattern-load-cues.h"
+#include "sprite-frame.h"
 #include "utilities.h"
 
 MainWindow::MainWindow(QWidget* const parent)
@@ -314,7 +316,7 @@ MainWindow::MainWindow(QWidget* const parent)
 		return extension_position != -1 && QStringView(file_path.data() + extension_position) == QStringLiteral(".asm");
 	};
 
-	const auto emit_mapmacros = [this](QTextStream &stream)
+	const auto emit_mapmacros = [this](std::ostream &stream)
 	{
 		stream << "SonicMappingsVer = ";
 
@@ -413,17 +415,15 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 		if (is_assembly_file_path(file_path))
 		{
 			// In case this file uses MapMacros, we'll generate a wrapper file to define the relevant macros.
-			QFile file(temporary_assembly_filename);
-			if (!file.open(QFile::OpenModeFlag::WriteOnly))
+			std::ofstream stream(temporary_assembly_filename);
+			if (!stream.is_open())
 				QMessageBox::critical(this, "Error", "Failed to save file: file could not be opened for writing.");
-
-			QTextStream stream(&file);
 
 			emit_mapmacros(stream);
 
-			stream << "\n\tinclude \"" << file_path << "\"\n";
+			stream << "\n\tinclude \"" << file_path.toStdString() << "\"\n";
 
-			file.close();
+			stream.close();
 
 			if (!assemble_file(temporary_assembly_filename, temporary_binary_filename))
 			{
@@ -790,18 +790,16 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 		}
 	);
 
-	const auto save_asm_or_bin_file = [this, assemble_file, is_assembly_file_path, emit_mapmacros, temporary_assembly_filename](const QString &file_path, const std::function<void(QTextStream &stream)> &callback)
+	const auto save_asm_or_bin_file = [this, assemble_file, is_assembly_file_path, emit_mapmacros, temporary_assembly_filename](const QString &file_path, const std::function<void(std::ostream &stream)> &callback)
 	{
 		if (file_path.isNull())
 			return;
 
 		const bool saving_assembly = is_assembly_file_path(file_path);
 
-		QFile file(saving_assembly ? file_path : temporary_assembly_filename);
-		if (!file.open(QFile::OpenModeFlag::WriteOnly))
+		std::ofstream stream(saving_assembly ? file_path.toStdString() : temporary_assembly_filename);
+		if (!stream.is_open())
 			QMessageBox::critical(this, "Error", "Failed to save file: file could not be opened for writing.");
-
-		QTextStream stream(&file);
 
 		if (saving_assembly)
 		{
@@ -813,7 +811,7 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 
 			callback(stream);
 
-			file.close();
+			stream.close();
 
 			if (!assemble_file(temporary_assembly_filename, file_path.toStdString().c_str()))
 			{
@@ -829,17 +827,24 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 		[this, save_asm_or_bin_file]()
 		{
 			save_asm_or_bin_file(QFileDialog::getSaveFileName(this, "Save Sprite Mappings File", QString(), "Sprite Mapping Files (*.bin *.asm);;All Files (*.*)", nullptr, QFileDialog::DontConfirmOverwrite),
-				[this](QTextStream &stream)
+				[this](std::ostream &stream)
 				{
+					const auto format_to_output = ui->actionLegacyFormats->isChecked() ? game_format : SpritePiece::Format::MAPMACROS;
+
+					stream << QStringLiteral("; --------------------------------------------------------------------------------\n"
+											 "; Sprite mappings - output from ClownMapEd - %1 format\n"
+											 "; --------------------------------------------------------------------------------\n\n"
+											).arg(format_to_output == SpritePiece::Format::SONIC_1 ? QStringLiteral("Sonic 1/CD") : format_to_output == SpritePiece::Format::SONIC_2 ? QStringLiteral("Sonic 2") : format_to_output == SpritePiece::Format::SONIC_3_AND_KNUCKLES ? QStringLiteral("Sonic 3 & Knuckles") : QStringLiteral("MapMacros")).toStdString();
+
 					if (ui->actionPattern_Load_Cues->isChecked())
 					{
 						auto sprite_mappings_copy = *sprite_mappings;
 						sprite_mappings_copy.removeDPLCs();
-						toQTextStream(sprite_mappings_copy, stream, ui->actionLegacyFormats->isChecked() ? game_format : SpritePiece::Format::MAPMACROS);
+						sprite_mappings_copy.toStream(stream, format_to_output);
 					}
 					else
 					{
-						toQTextStream(*sprite_mappings, stream, ui->actionLegacyFormats->isChecked() ? game_format : SpritePiece::Format::MAPMACROS);
+						sprite_mappings->toStream(stream, format_to_output);
 					}
 				}
 			);
@@ -850,10 +855,17 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 		[this, save_asm_or_bin_file]()
 		{
 			save_asm_or_bin_file(QFileDialog::getSaveFileName(this, "Save Dynamic Pattern Loading Cue File", QString(), "Pattern Cue Files (*.bin *.asm);;All Files (*.*)", nullptr, QFileDialog::DontConfirmOverwrite),
-				[this](QTextStream &stream)
+				[this](std::ostream &stream)
 				{
+					const auto format_to_output = !ui->actionLegacyFormats->isChecked() ? DynamicPatternLoadCues::Format::MAPMACROS : game_format == SpritePiece::Format::SONIC_1 ? DynamicPatternLoadCues::Format::SONIC_1 : DynamicPatternLoadCues::Format::SONIC_2_AND_3_AND_KNUCKLES_AND_CD;
+
+					stream << QStringLiteral("; --------------------------------------------------------------------------------\n"
+											 "; Dynamic Pattern Loading Cues - output from ClownMapEd - %1 format\n"
+											 "; --------------------------------------------------------------------------------\n\n"
+											).arg(format_to_output == DynamicPatternLoadCues::Format::SONIC_1 ? QStringLiteral("Sonic 1") : format_to_output == DynamicPatternLoadCues::Format::SONIC_2_AND_3_AND_KNUCKLES_AND_CD ? QStringLiteral("Sonic 2/3&K/CD") : QStringLiteral("MapMacros")).toStdString();
+
 					auto sprite_mappings_copy = *sprite_mappings;
-					toQTextStream(sprite_mappings_copy.removeDPLCs(), stream, !ui->actionLegacyFormats->isChecked() ? DynamicPatternLoadCues::Format::MAPMACROS : game_format == SpritePiece::Format::SONIC_1 ? DynamicPatternLoadCues::Format::SONIC_1 : DynamicPatternLoadCues::Format::SONIC_2_AND_3_AND_KNUCKLES_AND_CD);
+					sprite_mappings_copy.removeDPLCs().toStream(stream, format_to_output);
 				}
 			);
 		}

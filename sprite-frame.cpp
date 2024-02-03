@@ -1,17 +1,8 @@
 #include "sprite-frame.h"
 
 #include <climits>
-#include <sstream>
 
 #include <QSet>
-
-void toQTextStream(const SpriteFrame &frame, QTextStream &stream, const SpritePiece::Format format)
-{
-	// TODO: Don't do this.
-	std::stringstream string_stream;
-	frame.toStream(string_stream, format);
-	stream << string_stream.str().c_str();
-}
 
 void draw(const SpriteFrame &frame, QPainter &painter, bool hide_duplicate_tiles, const TileManager &tile_manager, const TileManager::PixmapType effect, const int starting_palette_line, const int x_offset, const int y_offset, const std::optional<std::pair<int, TileManager::PixmapType>> &selected_piece)
 {

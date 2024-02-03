@@ -1,15 +1,5 @@
 #include "sprite-piece.h"
 
-#include <sstream>
-
-void toQTextStream(const SpritePiece &piece, QTextStream &stream, const SpritePiece::Format format)
-{
-	// TODO: Don't do this.
-	std::stringstream string_stream;
-	piece.toStream(string_stream, format);
-	stream << string_stream.str().c_str();
-}
-
 void iterateTiles(const SpritePiece &piece, const std::function<void(const SpritePiece::Tile&)> &callback)
 {
 	int current_tile_index = piece.tile_index;
