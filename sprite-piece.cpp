@@ -1,109 +1,42 @@
 #include "sprite-piece.h"
 
-#include "utilities.h"
+#include <sstream>
 
-void SpritePiece::fromDataStream(DataStream &stream, const Format format)
+void toQTextStream(const SpritePiece &piece, QTextStream &stream, const SpritePiece::Format format)
 {
-	const auto original_byte_order = stream.byteOrder();
-	stream.setByteOrder(DataStream::BigEndian);
-
-	// This is specifically Sonic 2's mappings format.
-	y = stream.read<qint8>();
-	const uint size = stream.read<quint8>();
-	width = ((size >> 2) & 3) + 1;
-	height = ((size >> 0) & 3) + 1;
-	const uint art_tile = stream.read<quint16>();
-	priority = (art_tile & (1 << 15)) != 0;
-	palette_line = (art_tile >> 13) & 3;
-	y_flip = (art_tile & (1 << 12)) != 0;
-	x_flip = (art_tile & (1 << 11)) != 0;
-	tile_index = art_tile & 0x7FF;
-
-	switch (format)
-	{
-		case Format::MAPMACROS:
-			Q_ASSERT(false);
-			// Fallthrough
-		case Format::SONIC_1:
-			x = stream.read<qint8>();
-			break;
-
-		case Format::SONIC_2:
-			stream.read<quint16>(); // TODO: Actually use the 2-player data?
-			// Fallthrough
-		case Format::SONIC_3_AND_KNUCKLES:
-			x = stream.read<qint16>();
-			break;
-	}
-
-	stream.setByteOrder(original_byte_order);
+	// TODO: Don't do this.
+	std::stringstream string_stream;
+	piece.toStream(string_stream, format);
+	stream << string_stream.str().c_str();
 }
 
-void SpritePiece::toQTextStream(QTextStream &stream, const Format format) const
+void iterateTiles(const SpritePiece &piece, const std::function<void(const SpritePiece::Tile&)> &callback)
 {
-	if (format == Format::MAPMACROS)
+	int current_tile_index = piece.tile_index;
+
+	for (int tile_x = 0; tile_x < piece.width; ++tile_x)
 	{
-		stream << "\tspritePiece " << x << ", " << y << ", " << width << ", " << height << ", " << tile_index << ", " << x_flip << ", " << y_flip << ", " << palette_line << ", " << priority;
-	}
-	else
-	{
-		// TODO: Report to the user when the coordinates are truncated!
-		stream << "\tdc.b\t" << y << "\n";
-		stream << "\tdc.b\t$" << Utilities::IntegerToZeroPaddedHexQString(static_cast<quint8>(((static_cast<uint>(width) - 1) << 2) | (static_cast<uint>(height) - 1))) << "\n";
+		const int tile_x_corrected = (piece.x_flip ? piece.width - tile_x - 1 : tile_x) * TileManager::TILE_WIDTH;
 
-		const uint art_tile_upper_bits = static_cast<uint>(priority) << 15
-									   | static_cast<uint>(palette_line) << 13
-									   | static_cast<uint>(y_flip) << 12
-									   | static_cast<uint>(x_flip) << 11;
-
-		stream << "\tdc.w\t$" << Utilities::IntegerToZeroPaddedHexQString(static_cast<quint16>(art_tile_upper_bits | static_cast<uint>(tile_index))) << "\n";
-
-		switch (format)
+		for (int tile_y = 0; tile_y < piece.height; ++tile_y)
 		{
-			case Format::MAPMACROS:
-				Q_ASSERT(false);
-				// Fallthrough
-			case Format::SONIC_1:
-				stream << "\tdc.b\t" << x << "\n";
-				break;
+			const int tile_y_corrected = (piece.y_flip ? piece.height - tile_y - 1 : tile_y) * TileManager::TILE_HEIGHT;
 
-			case Format::SONIC_2:
-				stream << "\tdc.w\t$" << Utilities::IntegerToZeroPaddedHexQString(static_cast<quint16>(art_tile_upper_bits | static_cast<uint>(tile_index) / 2)) << "\n";
-				// Fallthrough
-			case Format::SONIC_3_AND_KNUCKLES:
-				stream << "\tdc.w\t" << x << "\n";
-				break;
-		}
-	}
-}
-
-void SpritePiece::iterateTiles(const std::function<void(const SpritePiece::Tile&)> &callback) const
-{
-	int current_tile_index = tile_index;
-
-	for (int tile_x = 0; tile_x < width; ++tile_x)
-	{
-		const int tile_x_corrected = (x_flip ? width - tile_x - 1 : tile_x) * TileManager::TILE_WIDTH;
-
-		for (int tile_y = 0; tile_y < height; ++tile_y)
-		{
-			const int tile_y_corrected = (y_flip ? height - tile_y - 1 : tile_y) * TileManager::TILE_HEIGHT;
-
-			callback({current_tile_index, x + tile_x_corrected, y + tile_y_corrected, palette_line, x_flip, y_flip});
+			callback({current_tile_index, piece.x + tile_x_corrected, piece.y + tile_y_corrected, piece.palette_line, piece.x_flip, piece.y_flip});
 
 			++current_tile_index;
 		}
 	}
 }
 
-void SpritePiece::Tile::draw(QPainter &painter, const TileManager &tile_manager, const TileManager::PixmapType effect) const
+void draw(const SpritePiece::Tile &tile, QPainter &painter, const TileManager &tile_manager, const TileManager::PixmapType effect)
 {
 	const QRect rect(
-		x,
-		y,
+		tile.x,
+		tile.y,
 		TileManager::TILE_WIDTH,
 		TileManager::TILE_HEIGHT
 	);
 
-	painter.drawPixmap(rect, tile_manager.pixmaps(index, palette_line, effect).transformed(QTransform::fromScale(x_flip ? -1 : 1, y_flip ? -1 : 1)), QRectF(0, 0, TileManager::TILE_WIDTH, TileManager::TILE_HEIGHT));
+	painter.drawPixmap(rect, tile_manager.pixmaps(tile.index, tile.palette_line, effect).transformed(QTransform::fromScale(tile.x_flip ? -1 : 1, tile.y_flip ? -1 : 1)), QRectF(0, 0, TileManager::TILE_WIDTH, TileManager::TILE_HEIGHT));
 }

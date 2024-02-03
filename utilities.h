@@ -1,7 +1,9 @@
 #ifndef UTILITIES_H
 #define UTILITIES_H
 
+#include <algorithm>
 #include <array>
+#include <vector>
 
 #include <QSizeF>
 #include <QString>
@@ -58,6 +60,17 @@ inline std::array<qreal, 3> sRGBToLAB(const std::array<qreal, 3> &colour)
 inline std::array<qreal, 3> LinearRGBToLAB(const std::array<qreal, 3> &colour)
 {
 	return XYZToLAB(LinearRGBToXYZ(colour));
+}
+
+template <typename T>
+inline void Move(std::vector<T> &vector, const uint source, const uint destination)
+{
+	auto it = vector.begin();
+
+	if (source < destination)
+		std::rotate(it + source, it + source + 1, it + destination + 1);
+	else if (source > destination)
+		std::rotate(it + destination, it + source, it + source + 1);
 }
 
 }

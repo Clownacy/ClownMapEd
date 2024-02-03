@@ -6,21 +6,8 @@
 
 #include "libsonassmd/dynamic-pattern-load-cues.h"
 
-struct DynamicPatternLoadCues : libsonassmd::DynamicPatternLoadCues
-{
-	struct Frame : libsonassmd::DynamicPatternLoadCues::Frame
-	{
-		struct Copy : libsonassmd::DynamicPatternLoadCues::Frame::Copy
-		{
-			void toQTextStream(QTextStream &stream, Format format) const;
-		};
+typedef libsonassmd::DynamicPatternLoadCues DynamicPatternLoadCues;
 
-		void toQTextStream(QTextStream &stream, Format format) const;
-	};
-
-	using libsonassmd::DynamicPatternLoadCues::DynamicPatternLoadCues;
-
-	void toQTextStream(QTextStream &stream, Format format) const;
-};
+void toQTextStream(const DynamicPatternLoadCues &dplc, QTextStream &stream, DynamicPatternLoadCues::Format format);
 
 #endif // DYNAMIC_PATTERN_LOAD_CUES_H

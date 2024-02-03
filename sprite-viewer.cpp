@@ -19,7 +19,7 @@ SpriteViewer::SpriteViewer(const TileManager &tile_manager, const SignalWrapper<
 			if (this->sprite_mappings.frames.size() == 0)
 				m_selected_sprite_index = -1;
 			else
-				m_selected_sprite_index = qBound(0, m_selected_sprite_index, this->sprite_mappings.frames.size() - 1);
+				m_selected_sprite_index = qBound(0u, m_selected_sprite_index, this->sprite_mappings.frames.size() - 1);
 
 			update();
 		}
@@ -40,7 +40,7 @@ void SpriteViewer::paintEvent(QPaintEvent* const event)
 	transform.scale(2, 2); // Apply general scale.
 	painter.setTransform(transform);
 
-	const QVector<SpriteFrame> &frames = sprite_mappings.frames;
+	const std::vector<SpriteFrame> &frames = sprite_mappings.frames;
 
 	if (frames.size() == 0)
 		return;
@@ -117,7 +117,7 @@ void SpriteViewer::paintEvent(QPaintEvent* const event)
 		{
 			// To reduce the thickness of the outline, we create a series of piece borders,
 			// which are only 1 pixel thick and reside exclusively outside of the piece's bounds.
-			const QRect rect = piece.rect();
+			const QRect rect = calculateRect(piece);
 
 			QPainterPath inner_path;
 			inner_path.addRect(rect.marginsAdded(QMargins(1, 1, 1, 1)));
@@ -142,36 +142,36 @@ void SpriteViewer::paintEvent(QPaintEvent* const event)
 
 	// Draw selected sprite.
 	if (m_selected_piece_index == -1)
-		selected_sprite.draw(painter, m_hide_duplicate_tiles, tile_manager, TileManager::PixmapType::NO_BACKGROUND, m_starting_palette_line);
+		draw(selected_sprite, painter, m_hide_duplicate_tiles, tile_manager, TileManager::PixmapType::NO_BACKGROUND, m_starting_palette_line);
 	else
-		selected_sprite.draw(painter, m_hide_duplicate_tiles, tile_manager, TileManager::PixmapType::TRANSPARENT, m_starting_palette_line, 0, 0, std::make_pair(m_selected_piece_index, TileManager::PixmapType::NO_BACKGROUND));
+		draw(selected_sprite, painter, m_hide_duplicate_tiles, tile_manager, TileManager::PixmapType::TRANSPARENT, m_starting_palette_line, 0, 0, std::make_pair(m_selected_piece_index, TileManager::PixmapType::NO_BACKGROUND));
 
 	int x_offset;
 
 	// Draw sprites to the left of the selected sprite.
 	x_offset = 0;
 
-	for (int i = m_selected_sprite_index; i-- > 0; )
+	for (uint i = m_selected_sprite_index; i-- > 0; )
 	{
-		x_offset += qMin(-16, frames[i + 1].rect().left());
-		x_offset -= frames[i].rect().right();
-                frames[i].draw(painter, m_hide_duplicate_tiles, tile_manager, TileManager::PixmapType::TRANSPARENT, m_starting_palette_line, x_offset);
+		x_offset += qMin(-16, calculateRect(frames[i + 1]).left());
+		x_offset -= calculateRect(frames[i]).right();
+		draw(frames[i], painter, m_hide_duplicate_tiles, tile_manager, TileManager::PixmapType::TRANSPARENT, m_starting_palette_line, x_offset);
 	}
 
 	// Draw sprites to the right of the selected sprite.
 	x_offset = 0;
 
-	for (int i = m_selected_sprite_index + 1; i < frames.size(); ++i)
+	for (uint i = m_selected_sprite_index + 1; i < frames.size(); ++i)
 	{
-		x_offset += qMax(16, frames[i - 1].rect().right());
-		x_offset -= frames[i].rect().left();
-                frames[i].draw(painter, m_hide_duplicate_tiles, tile_manager, TileManager::PixmapType::TRANSPARENT, m_starting_palette_line, x_offset);
+		x_offset += qMax(16, calculateRect(frames[i - 1]).right());
+		x_offset -= calculateRect(frames[i]).left();
+		draw(frames[i], painter, m_hide_duplicate_tiles, tile_manager, TileManager::PixmapType::TRANSPARENT, m_starting_palette_line, x_offset);
 	}
 }
 
-void SpriteViewer::setSelectedSprite(const int sprite_index)
+void SpriteViewer::setSelectedSprite(const uint sprite_index)
 {
-	m_selected_sprite_index = qBound(0, sprite_index, sprite_mappings.frames.size() - 1);
+	m_selected_sprite_index = qBound(0u, sprite_index, sprite_mappings.frames.size() - 1);
 	m_selected_piece_index = -1;
 	update();
 

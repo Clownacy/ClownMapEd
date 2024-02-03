@@ -5,19 +5,13 @@
 #include <QTextStream>
 #include <QVector>
 
-#include "data-stream.h"
+#include "libsonassmd/sprite-mappings.h"
+
 #include "dynamic-pattern-load-cues.h"
 #include "sprite-frame.h"
 
-struct SpriteMappings
-{
-	void fromFile(QFile &file, SpritePiece::Format format);
-	void toQTextStream(QTextStream &stream, SpritePiece::Format format) const;
+typedef libsonassmd::SpriteMappings SpriteMappings;
 
-	bool applyDPLCs(const DynamicPatternLoadCues &dplcs);
-	DynamicPatternLoadCues removeDPLCs();
-
-	QVector<SpriteFrame> frames;
-};
+void toQTextStream(const SpriteMappings &mappings, QTextStream &stream, SpritePiece::Format format);
 
 #endif // SPRITE_MAPPINGS_H

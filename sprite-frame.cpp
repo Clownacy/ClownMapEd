@@ -1,39 +1,19 @@
 #include "sprite-frame.h"
 
 #include <climits>
+#include <sstream>
 
 #include <QSet>
 
-void SpriteFrame::fromDataStream(DataStream &stream, const SpritePiece::Format format)
+void toQTextStream(const SpriteFrame &frame, QTextStream &stream, const SpritePiece::Format format)
 {
-	const auto original_byte_order = stream.byteOrder();
-	stream.setByteOrder(DataStream::BigEndian);
-
-	const int total_pieces = format == SpritePiece::Format::SONIC_1 ? stream.read<quint8>() : stream.read<quint16>();
-	pieces.resize(total_pieces);
-
-	for (auto &piece : pieces)
-		piece.fromDataStream(stream, format);
-
-	stream.setByteOrder(original_byte_order);
+	// TODO: Don't do this.
+	std::stringstream string_stream;
+	frame.toStream(string_stream, format);
+	stream << string_stream.str().c_str();
 }
 
-void SpriteFrame::toQTextStream(QTextStream &stream, const SpritePiece::Format format) const
-{
-	if (format != SpritePiece::Format::MAPMACROS)
-	{
-		// TODO: Report to the user when this is truncated!
-		stream << "\tdc." << (format == SpritePiece::Format::SONIC_1 ? "b" : "w") << "\t" << pieces.size() << "\n\n";
-	}
-
-	for (const auto &piece : pieces)
-	{
-		piece.toQTextStream(stream, format);
-		stream << "\n";
-	}
-}
-
-void SpriteFrame::draw(QPainter &painter, bool hide_duplicate_tiles, const TileManager &tile_manager, const TileManager::PixmapType effect, const int starting_palette_line, const int x_offset, const int y_offset, const std::optional<std::pair<int, TileManager::PixmapType>> &selected_piece) const
+void draw(const SpriteFrame &frame, QPainter &painter, bool hide_duplicate_tiles, const TileManager &tile_manager, const TileManager::PixmapType effect, const int starting_palette_line, const int x_offset, const int y_offset, const std::optional<std::pair<int, TileManager::PixmapType>> &selected_piece)
 {
 	const auto draw_tile = [&painter, &tile_manager, starting_palette_line, x_offset, y_offset](const SpritePiece::Tile tile, const TileManager::PixmapType effect)
 	{
@@ -44,17 +24,17 @@ void SpriteFrame::draw(QPainter &painter, bool hide_duplicate_tiles, const TileM
 		adjusted_tile.palette_line += starting_palette_line;
 		adjusted_tile.palette_line %= Palette::TOTAL_LINES;
 
-		adjusted_tile.draw(painter, tile_manager, effect);
+		draw(adjusted_tile, painter, tile_manager, effect);
 	};
 
 	QSet<int> recorded_tiles;
 
-	iteratePieces(
-		[this, &draw_tile, &recorded_tiles, effect, hide_duplicate_tiles, &selected_piece](const SpritePiece &piece)
+	iteratePieces(frame,
+		[frame, &draw_tile, &recorded_tiles, effect, hide_duplicate_tiles, &selected_piece](const SpritePiece &piece)
 		{
-			const bool is_selected_piece = selected_piece && &piece - pieces.data() == selected_piece->first;
+			const bool is_selected_piece = selected_piece && &piece - frame.pieces.data() == selected_piece->first;
 
-			piece.iterateTiles(
+			iterateTiles(piece,
 				[&draw_tile, &recorded_tiles, effect, hide_duplicate_tiles, &selected_piece, is_selected_piece](const SpritePiece::Tile &tile)
 				{
 					if (hide_duplicate_tiles)
@@ -72,16 +52,16 @@ void SpriteFrame::draw(QPainter &painter, bool hide_duplicate_tiles, const TileM
 	);
 }
 
-QRect SpriteFrame::rect() const
+QRect calculateRect(const SpriteFrame &frame)
 {
 	int x1 = INT_MAX;
 	int x2 = INT_MIN;
 	int y1 = INT_MAX;
 	int y2 = INT_MIN;
 
-	for (auto &piece : pieces)
+	for (auto &piece : frame.pieces)
 	{
-		const QRect rect = piece.rect();
+		const QRect rect = calculateRect(piece);
 
 		x1 = qMin(x1, rect.left());
 		x2 = qMax(x2, rect.right());
@@ -101,11 +81,11 @@ QRect SpriteFrame::rect() const
 	return QRect(QPoint(x1, y1), QPoint(x2, y2));
 }
 
-void SpriteFrame::iteratePieces(const std::function<void(const SpritePiece&)> &callback) const
+void iteratePieces(const SpriteFrame &frame, const std::function<void(const SpritePiece&)> &callback)
 {
 	// Must draw in reverse order.
 	for (uint i = 0; i < 2; ++i)
-		for (auto piece = pieces.crbegin(); piece != pieces.crend(); ++piece)
+		for (auto piece = frame.pieces.crbegin(); piece != frame.pieces.crend(); ++piece)
 			if (piece->priority == (i != 0))
 				callback(*piece);
 }

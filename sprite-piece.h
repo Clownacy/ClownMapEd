@@ -7,60 +7,31 @@
 #include <QRect>
 #include <QTextStream>
 
-#include "data-stream.h"
 #include "tile-manager.h"
 
-struct SpritePiece
+#include "libsonassmd/sprite-piece.h"
+
+typedef libsonassmd::SpritePiece SpritePiece;
+
+void draw(const SpritePiece::Tile &tile, QPainter &painter, const TileManager &tile_manager, TileManager::PixmapType effect);
+
+void toQTextStream(const SpritePiece &piece, QTextStream &stream, SpritePiece::Format format);
+
+inline QRect calculateRect(const SpritePiece &piece)
 {
-	enum class Format
-	{
-		SONIC_1,
-		SONIC_2,
-		SONIC_3_AND_KNUCKLES,
-		MAPMACROS
-	};
+	return QRect(piece.x, piece.y, piece.width * TileManager::TILE_WIDTH, piece.height * TileManager::TILE_HEIGHT);
+}
 
-	struct Tile
-	{
-		void draw(QPainter &painter, const TileManager &tile_manager, TileManager::PixmapType effect) const;
+void iterateTiles(const SpritePiece &piece, const std::function<void(const SpritePiece::Tile&)> &callback);
 
-		int index;
-		int x;
-		int y;
-		int palette_line;
-		bool x_flip;
-		bool y_flip;
-	};
-
-	void fromDataStream(DataStream &stream, Format format);
-	void toQTextStream(QTextStream &stream, Format format) const;
-
-	QRect rect() const
-	{
-		return QRect(x, y, width * TileManager::TILE_WIDTH, height * TileManager::TILE_HEIGHT);
-	}
-
-	void iterateTiles(const std::function<void(const SpritePiece::Tile&)> &callback) const;
-
-	void draw(QPainter &painter, const TileManager &tile_manager, const TileManager::PixmapType effect) const
-	{
-		iterateTiles(
-			[&painter, &tile_manager, effect](const Tile &tile)
-			{
-				tile.draw(painter, tile_manager, effect);
-			}
-		);
-	}
-
-	int x;
-	int y;
-	int width;
-	int height;
-	bool priority;
-	int palette_line;
-	bool y_flip;
-	bool x_flip;
-	int tile_index;
-};
+inline void draw(const SpritePiece &piece, QPainter &painter, const TileManager &tile_manager, const TileManager::PixmapType effect)
+{
+	iterateTiles(piece,
+		[&painter, &tile_manager, effect](const SpritePiece::Tile &tile)
+		{
+			draw(tile, painter, tile_manager, effect);
+		}
+	);
+}
 
 #endif // SPRITE_PIECE_H

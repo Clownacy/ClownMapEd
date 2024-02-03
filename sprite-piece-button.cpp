@@ -27,5 +27,5 @@ void SpritePieceButton::paintEvent(QPaintEvent* const event)
 	QPainter painter(this);
 
 	painter.scale(width() / (m_sprite_piece.width * TileManager::TILE_WIDTH), height() / (m_sprite_piece.height * TileManager::TILE_HEIGHT));
-	m_sprite_piece.draw(painter, tile_manager, TileManager::PixmapType::WITH_BACKGROUND);
+	draw(m_sprite_piece, painter, tile_manager, TileManager::PixmapType::WITH_BACKGROUND);
 }

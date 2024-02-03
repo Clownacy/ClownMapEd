@@ -2,32 +2,15 @@
 
 #include <sstream>
 
-#include <QRandomGenerator>
-
-#include "data-stream.h"
-
-void DynamicPatternLoadCues::toQTextStream(QTextStream &stream, const Format format) const
+void toQTextStream(const DynamicPatternLoadCues &dplc, QTextStream &stream, const DynamicPatternLoadCues::Format format)
 {
 	stream << QStringLiteral("; --------------------------------------------------------------------------------\n"
 	                         "; Dynamic Pattern Loading Cues - output from ClownMapEd - %1 format\n"
 	                         "; --------------------------------------------------------------------------------\n\n"
-	                        ).arg(format == Format::SONIC_1 ? QStringLiteral("Sonic 1") : format == Format::SONIC_2_AND_3_AND_KNUCKLES_AND_CD ? QStringLiteral("Sonic 2/3&K/CD") : QStringLiteral("MapMacros"));
+	                        ).arg(format == DynamicPatternLoadCues::Format::SONIC_1 ? QStringLiteral("Sonic 1") : format == DynamicPatternLoadCues::Format::SONIC_2_AND_3_AND_KNUCKLES_AND_CD ? QStringLiteral("Sonic 2/3&K/CD") : QStringLiteral("MapMacros"));
 
+	// TODO: Don't do this.
 	std::stringstream string_stream;
-	toStream(string_stream, format);
-	stream << string_stream.str().c_str();
-}
-
-void DynamicPatternLoadCues::Frame::toQTextStream(QTextStream &stream, const Format format) const
-{
-	std::stringstream string_stream;
-	toStream(string_stream, format);
-	stream << string_stream.str().c_str();
-}
-
-void DynamicPatternLoadCues::Frame::Copy::toQTextStream(QTextStream &stream, const Format format) const
-{
-	std::stringstream string_stream;
-	toStream(string_stream, format);
+	dplc.toStream(string_stream, format);
 	stream << string_stream.str().c_str();
 }

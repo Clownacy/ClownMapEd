@@ -157,12 +157,12 @@ MainWindow::MainWindow(QWidget* const parent)
 				{
 					if (sprite_viewer.selected_sprite_index() == -1)
 					{
-						mappings.frames.append(SpriteFrame());
+						mappings.frames.push_back(SpriteFrame());
 						sprite_viewer.setSelectedSprite(0);
 					}
 
 					auto &pieces = mappings.frames[sprite_viewer.selected_sprite_index()].pieces;
-					pieces.append(SpritePiece{0, 0, width, height, false, 0, false, false, sprite_piece_picker.selected_tile()});
+					pieces.push_back({0, 0, width, height, false, 0, false, false, sprite_piece_picker.selected_tile()}); // TODO: emplace_back
 					sprite_viewer.setSelectedPiece(pieces.size() - 1);
 					sprite_piece_picker.setSelectedTile(sprite_piece_picker.selected_tile() + width * height);
 				}
@@ -448,17 +448,17 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 		load_asm_or_bin_file(file_path,
 			[this](const QString &file_path)
 			{
-				QFile file(file_path);
-				if (!file.open(QFile::ReadOnly))
+				std::ifstream stream(file_path.toStdString(), std::ios::binary);
+				if (!stream.is_open())
 				{
 					QMessageBox::critical(this, "Error", "Failed to load file: file could not be opened for reading.");
 					return;
 				}
 
 				sprite_mappings.modify(
-					[this, &file](SpriteMappings &mappings)
+					[this, &stream](SpriteMappings &mappings)
 					{
-						mappings.fromFile(file, game_format);
+						mappings.fromStream(stream, game_format);
 					}
 				);
 
@@ -807,11 +807,11 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 					{
 						auto sprite_mappings_copy = *sprite_mappings;
 						sprite_mappings_copy.removeDPLCs();
-						sprite_mappings_copy.toQTextStream(stream, ui->actionLegacyFormats->isChecked() ? game_format : SpritePiece::Format::MAPMACROS);
+						toQTextStream(sprite_mappings_copy, stream, ui->actionLegacyFormats->isChecked() ? game_format : SpritePiece::Format::MAPMACROS);
 					}
 					else
 					{
-						sprite_mappings->toQTextStream(stream, ui->actionLegacyFormats->isChecked() ? game_format : SpritePiece::Format::MAPMACROS);
+						toQTextStream(*sprite_mappings, stream, ui->actionLegacyFormats->isChecked() ? game_format : SpritePiece::Format::MAPMACROS);
 					}
 				}
 			);
@@ -825,7 +825,7 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 				[this](QTextStream &stream)
 				{
 					auto sprite_mappings_copy = *sprite_mappings;
-					sprite_mappings_copy.removeDPLCs().toQTextStream(stream, !ui->actionLegacyFormats->isChecked() ? DynamicPatternLoadCues::Format::MAPMACROS : game_format == SpritePiece::Format::SONIC_1 ? DynamicPatternLoadCues::Format::SONIC_1 : DynamicPatternLoadCues::Format::SONIC_2_AND_3_AND_KNUCKLES_AND_CD);
+					toQTextStream(sprite_mappings_copy.removeDPLCs(), stream, !ui->actionLegacyFormats->isChecked() ? DynamicPatternLoadCues::Format::MAPMACROS : game_format == SpritePiece::Format::SONIC_1 ? DynamicPatternLoadCues::Format::SONIC_1 : DynamicPatternLoadCues::Format::SONIC_2_AND_3_AND_KNUCKLES_AND_CD);
 				}
 			);
 		}
@@ -888,7 +888,7 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 
 	const auto frame_to_qimage = [this](const SpriteFrame &frame, const bool render_as_is)
 	{
-		const auto &frame_rect = frame.rect();
+		const auto &frame_rect = calculateRect(frame);
 
 		QImage image(frame_rect.width(), frame_rect.height(), QImage::Format_RGB32);
 
@@ -899,7 +899,7 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 		// Render the sprite onto the image.
 		QPainter painter(&image);
 
-		frame.draw(painter, !render_as_is, tile_manager, render_as_is ? TileManager::PixmapType::NO_BACKGROUND : TileManager::PixmapType::WITH_BACKGROUND, sprite_viewer.starting_palette_line(), -frame_rect.left(), -frame_rect.top());
+		draw(frame, painter, !render_as_is, tile_manager, render_as_is ? TileManager::PixmapType::NO_BACKGROUND : TileManager::PixmapType::WITH_BACKGROUND, sprite_viewer.starting_palette_line(), -frame_rect.left(), -frame_rect.top());
 
 		return image;
 	};
@@ -951,9 +951,9 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 				[this, &frame, &their_image](QVector<std::array<uchar, TileManager::TILE_SIZE_IN_BYTES>> &tile_bytes)
 				{
 					// TODO: This doesn't account for overlapping pieces, which is a mistake that SonMapEd also makes. Is there anything that can be done about this?
-					const QVector<SpritePiece::Tile> tiles = frame.getUniqueTiles();
-					const int frame_left = frame.rect().left();
-					const int frame_top = frame.rect().top();
+					const QVector<SpritePiece::Tile> tiles = getUniqueTiles(frame);
+					const int frame_left = calculateRect(frame).left();
+					const int frame_top = calculateRect(frame).top();
 
 					// Overwrite each unique tile.
 					for (const auto &tile : tiles)
@@ -1013,7 +1013,7 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 			return;
 
 		const auto &frame = sprite_mappings->frames[sprite_viewer.selected_sprite_index()];
-		const auto &frame_rect = frame.rect();
+		const auto &frame_rect = calculateRect(frame);
 
 		QImage image(frame_rect.width(), frame_rect.height(), QImage::Format_RGB32);
 
@@ -1024,7 +1024,7 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 		// Render the sprite onto the image.
 		QPainter painter(&image);
 
-		frame.draw(painter, !render_as_is, tile_manager, render_as_is ? TileManager::PixmapType::NO_BACKGROUND : TileManager::PixmapType::WITH_BACKGROUND, sprite_viewer.starting_palette_line(), -frame_rect.left(), -frame_rect.top());
+		draw(frame, painter, !render_as_is, tile_manager, render_as_is ? TileManager::PixmapType::NO_BACKGROUND : TileManager::PixmapType::WITH_BACKGROUND, sprite_viewer.starting_palette_line(), -frame_rect.left(), -frame_rect.top());
 
 		// Save the image to disk.
 		if (!image.save(file_path))
@@ -1061,7 +1061,7 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 					auto &frames = mappings.frames;
 					const int selected_sprite_index = sprite_viewer.selected_sprite_index();
 
-					frames.move(selected_sprite_index, selected_sprite_index + 1);
+					Utilities::Move(frames, selected_sprite_index, selected_sprite_index + 1);
 					sprite_viewer.setSelectedSprite(selected_sprite_index + 1);
 				}
 			);
@@ -1079,7 +1079,7 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 					auto &frames = mappings.frames;
 					const int selected_sprite_index = sprite_viewer.selected_sprite_index();
 
-					frames.move(selected_sprite_index, selected_sprite_index - 1);
+					Utilities::Move(frames, selected_sprite_index, selected_sprite_index - 1);
 					sprite_viewer.setSelectedSprite(selected_sprite_index - 1);
 				}
 			);
@@ -1108,7 +1108,7 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 			sprite_mappings.modify(
 				[this](SpriteMappings &mappings)
 				{
-					mappings.frames.insert(sprite_viewer.selected_sprite_index() + 1, SpriteFrame());
+					mappings.frames.insert(mappings.frames.cbegin() + sprite_viewer.selected_sprite_index() + 1, SpriteFrame());
 				}
 			);
 
@@ -1125,7 +1125,7 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 					auto &frames = mappings.frames;
 					const int selected_sprite_index = sprite_viewer.selected_sprite_index();
 
-					frames.insert(selected_sprite_index + 1, frames[selected_sprite_index]);
+					frames.insert(frames.cbegin() + selected_sprite_index + 1, frames[selected_sprite_index]);
 					sprite_viewer.setSelectedSprite(selected_sprite_index + 1);
 				}
 			);
@@ -1138,7 +1138,7 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 			sprite_mappings.modify(
 				[this](SpriteMappings &mappings)
 				{
-					mappings.frames.remove(sprite_viewer.selected_sprite_index());
+					mappings.frames.erase(mappings.frames.cbegin() + sprite_viewer.selected_sprite_index());
 				}
 			);
 
@@ -1172,7 +1172,9 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 			sprite_mappings.modify(
 				[this](SpriteMappings &mappings)
 				{
-					mappings.frames[sprite_viewer.selected_sprite_index()].pieces.remove(sprite_viewer.selected_piece_index() + 1);
+					auto &pieces = mappings.frames[sprite_viewer.selected_sprite_index()].pieces;
+
+					pieces.erase(pieces.cbegin() + sprite_viewer.selected_piece_index() + 1);
 				}
 			);
 		}
@@ -1187,7 +1189,7 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 					auto &pieces = mappings.frames[sprite_viewer.selected_sprite_index()].pieces;
 					const int selected_piece_index = sprite_viewer.selected_piece_index();
 
-					pieces.insert(selected_piece_index + 1, pieces[selected_piece_index]);
+					pieces.insert(pieces.cbegin() + selected_piece_index + 1, pieces[selected_piece_index]);
 					sprite_viewer.setSelectedPiece(selected_piece_index + 1);
 				}
 			);
@@ -1206,8 +1208,8 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 					auto &frames = mappings.frames;
 					auto &pieces = frames[selected_sprite_index].pieces;
 
-					frames[next_sprite_index].pieces.append(pieces[selected_piece_index]);
-					pieces.remove(selected_piece_index);
+					frames[next_sprite_index].pieces.push_back(pieces[selected_piece_index]);
+					pieces.erase(pieces.cbegin() + selected_piece_index);
 
 					sprite_viewer.setSelectedSprite(next_sprite_index);
 					sprite_viewer.setSelectedPiece(frames[next_sprite_index].pieces.size() - 1);
@@ -1228,8 +1230,8 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 					auto &frames = mappings.frames;
 					auto &pieces = frames[selected_sprite_index].pieces;
 
-					frames[previous_sprite_index].pieces.append(pieces[selected_piece_index]);
-					pieces.remove(selected_piece_index);
+					frames[previous_sprite_index].pieces.push_back(pieces[selected_piece_index]);
+					pieces.erase(pieces.cbegin() + selected_piece_index);
 
 					sprite_viewer.setSelectedSprite(previous_sprite_index);
 					sprite_viewer.setSelectedPiece(frames[previous_sprite_index].pieces.size() - 1);
@@ -1250,9 +1252,9 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 					auto &frames = mappings.frames;
 					auto &pieces = frames[selected_sprite_index].pieces;
 
-					frames.insert(next_sprite_index, SpriteFrame());
-					frames[next_sprite_index].pieces.append(pieces[selected_piece_index]);
-					pieces.remove(selected_piece_index);
+					frames.insert(frames.cbegin() + next_sprite_index, SpriteFrame());
+					frames[next_sprite_index].pieces.push_back(pieces[selected_piece_index]);
+					pieces.erase(pieces.cbegin() + selected_piece_index);
 
 					sprite_viewer.setSelectedSprite(next_sprite_index);
 					sprite_viewer.setSelectedPiece(frames[next_sprite_index].pieces.size() - 1);
@@ -1271,7 +1273,7 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 					const int selected_piece_index = sprite_viewer.selected_piece_index();
 					const int next_piece_index = selected_piece_index + 1;
 
-					pieces.move(selected_piece_index, next_piece_index);
+					Utilities::Move(pieces, selected_piece_index, next_piece_index);
 
 					sprite_viewer.setSelectedPiece(next_piece_index);
 				}
@@ -1289,7 +1291,7 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 					const int selected_piece_index = sprite_viewer.selected_piece_index();
 					const int previous_piece_index = selected_piece_index - 1;
 
-					pieces.move(selected_piece_index, previous_piece_index);
+					Utilities::Move(pieces, selected_piece_index, previous_piece_index);
 
 					sprite_viewer.setSelectedPiece(previous_piece_index);
 				}
@@ -1307,7 +1309,7 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 					const int selected_piece_index = sprite_viewer.selected_piece_index();
 					const int last_piece_index = pieces.size() - 1;
 
-					pieces.move(selected_piece_index, last_piece_index);
+					Utilities::Move(pieces, selected_piece_index, last_piece_index);
 
 					sprite_viewer.setSelectedPiece(last_piece_index);
 				}
@@ -1325,7 +1327,7 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 					const int selected_piece_index = sprite_viewer.selected_piece_index();
 					const int first_piece_index = 0;
 
-					pieces.move(selected_piece_index, first_piece_index);
+					Utilities::Move(pieces, selected_piece_index, first_piece_index);
 
 					sprite_viewer.setSelectedPiece(first_piece_index);
 				}
@@ -1363,7 +1365,7 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 		[this, transform_frame_or_piece]()
 		{
 			const auto &frame = sprite_mappings->frames[sprite_viewer.selected_sprite_index()];
-			const QRect &rect = sprite_viewer.selected_piece_index() == -1 ? frame.rect() : frame.pieces[sprite_viewer.selected_piece_index()].rect();
+			const QRect &rect = sprite_viewer.selected_piece_index() == -1 ? calculateRect(frame) : calculateRect(frame.pieces[sprite_viewer.selected_piece_index()]);
 
 			transform_frame_or_piece(
 				[&rect](SpritePiece &piece)
@@ -1379,7 +1381,7 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 		[this, transform_frame_or_piece]()
 		{
 			const auto &frame = sprite_mappings->frames[sprite_viewer.selected_sprite_index()];
-			const QRect &rect = sprite_viewer.selected_piece_index() == -1 ? frame.rect() : frame.pieces[sprite_viewer.selected_piece_index()].rect();
+			const QRect &rect = sprite_viewer.selected_piece_index() == -1 ? calculateRect(frame) : calculateRect(frame.pieces[sprite_viewer.selected_piece_index()]);
 
 			transform_frame_or_piece(
 				[&rect](SpritePiece &piece)
@@ -1506,7 +1508,7 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 			const int selected_tile_index = tile_viewer.selection().indexOf(true);
 
 			const auto &frames = sprite_mappings->frames;
-			for (int frame_index = 0; frame_index < frames.size(); ++frame_index)
+			for (uint frame_index = 0; frame_index < frames.size(); ++frame_index)
 			{
 				const auto &frame = frames[frame_index];
 
@@ -1517,7 +1519,7 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 				// it cycled between every sprite that uses the tile instead.
 				if (frame_index != sprite_viewer.selected_sprite_index())
 				{
-					for (int piece_index = 0; piece_index < frame.pieces.size(); ++piece_index)
+					for (uint piece_index = 0; piece_index < frame.pieces.size(); ++piece_index)
 					{
 						const auto &piece = frame.pieces[piece_index];
 
