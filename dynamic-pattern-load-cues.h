@@ -3,44 +3,22 @@
 
 #include <QFile>
 #include <QTextStream>
-#include <QVector>
 
-#include "data-stream.h"
+#include "libsonassmd/dynamic-pattern-load-cues.h"
 
-struct DynamicPatternLoadCues
+struct DynamicPatternLoadCues : libmdsonass::DynamicPatternLoadCues
 {
-	enum class Format
+	struct Frame : libmdsonass::DynamicPatternLoadCues::Frame
 	{
-		SONIC_1,
-		SONIC_2_AND_3_AND_KNUCKLES_AND_CD,
-		MAPMACROS
-	};
-
-	struct Frame
-	{
-		struct Copy
+		struct Copy : libmdsonass::DynamicPatternLoadCues::Frame::Copy
 		{
-			int start;
-			int length;
-
-			int size_encoded() const;
-			int total_segments() const;
 			void toQTextStream(QTextStream &stream, Format format) const;
 		};
 
-		QVector<Copy> copies;
-
-		int getMappedTile(int tile_index) const;
-		int size_encoded() const;
-		int total_segments() const;
 		void toQTextStream(QTextStream &stream, Format format) const;
 	};
 
-	// TODO: Replace explicit constuctors with a method!
-	DynamicPatternLoadCues() = default;
-	DynamicPatternLoadCues(QFile &file, Format format);
-
-	QVector<Frame> frames;
+	using libmdsonass::DynamicPatternLoadCues::DynamicPatternLoadCues;
 
 	void toQTextStream(QTextStream &stream, Format format) const;
 };

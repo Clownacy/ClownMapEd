@@ -472,8 +472,8 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 		load_asm_or_bin_file(file_path,
 			[this](const QString &file_path)
 			{
-				QFile file(file_path);
-				if (!file.open(QFile::ReadOnly))
+				std::ifstream file(file_path.toStdString(), std::ios::binary);
+				if (!file.is_open())
 				{
 					QMessageBox::critical(this, "Error", "Failed to load file: file could not be opened for reading.");
 					return;

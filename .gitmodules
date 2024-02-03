@@ -7,3 +7,6 @@
 [submodule "clownassembler"]
 	path = clownassembler
 	url = https://github.com/Clownacy/clownassembler
+[submodule "libsonassmd"]
+	path = libsonassmd
+	url = https://github.com/Clownacy/libsonassmd

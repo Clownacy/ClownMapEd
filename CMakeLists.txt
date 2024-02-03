@@ -57,6 +57,16 @@ set(PROJECT_SOURCES
 	"tile-viewer.h"
 	"utilities.cpp"
 	"utilities.h"
+	"libsonassmd/common.cpp"
+	"libsonassmd/common.h"
+	"libsonassmd/dynamic-pattern-load-cues.cpp"
+	"libsonassmd/dynamic-pattern-load-cues.h"
+	"libsonassmd/sprite-frame.cpp"
+	"libsonassmd/sprite-frame.h"
+	"libsonassmd/sprite-mappings.cpp"
+	"libsonassmd/sprite-mappings.h"
+	"libsonassmd/sprite-piece.cpp"
+	"libsonassmd/sprite-piece.h"
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
