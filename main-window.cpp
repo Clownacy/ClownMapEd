@@ -467,7 +467,7 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 				}
 				catch (const std::ios::failure &e)
 				{
-					QMessageBox::critical(this, "Error", QString("Failed to load file. File is probably not a valid mappings file. Exception details: ") + e.what());
+					QMessageBox::critical(this, "Error", QStringLiteral("Failed to load file. File is probably not a valid mappings file. Exception details: ") + e.what());
 					return;
 				}
 
@@ -510,7 +510,7 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 				}
 				catch (const std::ios::failure &e)
 				{
-					QMessageBox::critical(this, "Error", QString("Failed to load file. File is probably not a valid DPLC file. Exception details: ") + e.what());
+					QMessageBox::critical(this, "Error", QStringLiteral("Failed to load file. File is probably not a valid DPLC file. Exception details: ") + e.what());
 					return;
 				}
 
