@@ -180,9 +180,15 @@ void SpriteViewer::setSelectedSprite(const uint sprite_index)
 
 void SpriteViewer::setSelectedPiece(const int piece_index)
 {
-	m_selected_piece_index = ((piece_index + 1) % (sprite_mappings.frames[m_selected_sprite_index].pieces.size() + 1)) - 1;
-	if (m_selected_piece_index < -1)
-		m_selected_piece_index += sprite_mappings.frames[m_selected_sprite_index].pieces.size() + 1;
+	const auto total_pieces = sprite_mappings.frames[m_selected_sprite_index].pieces.size();
+
+	if (piece_index == -2)
+		m_selected_piece_index = total_pieces - 1;
+	else if (piece_index == total_pieces)
+		m_selected_piece_index = -1;
+	else
+		m_selected_piece_index = piece_index;
+
 	update();
 
 	emit selectedSpriteChanged();
