@@ -32,7 +32,8 @@ void draw(const SpriteFrame &frame, QPainter &painter, bool hide_duplicate_tiles
 	iteratePieces(frame,
 		[&frame, &draw_tile, &recorded_tiles, effect, hide_duplicate_tiles, &selected_piece](const SpritePiece &piece)
 		{
-			const bool is_selected_piece = selected_piece && &piece - frame.pieces.data() == selected_piece->first;
+			const auto this_piece_index = &piece - frame.pieces.data();
+			const bool is_selected_piece = selected_piece && this_piece_index == selected_piece->first;
 
 			iterateTiles(piece,
 				[&draw_tile, &recorded_tiles, effect, hide_duplicate_tiles, &selected_piece, is_selected_piece](const SpritePiece::Tile &tile)
