@@ -57,16 +57,6 @@ set(PROJECT_SOURCES
 	"tile-viewer.h"
 	"utilities.cpp"
 	"utilities.h"
-	"libsonassmd/common.cpp"
-	"libsonassmd/common.h"
-	"libsonassmd/dynamic-pattern-load-cues.cpp"
-	"libsonassmd/dynamic-pattern-load-cues.h"
-	"libsonassmd/sprite-frame.cpp"
-	"libsonassmd/sprite-frame.h"
-	"libsonassmd/sprite-mappings.cpp"
-	"libsonassmd/sprite-mappings.h"
-	"libsonassmd/sprite-piece.cpp"
-	"libsonassmd/sprite-piece.h"
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -161,3 +151,11 @@ target_link_libraries(ClownMapEd PRIVATE CIEDE2000)
 add_subdirectory("clownassembler" EXCLUDE_FROM_ALL)
 
 target_link_libraries(ClownMapEd PRIVATE clownassembler_core)
+
+###############
+# libsonassmd #
+###############
+
+add_subdirectory("libsonassmd" EXCLUDE_FROM_ALL)
+
+target_link_libraries(ClownMapEd PRIVATE sonassmd)
