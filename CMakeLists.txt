@@ -144,14 +144,6 @@ target_include_directories(CIEDE2000 PRIVATE "CIEDE2000")
 
 target_link_libraries(ClownMapEd PRIVATE CIEDE2000)
 
-##################
-# clownassembler #
-##################
-
-add_subdirectory("clownassembler" EXCLUDE_FROM_ALL)
-
-target_link_libraries(ClownMapEd PRIVATE clownassembler_core)
-
 ###############
 # libsonassmd #
 ###############

@@ -21,8 +21,6 @@
 
 #include "CIEDE2000/CIEDE2000.h"
 
-#include "clownassembler/semantic.h"
-
 #include "dynamic-pattern-load-cues.h"
 #include "sprite-frame.h"
 #include "utilities.h"
@@ -295,20 +293,6 @@ MainWindow::MainWindow(QWidget* const parent)
 		);
 	};
 
-	const auto assemble_file = [](const char* const input_filename, const char* const output_filename)
-	{
-		// TODO: This is terrible: refactor clownassembler to support using memory buffers as input/output!
-		FILE* const in_file = fopen(input_filename, "r");
-		FILE* const out_file = fopen(output_filename, "wb");
-
-		const cc_bool assembled_successfully = ClownAssembler_Assemble(in_file, out_file, nullptr, nullptr, input_filename, cc_false, cc_true, cc_false);
-
-		fclose(in_file);
-		fclose(out_file);
-
-		return assembled_successfully;
-	};
-
 	const auto is_assembly_file_path = [](const QString &file_path)
 	{
 		const int extension_position = file_path.lastIndexOf('.');
@@ -316,139 +300,23 @@ MainWindow::MainWindow(QWidget* const parent)
 		return extension_position != -1 && QStringView(file_path.data() + extension_position) == QStringLiteral(".asm");
 	};
 
-	const auto emit_mapmacros = [this](std::ostream &stream)
-	{
-		stream << "SonicMappingsVer = ";
-
-		switch(game_format)
-		{
-			case SpritePiece::Format::MAPMACROS:
-				Q_ASSERT(false);
-				// Fallthrough
-			case SpritePiece::Format::SONIC_1:
-				stream << "1";
-				break;
-
-			case SpritePiece::Format::SONIC_2:
-				stream << "2";
-				break;
-
-			case SpritePiece::Format::SONIC_3_AND_KNUCKLES:
-				stream << "3";
-				break;
-		}
-
-		stream << "\n";
-		stream << R"(
-mappingsTable macro
-currentMappingsTable set *
-	endm
-
-mappingsTableEntry macro label
-	dc.\0	label-currentMappingsTable
-	endm
-
-spriteHeader macro *
-\* equ *
-	if SonicMappingsVer=1
-		dc.b	(\*_End-\*_Begin)/5
-	elseif SonicMappingsVer=2
-		dc.w	(\*_End-\*_Begin)/8
-	elseif SonicMappingsVer=3
-		dc.w	(\*_End-\*_Begin)/6
-	endif
-\*_Begin equ *
-	endm
-
-spritePiece macro xOffset, yOffset, width, height, tileIndex, xFlip, yFlip, palette, priority
-	dc.b	yOffset
-	dc.b	((width-1)<<2)|((height-1)<<0)
-	dc.w	(priority<<15)|(palette<<13)|(yFlip<<12)|(xFlip<<11)|(tileIndex<<0)
-	if SonicMappingsVer=2
-		dc.w	(priority<<15)|(palette<<13)|(yFlip<<12)|(xFlip<<11)|((tileIndex/2)<<0)
-	endif
-	if SonicMappingsVer=1
-		dc.b	xOffset
-	else
-		dc.w	xOffset
-	endif
-	endm
-
-dplcHeader macro *
-\* equ *
-	if SonicMappingsVer=1
-		dc.b	(\*_End-\*_Begin)/2
-	elseif SonicMappingsVer=2
-		dc.w	(\*_End-\*_Begin)/2
-	elseif SonicMappingsVer=3
-		dc.w	((\*_End-\*_Begin)/2)-1
-	endif
-\*_Begin equ *
-	endm
-
-dplcEntry macro totalTiles, tileIndex
-	if SonicMappingsVer=3
-		dc.w	(tileIndex<<4)|((totalTiles-1)<<0)
-	else
-		dc.w	((totalTiles-1)<<12)|(tileIndex<<0)
-	endif
-	endm
-
-s3kPlayerDplcHeader macro *
-	dplcHeader \*
-	endm
-
-s3kPlayerDplcEntry macro totalTiles, tileIndex
-	dplcEntry \*
-	endm
-)";
-	};
-
-	const char* const temporary_assembly_filename = "clownmaped-temporary.asm";
-	const char* const temporary_binary_filename = "clownmaped-temporary.bin";
-
-	const auto load_asm_or_bin_file = [this, assemble_file, is_assembly_file_path, emit_mapmacros, temporary_assembly_filename, temporary_binary_filename](const QString &file_path, const std::function<void(const QString &file_path)> &callback)
+	// TODO: This lambda is pointless now: get rid of it.
+	const auto load_asm_or_bin_file = [](const QString &file_path, const std::function<void(const QString &file_path)> &callback)
 	{
 		if (file_path.isNull())
 			return;
 
-		if (is_assembly_file_path(file_path))
-		{
-			// In case this file uses MapMacros, we'll generate a wrapper file to define the relevant macros.
-			std::ofstream stream(temporary_assembly_filename);
-			if (!stream.is_open())
-				QMessageBox::critical(this, "Error", "Failed to save file: file could not be opened for writing.");
-
-			emit_mapmacros(stream);
-
-			stream << "\n\tinclude \"" << file_path.toStdString() << "\"\n";
-
-			stream.close();
-
-			if (!assemble_file(temporary_assembly_filename, temporary_binary_filename))
-			{
-				QMessageBox::critical(this, "Error", "Failed to load file: file could not be assembled.");
-				return;
-			}
-
-			remove(temporary_assembly_filename);
-
-			callback(temporary_binary_filename);
-
-			remove(temporary_binary_filename);
-		}
-		else
-		{
-			callback(file_path);
-		};
+		callback(file_path);
 	};
 
-	const auto load_sprite_mappings_file = [this, load_asm_or_bin_file](const QString &file_path)
+	const auto load_sprite_mappings_file = [this, load_asm_or_bin_file, is_assembly_file_path](const QString &file_path)
 	{
 		load_asm_or_bin_file(file_path,
-			[this](const QString &file_path)
+			[this, is_assembly_file_path](const QString &file_path)
 			{
-				std::ifstream stream(file_path.toStdString(), std::ios::binary);
+				const bool loading_assembly_file = is_assembly_file_path(file_path);
+
+				std::ifstream stream(file_path.toStdString(), loading_assembly_file ? 0 : std::ios::binary);
 				if (!stream.is_open())
 				{
 					QMessageBox::critical(this, "Error", "Failed to load file: file could not be opened for reading.");
@@ -463,7 +331,10 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 
 				try
 				{
-					new_mappings.fromStream(stream, game_format);
+					if (loading_assembly_file)
+						new_mappings.fromAssemblyStream(stream, game_format);
+					else
+						new_mappings.fromBinaryStream(stream, game_format);
 				}
 				catch (const std::ios::failure &e)
 				{
@@ -483,12 +354,14 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 		);
 	};
 
-	const auto load_dynamic_pattern_load_cue_file = [this, load_asm_or_bin_file](const QString &file_path)
+	const auto load_dynamic_pattern_load_cue_file = [this, load_asm_or_bin_file, is_assembly_file_path](const QString &file_path)
 	{
 		load_asm_or_bin_file(file_path,
-			[this](const QString &file_path)
+			[this, is_assembly_file_path](const QString &file_path)
 			{
-				std::ifstream file(file_path.toStdString(), std::ios::binary);
+				const bool loading_assembly_file = is_assembly_file_path(file_path);
+
+				std::ifstream file(file_path.toStdString(), loading_assembly_file ? 0 : std::ios::binary);
 				if (!file.is_open())
 				{
 					QMessageBox::critical(this, "Error", "Failed to load file: file could not be opened for reading.");
@@ -502,7 +375,15 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 				SpriteMappings sprite_mappings_copy = *sprite_mappings;
 				try
 				{
-					if (!sprite_mappings_copy.applyDPLCs(DynamicPatternLoadCues(file, game_format == SpritePiece::Format::SONIC_1 ? DynamicPatternLoadCues::Format::SONIC_1 : DynamicPatternLoadCues::Format::SONIC_2_AND_3_AND_KNUCKLES_AND_CD)))
+					const auto dplc_format = game_format == SpritePiece::Format::SONIC_1 ? DynamicPatternLoadCues::Format::SONIC_1 : DynamicPatternLoadCues::Format::SONIC_2_AND_3_AND_KNUCKLES_AND_CD;
+
+					DynamicPatternLoadCues dplc;
+					if (loading_assembly_file)
+						dplc.fromAssemblyStream(file, dplc_format);
+					else
+						dplc.fromBinaryStream(file, dplc_format);
+
+					if (!sprite_mappings_copy.applyDPLCs(dplc))
 					{
 						QMessageBox::critical(this, "Error", "Failed to load file: these cues are not compatible with the loaded mappings.");
 						return;
@@ -790,37 +671,17 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 		}
 	);
 
-	const auto save_asm_or_bin_file = [this, assemble_file, is_assembly_file_path, emit_mapmacros, temporary_assembly_filename](const QString &file_path, const std::function<void(std::ostream &stream)> &callback)
+	// TODO: This lambda is pointless now: get rid of it.
+	const auto save_asm_or_bin_file = [this](const QString &file_path, const std::function<void(std::ostream &stream)> &callback)
 	{
 		if (file_path.isNull())
 			return;
 
-		const bool saving_assembly = is_assembly_file_path(file_path);
-
-		std::ofstream stream(saving_assembly ? file_path.toStdString() : temporary_assembly_filename);
+		std::ofstream stream(file_path.toStdString());
 		if (!stream.is_open())
 			QMessageBox::critical(this, "Error", "Failed to save file: file could not be opened for writing.");
 
-		if (saving_assembly)
-		{
-			callback(stream);
-		}
-		else
-		{
-			emit_mapmacros(stream);
-
-			callback(stream);
-
-			stream.close();
-
-			if (!assemble_file(temporary_assembly_filename, file_path.toStdString().c_str()))
-			{
-				QMessageBox::critical(this, "Error", "Failed to save file: data could not be assembled.");
-				return;
-			}
-
-			remove(temporary_assembly_filename);
-		}
+		callback(stream);
 	};
 
 	connect(ui->actionSave_Mappings, &QAction::triggered, this,
@@ -840,11 +701,11 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 					{
 						auto sprite_mappings_copy = *sprite_mappings;
 						sprite_mappings_copy.removeDPLCs();
-						sprite_mappings_copy.toStream(stream, format_to_output);
+						sprite_mappings_copy.toAssemblyStream(stream, format_to_output);
 					}
 					else
 					{
-						sprite_mappings->toStream(stream, format_to_output);
+						sprite_mappings->toAssemblyStream(stream, format_to_output);
 					}
 				}
 			);
@@ -865,7 +726,7 @@ s3kPlayerDplcEntry macro totalTiles, tileIndex
 											).arg(format_to_output == DynamicPatternLoadCues::Format::SONIC_1 ? QStringLiteral("Sonic 1") : format_to_output == DynamicPatternLoadCues::Format::SONIC_2_AND_3_AND_KNUCKLES_AND_CD ? QStringLiteral("Sonic 2/3&K/CD") : QStringLiteral("MapMacros")).toStdString();
 
 					auto sprite_mappings_copy = *sprite_mappings;
-					sprite_mappings_copy.removeDPLCs().toStream(stream, format_to_output);
+					sprite_mappings_copy.removeDPLCs().toAssemblyStream(stream, format_to_output);
 				}
 			);
 		}
