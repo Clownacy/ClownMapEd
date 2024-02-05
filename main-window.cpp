@@ -205,7 +205,7 @@ MainWindow::MainWindow(QWidget* const parent)
 		if (file_path.isNull())
 			return;
 
-		std::ifstream file_stream(file_path.toStdString(), std::ifstream::in | std::ifstream::binary);
+		std::ifstream file_stream(file_path.toStdString(), std::ios::binary);
 
 		if (!file_stream.is_open())
 		{
@@ -213,7 +213,7 @@ MainWindow::MainWindow(QWidget* const parent)
 			return;
 		}
 
-		std::stringstream string_stream(std::stringstream::in | std::stringstream::out | std::stringstream::binary);
+		std::stringstream string_stream(std::ios::binary);
 
 		if (!decompression_function(file_stream, string_stream))
 		{
@@ -518,7 +518,7 @@ MainWindow::MainWindow(QWidget* const parent)
 		}
 		else
 		{
-			std::ofstream file(file_path.toStdString(), std::ofstream::out | std::ofstream::binary);
+			std::ofstream file(file_path.toStdString(), std::ios::binary);
 
 			if (!file.is_open())
 			{
