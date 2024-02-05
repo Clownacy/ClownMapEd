@@ -44,9 +44,9 @@ public:
 		emit pixmapsChanged();
 	}
 
-	bool setTiles(std::istream &stream, const libsonassmd::Game game)
+	bool setTiles(std::istream &stream)
 	{
-		tiles.fromBinaryStream(stream, game);
+		tiles.fromBinaryStream(stream);
 
 		tile_pixmaps.resize(tiles.vector.size()); // TODO: Reserve instead?
 

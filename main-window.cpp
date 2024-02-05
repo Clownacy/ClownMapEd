@@ -221,7 +221,7 @@ MainWindow::MainWindow(QWidget* const parent)
 			return;
 		}
 
-		if (!tile_manager.setTiles(string_stream, game))
+		if (!tile_manager.setTiles(string_stream))
 		{
 			QMessageBox::critical(this, "Error", "Failed to load file: data ends with an incomplete tile. The file might not actually be tile data.");
 			return;
@@ -476,7 +476,7 @@ MainWindow::MainWindow(QWidget* const parent)
 		// TODO: This copy should not be necessary.
 		// Maybe I should modify mdcomp to use a better interface.
 		std::stringstream input_stream;
-		tile_manager.getTiles().toBinaryStream(input_stream, game);
+		tile_manager.getTiles().toBinaryStream(input_stream);
 
 		if (is_assembly_file_path(file_path))
 		{

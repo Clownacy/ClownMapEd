@@ -1,3 +1,4 @@
+- Update tile count in title bar after loading tiles
 - Support for Sonic 3 & Knuckles' unique DPLC format (used by non-player objects).
 - Sprite spacing (figure out what algorithm SonMapEd uses).
 - Add scrollbar to tile viewer.
