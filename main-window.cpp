@@ -301,44 +301,31 @@ MainWindow::MainWindow(QWidget* const parent)
 	};
 
 	// TODO: This lambda is pointless now: get rid of it.
-	const auto load_asm_or_bin_file = [this, is_assembly_file_path](const QString &file_path, const std::function<void(std::istream &stream, bool loading_assembly_file)> &callback)
+	const auto load_asm_or_bin_file = [](const QString &file_path, const std::function<void(const QString &file_path)> &callback)
 	{
 		if (file_path.isNull())
 			return;
 
-		const bool loading_assembly_file = is_assembly_file_path(file_path);
-
-		std::ifstream stream(file_path.toStdString(), loading_assembly_file ? 0 : std::ios::binary);
-		if (!stream.is_open())
-		{
-			QMessageBox::critical(this, "Error", "Failed to load file: file could not be opened for reading.");
-			return;
-		}
-
-		// Gimme exceptions when IO errors occur.
-		// It's better than letting the program continue with mangled data.
-		stream.exceptions(std::ios::badbit | std::ios::eofbit | std::ios::failbit);
-
-		callback(stream, loading_assembly_file);
+		callback(file_path);
 	};
 
-	const auto load_sprite_mappings_file = [this, load_asm_or_bin_file](const QString &file_path)
+	const auto load_sprite_mappings_file = [this, load_asm_or_bin_file, is_assembly_file_path](const QString &file_path)
 	{
 		load_asm_or_bin_file(file_path,
-			[this](std::istream &stream, const bool loading_assembly_file)
+			[this, is_assembly_file_path](const QString &file_path)
 			{
 				SpriteMappings new_mappings;
 
 				try
 				{
-					if (loading_assembly_file)
-						new_mappings.fromAssemblyStream(stream, game);
+					if (is_assembly_file_path(file_path))
+						new_mappings.fromAssemblyFile(file_path.toStdString().c_str(), game);
 					else
-						new_mappings.fromBinaryStream(stream, game);
+						new_mappings.fromBinaryFile(file_path.toStdString().c_str(), game);
 				}
 				catch (const std::ios::failure &e)
 				{
-					QMessageBox::critical(this, "Error", QStringLiteral("Failed to load file. File is probably not a valid mappings file. Exception details: ") + e.what());
+					QMessageBox::critical(this, "Error", QStringLiteral("Failed to load file. Exception details: ") + e.what());
 					return;
 				}
 
@@ -354,19 +341,21 @@ MainWindow::MainWindow(QWidget* const parent)
 		);
 	};
 
-	const auto load_dynamic_pattern_load_cue_file = [this, load_asm_or_bin_file](const QString &file_path)
+	const auto load_dynamic_pattern_load_cue_file = [this, load_asm_or_bin_file, is_assembly_file_path](const QString &file_path)
 	{
 		load_asm_or_bin_file(file_path,
-			[this](std::istream &stream, const bool loading_assembly_file)
+			[this, is_assembly_file_path](const QString &file_path)
 			{
 				SpriteMappings sprite_mappings_copy = *sprite_mappings;
+
 				try
 				{
 					DynamicPatternLoadCues dplc;
-					if (loading_assembly_file)
-						dplc.fromAssemblyStream(stream, game);
+
+					if (is_assembly_file_path(file_path))
+						dplc.fromAssemblyFile(file_path.toStdString().c_str(), game);
 					else
-						dplc.fromBinaryStream(stream, game);
+						dplc.fromBinaryFile(file_path.toStdString().c_str(), game);
 
 					if (!sprite_mappings_copy.applyDPLCs(dplc))
 					{
@@ -376,7 +365,7 @@ MainWindow::MainWindow(QWidget* const parent)
 				}
 				catch (const std::ios::failure &e)
 				{
-					QMessageBox::critical(this, "Error", QStringLiteral("Failed to load file. File is probably not a valid DPLC file. Exception details: ") + e.what());
+					QMessageBox::critical(this, "Error", QStringLiteral("Failed to load file. Exception details: ") + e.what());
 					return;
 				}
 
