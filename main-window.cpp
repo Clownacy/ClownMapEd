@@ -301,32 +301,32 @@ MainWindow::MainWindow(QWidget* const parent)
 	};
 
 	// TODO: This lambda is pointless now: get rid of it.
-	const auto load_asm_or_bin_file = [](const QString &file_path, const std::function<void(const QString &file_path)> &callback)
+	const auto load_asm_or_bin_file = [this, is_assembly_file_path](const QString &file_path, const std::function<void(std::istream &stream, bool loading_assembly_file)> &callback)
 	{
 		if (file_path.isNull())
 			return;
 
-		callback(file_path);
+		const bool loading_assembly_file = is_assembly_file_path(file_path);
+
+		std::ifstream stream(file_path.toStdString(), loading_assembly_file ? 0 : std::ios::binary);
+		if (!stream.is_open())
+		{
+			QMessageBox::critical(this, "Error", "Failed to load file: file could not be opened for reading.");
+			return;
+		}
+
+		// Gimme exceptions when IO errors occur.
+		// It's better than letting the program continue with mangled data.
+		stream.exceptions(std::ios::badbit | std::ios::eofbit | std::ios::failbit);
+
+		callback(stream, loading_assembly_file);
 	};
 
-	const auto load_sprite_mappings_file = [this, load_asm_or_bin_file, is_assembly_file_path](const QString &file_path)
+	const auto load_sprite_mappings_file = [this, load_asm_or_bin_file](const QString &file_path)
 	{
 		load_asm_or_bin_file(file_path,
-			[this, is_assembly_file_path](const QString &file_path)
+			[this](std::istream &stream, const bool loading_assembly_file)
 			{
-				const bool loading_assembly_file = is_assembly_file_path(file_path);
-
-				std::ifstream stream(file_path.toStdString(), loading_assembly_file ? 0 : std::ios::binary);
-				if (!stream.is_open())
-				{
-					QMessageBox::critical(this, "Error", "Failed to load file: file could not be opened for reading.");
-					return;
-				}
-
-				// Gimme exceptions when IO errors occur.
-				// It's better than letting the program continue with mangled data.
-				stream.exceptions(std::ios::badbit | std::ios::eofbit | std::ios::failbit);
-
 				SpriteMappings new_mappings;
 
 				try
@@ -354,24 +354,11 @@ MainWindow::MainWindow(QWidget* const parent)
 		);
 	};
 
-	const auto load_dynamic_pattern_load_cue_file = [this, load_asm_or_bin_file, is_assembly_file_path](const QString &file_path)
+	const auto load_dynamic_pattern_load_cue_file = [this, load_asm_or_bin_file](const QString &file_path)
 	{
 		load_asm_or_bin_file(file_path,
-			[this, is_assembly_file_path](const QString &file_path)
+			[this](std::istream &stream, const bool loading_assembly_file)
 			{
-				const bool loading_assembly_file = is_assembly_file_path(file_path);
-
-				std::ifstream file(file_path.toStdString(), loading_assembly_file ? 0 : std::ios::binary);
-				if (!file.is_open())
-				{
-					QMessageBox::critical(this, "Error", "Failed to load file: file could not be opened for reading.");
-					return;
-				}
-
-				// Gimme exceptions when IO errors occur.
-				// It's better than letting the program continue with mangled data.
-				file.exceptions(std::ios::badbit | std::ios::eofbit | std::ios::failbit);
-
 				SpriteMappings sprite_mappings_copy = *sprite_mappings;
 				try
 				{
@@ -379,9 +366,9 @@ MainWindow::MainWindow(QWidget* const parent)
 
 					DynamicPatternLoadCues dplc;
 					if (loading_assembly_file)
-						dplc.fromAssemblyStream(file, dplc_format);
+						dplc.fromAssemblyStream(stream, dplc_format);
 					else
-						dplc.fromBinaryStream(file, dplc_format);
+						dplc.fromBinaryStream(stream, dplc_format);
 
 					if (!sprite_mappings_copy.applyDPLCs(dplc))
 					{
@@ -672,40 +659,45 @@ MainWindow::MainWindow(QWidget* const parent)
 	);
 
 	// TODO: This lambda is pointless now: get rid of it.
-	const auto save_asm_or_bin_file = [this](const QString &file_path, const std::function<void(std::ostream &stream)> &callback)
+	const auto save_asm_or_bin_file = [this, is_assembly_file_path](const QString &file_path, const std::function<void(std::ostream &stream, bool saving_assembly_file)> &callback)
 	{
 		if (file_path.isNull())
 			return;
 
-		std::ofstream stream(file_path.toStdString());
+		const bool saving_assembly_file = is_assembly_file_path(file_path);
+
+		std::ofstream stream(file_path.toStdString(), saving_assembly_file ? 0 : std::ios::binary);
 		if (!stream.is_open())
 			QMessageBox::critical(this, "Error", "Failed to save file: file could not be opened for writing.");
 
-		callback(stream);
+		callback(stream, saving_assembly_file);
 	};
 
 	connect(ui->actionSave_Mappings, &QAction::triggered, this,
 		[this, save_asm_or_bin_file]()
 		{
 			save_asm_or_bin_file(QFileDialog::getSaveFileName(this, "Save Sprite Mappings File", QString(), "Sprite Mapping Files (*.bin *.asm);;All Files (*.*)", nullptr, QFileDialog::DontConfirmOverwrite),
-				[this](std::ostream &stream)
+				[this](std::ostream &stream, const bool saving_assembly_file)
 				{
 					const auto format_to_output = ui->actionLegacyFormats->isChecked() ? game_format : SpritePiece::Format::MAPMACROS;
 
-					stream << QStringLiteral("; --------------------------------------------------------------------------------\n"
-											 "; Sprite mappings - output from ClownMapEd - %1 format\n"
-											 "; --------------------------------------------------------------------------------\n\n"
-											).arg(format_to_output == SpritePiece::Format::SONIC_1 ? QStringLiteral("Sonic 1/CD") : format_to_output == SpritePiece::Format::SONIC_2 ? QStringLiteral("Sonic 2") : format_to_output == SpritePiece::Format::SONIC_3_AND_KNUCKLES ? QStringLiteral("Sonic 3 & Knuckles") : QStringLiteral("MapMacros")).toStdString();
+					auto sprite_mappings_copy = *sprite_mappings;
 
 					if (ui->actionPattern_Load_Cues->isChecked())
-					{
-						auto sprite_mappings_copy = *sprite_mappings;
 						sprite_mappings_copy.removeDPLCs();
+
+					if (saving_assembly_file)
+					{
+						stream << QStringLiteral("; --------------------------------------------------------------------------------\n"
+												 "; Sprite mappings - output from ClownMapEd - %1 format\n"
+												 "; --------------------------------------------------------------------------------\n\n"
+												).arg(format_to_output == SpritePiece::Format::SONIC_1 ? QStringLiteral("Sonic 1/CD") : format_to_output == SpritePiece::Format::SONIC_2 ? QStringLiteral("Sonic 2") : format_to_output == SpritePiece::Format::SONIC_3_AND_KNUCKLES ? QStringLiteral("Sonic 3 & Knuckles") : QStringLiteral("MapMacros")).toStdString();
+
 						sprite_mappings_copy.toAssemblyStream(stream, format_to_output);
 					}
 					else
 					{
-						sprite_mappings->toAssemblyStream(stream, format_to_output);
+						sprite_mappings_copy.toBinaryStream(stream, format_to_output);
 					}
 				}
 			);
@@ -716,17 +708,26 @@ MainWindow::MainWindow(QWidget* const parent)
 		[this, save_asm_or_bin_file]()
 		{
 			save_asm_or_bin_file(QFileDialog::getSaveFileName(this, "Save Dynamic Pattern Loading Cue File", QString(), "Pattern Cue Files (*.bin *.asm);;All Files (*.*)", nullptr, QFileDialog::DontConfirmOverwrite),
-				[this](std::ostream &stream)
+				[this](std::ostream &stream, const bool saving_assembly_file)
 				{
 					const auto format_to_output = !ui->actionLegacyFormats->isChecked() ? DynamicPatternLoadCues::Format::MAPMACROS : game_format == SpritePiece::Format::SONIC_1 ? DynamicPatternLoadCues::Format::SONIC_1 : DynamicPatternLoadCues::Format::SONIC_2_AND_3_AND_KNUCKLES_AND_CD;
 
-					stream << QStringLiteral("; --------------------------------------------------------------------------------\n"
-											 "; Dynamic Pattern Loading Cues - output from ClownMapEd - %1 format\n"
-											 "; --------------------------------------------------------------------------------\n\n"
-											).arg(format_to_output == DynamicPatternLoadCues::Format::SONIC_1 ? QStringLiteral("Sonic 1") : format_to_output == DynamicPatternLoadCues::Format::SONIC_2_AND_3_AND_KNUCKLES_AND_CD ? QStringLiteral("Sonic 2/3&K/CD") : QStringLiteral("MapMacros")).toStdString();
-
 					auto sprite_mappings_copy = *sprite_mappings;
-					sprite_mappings_copy.removeDPLCs().toAssemblyStream(stream, format_to_output);
+					const auto dplc = sprite_mappings_copy.removeDPLCs();
+
+					if (saving_assembly_file)
+					{
+						stream << QStringLiteral("; --------------------------------------------------------------------------------\n"
+												 "; Dynamic Pattern Loading Cues - output from ClownMapEd - %1 format\n"
+												 "; --------------------------------------------------------------------------------\n\n"
+												).arg(format_to_output == DynamicPatternLoadCues::Format::SONIC_1 ? QStringLiteral("Sonic 1") : format_to_output == DynamicPatternLoadCues::Format::SONIC_2_AND_3_AND_KNUCKLES_AND_CD ? QStringLiteral("Sonic 2/3&K/CD") : QStringLiteral("MapMacros")).toStdString();
+
+						dplc.toAssemblyStream(stream, format_to_output);
+					}
+					else
+					{
+						dplc.toBinaryStream(stream, format_to_output);
+					}
 				}
 			);
 		}
