@@ -565,7 +565,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionModuled_Kosinski, &QAction::triggered, this,
 		[this, save_tile_file]()
 		{
-			if (tile_manager.getTiles().size() > 0xFFFF)
+			if (tile_manager.getTiles().total_bytes() > 0xFFFF)
 			{
 				QMessageBox::critical(this, "Error", "Tile data is too large for moduled compression.");
 				return;
@@ -585,7 +585,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionModuled_Kosinski_2, &QAction::triggered, this,
 		[this, save_tile_file]()
 		{
-			if (tile_manager.getTiles().size() > 0xFFFF)
+			if (tile_manager.getTiles().total_bytes() > 0xFFFF)
 			{
 				QMessageBox::critical(this, "Error", "Tile data is too large for moduled compression.");
 				return;
