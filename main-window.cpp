@@ -181,7 +181,7 @@ MainWindow::MainWindow(QWidget* const parent)
 			return " | " + string + (index == -1 ? "s: " : (" " + QString::number(index, 0x10).toUpper() + "/")) + QString::number(total, 0x10).toUpper();
 		};
 
-		const QString format_string = game_format == SpritePiece::Format::SONIC_1 ? "S1" : game_format == SpritePiece::Format::SONIC_2 ? "S2" : "S3K";
+		const QString format_string = game == libsonassmd::Game::SONIC_1 ? "S1" : game == libsonassmd::Game::SONIC_2 ? "S2" : "S3K";
 		const QString frame_string = do_string_thingy("Frame", sprite_viewer.selected_sprite_index(), sprite_mappings->frames.size());
 		const QString piece_string = sprite_viewer.selected_sprite_index() == -1 ? "" : do_string_thingy("Piece", sprite_viewer.selected_piece_index(), sprite_mappings->frames[sprite_viewer.selected_sprite_index()].pieces.size());
 		const QString tile_string = do_string_thingy("Tile", tile_viewer.selection().indexOf(true), tile_manager.total_tiles());
@@ -332,9 +332,9 @@ MainWindow::MainWindow(QWidget* const parent)
 				try
 				{
 					if (loading_assembly_file)
-						new_mappings.fromAssemblyStream(stream, game_format);
+						new_mappings.fromAssemblyStream(stream, game);
 					else
-						new_mappings.fromBinaryStream(stream, game_format);
+						new_mappings.fromBinaryStream(stream, game);
 				}
 				catch (const std::ios::failure &e)
 				{
@@ -362,13 +362,11 @@ MainWindow::MainWindow(QWidget* const parent)
 				SpriteMappings sprite_mappings_copy = *sprite_mappings;
 				try
 				{
-					const auto dplc_format = game_format == SpritePiece::Format::SONIC_1 ? DynamicPatternLoadCues::Format::SONIC_1 : DynamicPatternLoadCues::Format::SONIC_2_AND_3_AND_KNUCKLES_AND_CD;
-
 					DynamicPatternLoadCues dplc;
 					if (loading_assembly_file)
-						dplc.fromAssemblyStream(stream, dplc_format);
+						dplc.fromAssemblyStream(stream, game);
 					else
-						dplc.fromBinaryStream(stream, dplc_format);
+						dplc.fromBinaryStream(stream, game);
 
 					if (!sprite_mappings_copy.applyDPLCs(dplc))
 					{
@@ -679,7 +677,7 @@ MainWindow::MainWindow(QWidget* const parent)
 			save_asm_or_bin_file(QFileDialog::getSaveFileName(this, "Save Sprite Mappings File", QString(), "Sprite Mapping Files (*.bin *.asm);;All Files (*.*)", nullptr, QFileDialog::DontConfirmOverwrite),
 				[this](std::ostream &stream, const bool saving_assembly_file)
 				{
-					const auto format_to_output = ui->actionLegacyFormats->isChecked() ? game_format : SpritePiece::Format::MAPMACROS;
+					const bool mapmacros = !ui->actionLegacyFormats->isChecked();
 
 					auto sprite_mappings_copy = *sprite_mappings;
 
@@ -691,13 +689,13 @@ MainWindow::MainWindow(QWidget* const parent)
 						stream << QStringLiteral("; --------------------------------------------------------------------------------\n"
 												 "; Sprite mappings - output from ClownMapEd - %1 format\n"
 												 "; --------------------------------------------------------------------------------\n\n"
-												).arg(format_to_output == SpritePiece::Format::SONIC_1 ? QStringLiteral("Sonic 1/CD") : format_to_output == SpritePiece::Format::SONIC_2 ? QStringLiteral("Sonic 2") : format_to_output == SpritePiece::Format::SONIC_3_AND_KNUCKLES ? QStringLiteral("Sonic 3 & Knuckles") : QStringLiteral("MapMacros")).toStdString();
+												).arg(mapmacros ? QStringLiteral("MapMacros") : game == libsonassmd::Game::SONIC_1 ? QStringLiteral("Sonic 1/CD") : game == libsonassmd::Game::SONIC_2 ? QStringLiteral("Sonic 2") : QStringLiteral("Sonic 3 & Knuckles")).toStdString();
 
-						sprite_mappings_copy.toAssemblyStream(stream, format_to_output);
+						sprite_mappings_copy.toAssemblyStream(stream, game, mapmacros);
 					}
 					else
 					{
-						sprite_mappings_copy.toBinaryStream(stream, format_to_output);
+						sprite_mappings_copy.toBinaryStream(stream, game);
 					}
 				}
 			);
@@ -710,7 +708,7 @@ MainWindow::MainWindow(QWidget* const parent)
 			save_asm_or_bin_file(QFileDialog::getSaveFileName(this, "Save Dynamic Pattern Loading Cue File", QString(), "Pattern Cue Files (*.bin *.asm);;All Files (*.*)", nullptr, QFileDialog::DontConfirmOverwrite),
 				[this](std::ostream &stream, const bool saving_assembly_file)
 				{
-					const auto format_to_output = !ui->actionLegacyFormats->isChecked() ? DynamicPatternLoadCues::Format::MAPMACROS : game_format == SpritePiece::Format::SONIC_1 ? DynamicPatternLoadCues::Format::SONIC_1 : DynamicPatternLoadCues::Format::SONIC_2_AND_3_AND_KNUCKLES_AND_CD;
+					const bool mapmacros = !ui->actionLegacyFormats->isChecked();
 
 					auto sprite_mappings_copy = *sprite_mappings;
 					const auto dplc = sprite_mappings_copy.removeDPLCs();
@@ -720,13 +718,13 @@ MainWindow::MainWindow(QWidget* const parent)
 						stream << QStringLiteral("; --------------------------------------------------------------------------------\n"
 												 "; Dynamic Pattern Loading Cues - output from ClownMapEd - %1 format\n"
 												 "; --------------------------------------------------------------------------------\n\n"
-												).arg(format_to_output == DynamicPatternLoadCues::Format::SONIC_1 ? QStringLiteral("Sonic 1") : format_to_output == DynamicPatternLoadCues::Format::SONIC_2_AND_3_AND_KNUCKLES_AND_CD ? QStringLiteral("Sonic 2/3&K/CD") : QStringLiteral("MapMacros")).toStdString();
+												).arg(mapmacros ? QStringLiteral("MapMacros") : game == libsonassmd::Game::SONIC_1 ? QStringLiteral("Sonic 1") : QStringLiteral("Sonic 2/3&K/CD")).toStdString();
 
-						dplc.toAssemblyStream(stream, format_to_output);
+						dplc.toAssemblyStream(stream, game, mapmacros);
 					}
 					else
 					{
-						dplc.toBinaryStream(stream, format_to_output);
+						dplc.toBinaryStream(stream, game);
 					}
 				}
 			);
@@ -1606,22 +1604,22 @@ MainWindow::MainWindow(QWidget* const parent)
 	// Menubar: Settings/Game Format //
 	///////////////////////////////////
 
-	const auto set_game_format = [this, update_title](const SpritePiece::Format format)
+	const auto set_game_format = [this, update_title](const libsonassmd::Game game)
 	{
-		game_format = format;
+		this->game = game;
 
-		ui->actionSonic_1->setChecked(format == SpritePiece::Format::SONIC_1);
-		ui->actionSonic_2->setChecked(format == SpritePiece::Format::SONIC_2);
-		ui->actionSonic_3_Knuckles->setChecked(format == SpritePiece::Format::SONIC_3_AND_KNUCKLES);
+		ui->actionSonic_1->setChecked(game == libsonassmd::Game::SONIC_1);
+		ui->actionSonic_2->setChecked(game == libsonassmd::Game::SONIC_2);
+		ui->actionSonic_3_Knuckles->setChecked(game == libsonassmd::Game::SONIC_3_AND_KNUCKLES);
 
 		update_title();
 	};
 
-	connect(ui->actionSonic_1, &QAction::triggered, this, [set_game_format](){set_game_format(SpritePiece::Format::SONIC_1);});
-	connect(ui->actionSonic_2, &QAction::triggered, this, [set_game_format](){set_game_format(SpritePiece::Format::SONIC_2);});
-	connect(ui->actionSonic_3_Knuckles, &QAction::triggered, this, [set_game_format](){set_game_format(SpritePiece::Format::SONIC_3_AND_KNUCKLES);});
+	connect(ui->actionSonic_1, &QAction::triggered, this, [set_game_format](){set_game_format(libsonassmd::Game::SONIC_1);});
+	connect(ui->actionSonic_2, &QAction::triggered, this, [set_game_format](){set_game_format(libsonassmd::Game::SONIC_2);});
+	connect(ui->actionSonic_3_Knuckles, &QAction::triggered, this, [set_game_format](){set_game_format(libsonassmd::Game::SONIC_3_AND_KNUCKLES);});
 
-	set_game_format(SpritePiece::Format::SONIC_1);
+	set_game_format(libsonassmd::Game::SONIC_1);
 
 	//////////////////////////////////////
 	// Menubar: Settings/Tile Rendering //

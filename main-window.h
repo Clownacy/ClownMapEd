@@ -39,7 +39,7 @@ private:
 	TileViewer tile_viewer;
 	QVBoxLayout vertical_layout;
 	QHBoxLayout horizontal_layout;
-	SpritePiece::Format game_format;
+	libsonassmd::Game game;
 	About about = About(this);
 	Licence licences = Licence(this);
 };
