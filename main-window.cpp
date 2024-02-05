@@ -221,8 +221,7 @@ MainWindow::MainWindow(QWidget* const parent)
 			return;
 		}
 
-		const std::string string = string_stream.str();
-		if (!tile_manager.setTiles(string.begin(), string.end()))
+		if (!tile_manager.setTiles(string_stream, game))
 		{
 			QMessageBox::critical(this, "Error", "Failed to load file: data ends with an incomplete tile. The file might not actually be tile data.");
 			return;
@@ -474,12 +473,13 @@ MainWindow::MainWindow(QWidget* const parent)
 		if (file_path.isNull())
 			return;
 
-		const auto &tile_bytes = tile_manager.tile_bytes();
+		const auto &tiles = tile_manager.getTiles();
 
 		// TODO: This copy should not be necessary.
 		// Maybe I should modify mdcomp to use a better interface.
 		std::stringstream input_stream;
-		input_stream.write(reinterpret_cast<const char*>(tile_bytes.data()->data()), tile_bytes.size() * tile_bytes.data()->size());
+		for (const auto &tile : std::as_const(tiles))
+			tile.toBinaryStream(input_stream, game); // TODO: Good lord this is inefficient: we're invoking the assembler here for each tile!
 
 		if (is_assembly_file_path(file_path))
 		{
@@ -570,7 +570,8 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionModuled_Kosinski, &QAction::triggered, this,
 		[this, save_tile_file]()
 		{
-			if (tile_manager.tile_bytes().size() * tile_manager.tile_bytes().data()->size() > 0xFFFF)
+			const auto tiles = tile_manager.getTiles();
+			if (tiles.size() * tile_manager.TILE_SIZE_IN_BYTES > 0xFFFF)
 			{
 				QMessageBox::critical(this, "Error", "Tile data is too large for moduled compression.");
 				return;
@@ -590,7 +591,8 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionModuled_Kosinski_2, &QAction::triggered, this,
 		[this, save_tile_file]()
 		{
-			if (tile_manager.tile_bytes().size() * tile_manager.tile_bytes().data()->size() > 0xFFFF)
+			const auto tiles = tile_manager.getTiles();
+			if (tiles.size() * tile_manager.TILE_SIZE_IN_BYTES > 0xFFFF)
 			{
 				QMessageBox::critical(this, "Error", "Tile data is too large for moduled compression.");
 				return;
@@ -837,15 +839,15 @@ MainWindow::MainWindow(QWidget* const parent)
 
 			// Finally, import the image over the sprite.
 			tile_manager.modifyTiles(
-				[this, &frame, &their_image](QVector<std::array<uchar, TileManager::TILE_SIZE_IN_BYTES>> &tile_bytes)
+				[this, &frame, &their_image](QVector<libsonassmd::Tile> &old_tiles)
 				{
 					// TODO: This doesn't account for overlapping pieces, which is a mistake that SonMapEd also makes. Is there anything that can be done about this?
-					const QVector<SpritePiece::Tile> tiles = getUniqueTiles(frame);
+					const QVector<SpritePiece::Tile> new_tiles = getUniqueTiles(frame);
 					const int frame_left = calculateRect(frame).left();
 					const int frame_top = calculateRect(frame).top();
 
 					// Overwrite each unique tile.
-					for (const auto &tile : tiles)
+					for (const auto &tile : new_tiles)
 					{
 						for (int y = 0; y < TileManager::TILE_HEIGHT; ++y)
 						{
@@ -878,10 +880,7 @@ MainWindow::MainWindow(QWidget* const parent)
 									}
 								}
 
-								// Insert the colour into the tile data.
-								const uint shift = (x % 2 == 0) * 4;
-								uchar &byte = tile_bytes[tile.index][(x + y * 8) / 2];
-								byte = (byte & ~(0xF << shift)) | (closest_colour_index << shift);
+								old_tiles[tile.index].pixels[y][x] = closest_colour_index;
 							}
 						}
 					}
