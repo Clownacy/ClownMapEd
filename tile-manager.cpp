@@ -11,7 +11,7 @@ TileManager::TileManager(const SignalWrapper<Palette> &palette)
 
 void TileManager::deleteTile(const int tile_index)
 {
-	tiles.remove(tile_index);
+	tiles.vector.erase(tiles.vector.cbegin() + tile_index);
 	tile_pixmaps.remove(tile_index);
 
 	emit pixmapsChanged();
@@ -19,7 +19,7 @@ void TileManager::deleteTile(const int tile_index)
 
 void TileManager::duplicateTile(const int tile_index, const int insert_index)
 {
-	tiles.insert(insert_index, tiles[tile_index]);
+	tiles.vector.insert(tiles.vector.cbegin() + insert_index, tiles.vector[tile_index]);
 	tile_pixmaps.insert(insert_index, tile_pixmaps[tile_index]);
 
 	emit pixmapsChanged();
@@ -27,15 +27,15 @@ void TileManager::duplicateTile(const int tile_index, const int insert_index)
 
 void TileManager::clearTile(const int tile_index)
 {
-	std::fill(&tiles[tile_index].pixels[0][0], &tiles[tile_index].pixels[0][0] + sizeof(tiles[tile_index]), 0);
+	std::fill(&tiles.vector[tile_index].pixels[0][0], &tiles.vector[tile_index].pixels[0][0] + sizeof(tiles.vector[tile_index]), 0);
 	regeneratePixmap(tile_index);
 
 	emit pixmapsChanged();
 }
 
-void TileManager::modifyTiles(const std::function<void(QVector<libsonassmd::Tile>&)> &callback)
+void TileManager::modifyTiles(const std::function<void(std::vector<libsonassmd::Tile>&)> &callback)
 {
-	callback(tiles);
+	callback(tiles.vector);
 	regeneratePixmaps();
 }
 
@@ -43,7 +43,7 @@ void TileManager::regeneratePixmaps()
 {
 	invalid_tile_pixmaps = createPixmaps(createInvalidTilePixmap());
 
-	for (int tile_index = 0; tile_index < tiles.size(); ++tile_index)
+	for (int tile_index = 0; tile_index < tiles.vector.size(); ++tile_index)
 		regeneratePixmap(tile_index);
 
 	emit pixmapsChanged();
@@ -59,7 +59,7 @@ void TileManager::regeneratePixmap(const int tile_index)
 		{
 			for (uint x = 0; x < TILE_WIDTH; ++x)
 			{
-				const uint palette_index = tiles[tile_index].pixels[y][x];
+				const uint palette_index = tiles.vector[tile_index].pixels[y][x];
 
 				rgb_pixels[y][x] = palette_index == 0 ? QColor(0, 0, 0, 0) : palette.lines[line].colours[palette_index].toQColor224();
 			}

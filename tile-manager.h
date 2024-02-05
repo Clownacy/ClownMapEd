@@ -11,7 +11,7 @@
 #include <QPixmap>
 #include <QVector>
 
-#include "libsonassmd/tile.h"
+#include "libsonassmd/tiles.h"
 
 #include "palette.h"
 #include "signal-wrapper.h"
@@ -38,7 +38,7 @@ public:
 
 	void unloadTiles()
 	{
-		tiles.clear();
+		tiles.vector.clear();
 		tile_pixmaps.clear();
 
 		emit pixmapsChanged();
@@ -46,18 +46,9 @@ public:
 
 	bool setTiles(std::istream &stream, const libsonassmd::Game game)
 	{
-		tiles.clear();
+		tiles.fromBinaryStream(stream, game);
 
-		// TODO: Detect and handle files that end with a partial tile.
-		do
-		{
-			tiles.push_back({}); // TODO: emplace_back
-			tiles.back().fromBinaryStream(stream, game);
-		} while (!stream.eof());
-
-		tiles.pop_back();
-
-		tile_pixmaps.resize(tiles.size()); // TODO: Reserve instead?
+		tile_pixmaps.resize(tiles.vector.size()); // TODO: Reserve instead?
 
 		regeneratePixmaps();
 
@@ -80,7 +71,7 @@ public:
 	void deleteTile(int tile_index);
 	void duplicateTile(int tile_index, int insert_index);
 	void clearTile(int tile_index);
-	void modifyTiles(const std::function<void(QVector<libsonassmd::Tile>&)> &callback);
+	void modifyTiles(const std::function<void(std::vector<libsonassmd::Tile>&)> &callback);
 	auto& getTiles() const
 	{
 		return tiles;
@@ -101,7 +92,7 @@ private:
 	const Palette &palette;
 
 	std::array<QPixmap, static_cast<std::size_t>(PixmapType::MAX)> invalid_tile_pixmaps;
-	QVector<libsonassmd::Tile> tiles;
+	libsonassmd::Tiles tiles;
 	QVector<std::array<std::array<QPixmap, static_cast<std::size_t>(PixmapType::MAX)>, Palette::TOTAL_LINES>> tile_pixmaps;
 };
 
