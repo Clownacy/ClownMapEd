@@ -473,8 +473,6 @@ MainWindow::MainWindow(QWidget* const parent)
 		if (file_path.isNull())
 			return;
 
-		// TODO: This copy should not be necessary.
-		// Maybe I should modify mdcomp to use a better interface.
 		std::stringstream input_stream;
 		tile_manager.getTiles().toBinaryStream(input_stream);
 
