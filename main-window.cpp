@@ -56,7 +56,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	// Additional Shortcuts //
 	//////////////////////////
 
-	/* I would use 7,8/9,0 instead of 6,7/8,9, but Windows has this dumbass anti-feature that disallows to Shift+0 ever be used. */
+	/* I would use 7,8/9,0 instead of 6,7/8,9, but Windows has this dumbass anti-feature that disallows Shift+0 to ever be used. */
 	ui->actionPrevious_Sprite->setShortcuts({QKeySequence("8"), QKeySequence("[")});
 	ui->actionNext_Sprite->setShortcuts({QKeySequence("9"), QKeySequence("]")});
 
