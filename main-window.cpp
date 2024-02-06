@@ -213,7 +213,7 @@ MainWindow::MainWindow(QWidget* const parent)
 			return;
 		}
 
-		std::stringstream string_stream(std::ios::binary);
+		std::stringstream string_stream(std::ios::in | std::ios::out | std::ios::binary);
 
 		if (!decompression_function(file_stream, string_stream))
 		{
@@ -473,12 +473,12 @@ MainWindow::MainWindow(QWidget* const parent)
 		if (file_path.isNull())
 			return;
 
-		std::stringstream input_stream;
+		std::stringstream input_stream(std::ios::in | std::ios::out | std::ios::binary);
 		tile_manager.getTiles().toBinaryStream(input_stream);
 
 		if (is_assembly_file_path(file_path))
 		{
-			std::stringstream output_stream;
+			std::stringstream output_stream(std::ios::in | std::ios::out | std::ios::binary);
 
 			if (!callback(input_stream, output_stream))
 			{
