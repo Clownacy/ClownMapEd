@@ -2,6 +2,7 @@
 #include "./ui_main-window.h"
 
 #include <fstream>
+#include <sstream>
 #include <functional>
 #include <limits>
 #include <utility>
@@ -13,11 +14,6 @@
 #include <QMessageBox>
 #include <QTextStream>
 #include <QtMath>
-
-#include "comper.h"
-#include "kosinski.h"
-#include "kosplus.h"
-#include "nemesis.h"
 
 #include "CIEDE2000/CIEDE2000.h"
 
@@ -200,30 +196,18 @@ MainWindow::MainWindow(QWidget* const parent)
 	// Menubar: File/Load Data File //
 	//////////////////////////////////
 
-	const auto load_tile_file = [this](const QString &file_path, bool (* const decompression_function)(std::istream &src, std::iostream &dst))
+	const auto load_tile_file = [this](const QString &file_path, const libsonassmd::Tiles::Format format)
 	{
 		if (file_path.isNull())
 			return;
 
-		std::ifstream file_stream(file_path.toStdString(), std::ios::binary);
-
-		if (!file_stream.is_open())
+		try
 		{
-			QMessageBox::critical(this, "Error", "Failed to load file: file could not be opened for reading.");
-			return;
+			tile_manager.loadTilesFromFile(file_path.toStdString().c_str(), format);
 		}
-
-		std::stringstream string_stream(std::ios::in | std::ios::out | std::ios::binary);
-
-		if (!decompression_function(file_stream, string_stream))
+		catch (const std::exception &e)
 		{
-			QMessageBox::critical(this, "Error", "Failed to load file: data could not be decompressed file. Your chosen compression format may have been incorrect.");
-			return;
-		}
-
-		if (!tile_manager.setTiles(string_stream))
-		{
-			QMessageBox::critical(this, "Error", "Failed to load file: data ends with an incomplete tile. The file might not actually be tile data.");
+			QMessageBox::critical(this, "Error", QStringLiteral("Failed to load file. Exception details:") + e.what());
 			return;
 		}
 
@@ -232,42 +216,37 @@ MainWindow::MainWindow(QWidget* const parent)
 
 	const auto load_uncompressed_tile_file = [load_tile_file](const QString &file_path)
 	{
-		load_tile_file(file_path, [](std::istream &src, std::iostream &dst)
-			{
-				dst << src.rdbuf();
-				return true;
-			}
-		);
+		load_tile_file(file_path, libsonassmd::Tiles::Format::BINARY);
 	};
 
 	const auto load_nemesis_tile_file = [load_tile_file](const QString &file_path)
 	{
-		load_tile_file(file_path, [](std::istream &src, std::iostream &dst){return nemesis::decode(src, dst);});
+		load_tile_file(file_path, libsonassmd::Tiles::Format::NEMESIS);
 	};
 
 	const auto load_kosinski_tile_file = [load_tile_file](const QString &file_path)
 	{
-		load_tile_file(file_path, kosinski::decode);
+		load_tile_file(file_path, libsonassmd::Tiles::Format::KOSINSKI);
 	};
 
 	const auto load_moduled_kosinski_tile_file = [load_tile_file](const QString &file_path)
 	{
-		load_tile_file(file_path, [](std::istream &src, std::iostream &dst){return kosinski::moduled_decode(src, dst);});
+		load_tile_file(file_path, libsonassmd::Tiles::Format::MODULED_KOSINSKI);
 	};
 
 	const auto load_kosinski_plus_tile_file = [load_tile_file](const QString &file_path)
 	{
-		load_tile_file(file_path, kosplus::decode);
+		load_tile_file(file_path, libsonassmd::Tiles::Format::KOSINSKI_PLUS);
 	};
 
 	const auto load_moduled_kosinski_plus_tile_file = [load_tile_file](const QString &file_path)
 	{
-		load_tile_file(file_path, [](std::istream &src, std::iostream &dst){return kosplus::moduled_decode(src, dst);});
+		load_tile_file(file_path, libsonassmd::Tiles::Format::MODULED_KOSINSKI_PLUS);
 	};
 
 	const auto load_comper_tile_file = [load_tile_file](const QString &file_path)
 	{
-		load_tile_file(file_path, comper::decode);
+		load_tile_file(file_path, libsonassmd::Tiles::Format::COMPER);
 	};
 
 	const auto load_palette_file = [this](const QString &file_path, const int starting_palette_line)
@@ -317,12 +296,9 @@ MainWindow::MainWindow(QWidget* const parent)
 
 				try
 				{
-					if (is_assembly_file_path(file_path))
-						new_mappings.fromAssemblyFile(file_path.toStdString().c_str());
-					else
-						new_mappings.fromBinaryFile(file_path.toStdString().c_str());
+					new_mappings.fromFile(file_path.toStdString().c_str(), is_assembly_file_path(file_path) ? SpriteMappings::Format::ASSEMBLY : SpriteMappings::Format::BINARY);
 				}
-				catch (const std::ios::failure &e)
+				catch (const std::exception &e)
 				{
 					QMessageBox::critical(this, "Error", QStringLiteral("Failed to load file. Exception details: ") + e.what());
 					return;
@@ -351,10 +327,7 @@ MainWindow::MainWindow(QWidget* const parent)
 				{
 					DynamicPatternLoadCues dplc;
 
-					if (is_assembly_file_path(file_path))
-						dplc.fromAssemblyFile(file_path.toStdString().c_str());
-					else
-						dplc.fromBinaryFile(file_path.toStdString().c_str());
+					dplc.fromFile(file_path.toStdString().c_str(), is_assembly_file_path(file_path) ? DynamicPatternLoadCues::Format::ASSEMBLY : DynamicPatternLoadCues::Format::BINARY);
 
 					if (!sprite_mappings_copy.applyDPLCs(dplc))
 					{
@@ -362,7 +335,7 @@ MainWindow::MainWindow(QWidget* const parent)
 						return;
 					}
 				}
-				catch (const std::ios::failure &e)
+				catch (const std::exception &e)
 				{
 					QMessageBox::critical(this, "Error", QStringLiteral("Failed to load file. Exception details: ") + e.what());
 					return;
@@ -466,25 +439,17 @@ MainWindow::MainWindow(QWidget* const parent)
 	// Menubar: File/Save Data File //
 	//////////////////////////////////
 
-	const auto save_tile_file = [this, is_assembly_file_path](const QString &compression_name, const QString &file_extension, bool (* const callback)(std::istream &in, std::ostream &out))
+	const auto save_tile_file = [this, is_assembly_file_path](const QString &compression_name, const QString &file_extension, const libsonassmd::Tiles::Format format)
 	{
 		const QString file_path = QFileDialog::getSaveFileName(this, "Save " + compression_name + " Tile Graphics File", QString(), compression_name + " Tile Graphics Files (*." + file_extension + " *.bin *.asm);;All Files (*.*)", nullptr, QFileDialog::DontConfirmOverwrite);
 
 		if (file_path.isNull())
 			return;
 
-		std::stringstream input_stream(std::ios::in | std::ios::out | std::ios::binary);
-		tile_manager.getTiles().toBinaryStream(input_stream);
-
 		if (is_assembly_file_path(file_path))
 		{
-			std::stringstream output_stream(std::ios::in | std::ios::out | std::ios::binary);
-
-			if (!callback(input_stream, output_stream))
-			{
-				QMessageBox::critical(this, "Error", "Failed to save file: data could not be compressed.");
-				return;
-			}
+			std::stringstream string_stream(std::ios::in | std::ios::out | std::ios::binary);
+			tile_manager.getTiles().toStream(string_stream, format);
 
 			QFile file(file_path);
 			if (!file.open(QFile::OpenModeFlag::WriteOnly))
@@ -498,7 +463,7 @@ MainWindow::MainWindow(QWidget* const parent)
 			                         ).arg(compression_name);
 
 			const std::string::size_type bytes_per_line = 0x20;
-			const std::string &output_string = output_stream.str();
+			const std::string &output_string = string_stream.str();
 			for (std::string::size_type i = 0; i < output_string.size(); i += bytes_per_line)
 			{
 				stream << "\tdc.b ";
@@ -518,47 +483,28 @@ MainWindow::MainWindow(QWidget* const parent)
 		}
 		else
 		{
-			std::ofstream file(file_path.toStdString(), std::ios::binary);
-
-			if (!file.is_open())
-			{
-				QMessageBox::critical(this, "Error", "Failed to save file: file could not be opened for writing.");
-				return;
-			}
-
-			if (!callback(input_stream, file))
-			{
-				QMessageBox::critical(this, "Error", "Failed to save file: data could not be compressed.");
-				return;
-			}
+			tile_manager.getTiles().toFile(file_path.toStdString().c_str(), format);
 		}
 	};
 
 	connect(ui->actionUncompressed, &QAction::triggered, this,
 		[save_tile_file]()
 		{
-			save_tile_file("Uncompressed", "unc",
-				[](std::istream &in, std::ostream &out)
-				{
-					out << in.rdbuf();
-
-					return true;
-				}
-			);
+			save_tile_file("Uncompressed", "unc", libsonassmd::Tiles::Format::BINARY);
 		}
 	);
 
 	connect(ui->actionNemesis, &QAction::triggered, this,
 		[save_tile_file]()
 		{
-			save_tile_file("Nemesis-Compressed", "nem", nemesis::encode);
+			save_tile_file("Nemesis-Compressed", "nem", libsonassmd::Tiles::Format::NEMESIS);
 		}
 	);
 
 	connect(ui->actionKosinski, &QAction::triggered, this,
 		[save_tile_file]()
 		{
-			save_tile_file("Kosinski-Compressed", "kos", kosinski::encode);
+			save_tile_file("Kosinski-Compressed", "kos", libsonassmd::Tiles::Format::KOSINSKI);
 		}
 	);
 
@@ -571,14 +517,14 @@ MainWindow::MainWindow(QWidget* const parent)
 				return;
 			}
 
-			save_tile_file("Moduled Kosinski-Compressed", "kosm", [](std::istream &in, std::ostream &out){return kosinski::moduled_encode(in, out);});
+			save_tile_file("Moduled Kosinski-Compressed", "kosm", libsonassmd::Tiles::Format::MODULED_KOSINSKI);
 		}
 	);
 
 	connect(ui->actionKosinski_2, &QAction::triggered, this,
 		[save_tile_file]()
 		{
-			save_tile_file("Kosinski+-Compressed", "kosp", kosplus::encode);
+			save_tile_file("Kosinski+-Compressed", "kosp", libsonassmd::Tiles::Format::KOSINSKI_PLUS);
 		}
 	);
 
@@ -591,14 +537,14 @@ MainWindow::MainWindow(QWidget* const parent)
 				return;
 			}
 
-			save_tile_file("Moduled Kosinski+-Compressed", "kospm", [](std::istream &in, std::ostream &out){return kosplus::moduled_encode(in, out);});
+			save_tile_file("Moduled Kosinski+-Compressed", "kospm", libsonassmd::Tiles::Format::MODULED_KOSINSKI_PLUS);
 		}
 	);
 
 	connect(ui->actionComper, &QAction::triggered, this,
 		[save_tile_file]()
 		{
-			save_tile_file("Comper-Compressed", "comp", comper::encode);
+			save_tile_file("Comper-Compressed", "comp", libsonassmd::Tiles::Format::COMPER);
 		}
 	);
 
@@ -675,11 +621,11 @@ MainWindow::MainWindow(QWidget* const parent)
 												 "; --------------------------------------------------------------------------------\n\n"
 												).arg(mapmacros ? QStringLiteral("MapMacros") : libsonassmd::game == libsonassmd::Game::SONIC_1 ? QStringLiteral("Sonic 1/CD") : libsonassmd::game == libsonassmd::Game::SONIC_2 ? QStringLiteral("Sonic 2") : QStringLiteral("Sonic 3 & Knuckles")).toStdString();
 
-						sprite_mappings_copy.toAssemblyStream(stream);
+						sprite_mappings_copy.toStream(stream, SpriteMappings::Format::ASSEMBLY);
 					}
 					else
 					{
-						sprite_mappings_copy.toBinaryStream(stream);
+						sprite_mappings_copy.toStream(stream, SpriteMappings::Format::BINARY);
 					}
 				}
 			);
@@ -704,11 +650,11 @@ MainWindow::MainWindow(QWidget* const parent)
 												 "; --------------------------------------------------------------------------------\n\n"
 												).arg(mapmacros ? QStringLiteral("MapMacros") : libsonassmd::game == libsonassmd::Game::SONIC_1 ? QStringLiteral("Sonic 1") : QStringLiteral("Sonic 2/3&K/CD")).toStdString();
 
-						dplc.toAssemblyStream(stream);
+						dplc.toStream(stream, DynamicPatternLoadCues::Format::ASSEMBLY);
 					}
 					else
 					{
-						dplc.toBinaryStream(stream);
+						dplc.toStream(stream, DynamicPatternLoadCues::Format::BINARY);
 					}
 				}
 			);

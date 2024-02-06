@@ -44,15 +44,13 @@ public:
 		emit pixmapsChanged();
 	}
 
-	bool setTiles(std::istream &stream)
+	void loadTilesFromFile(const char* const file_path, libsonassmd::Tiles::Format format)
 	{
-		tiles.fromBinaryStream(stream);
+		tiles.fromFile(file_path, format);
 
 		tile_pixmaps.resize(tiles.size()); // TODO: Reserve instead?
 
 		regeneratePixmaps();
-
-		return true;
 	}
 
 	const QPixmap& pixmaps(const int tile_index, const int palette_line, const PixmapType type) const
