@@ -181,7 +181,7 @@ MainWindow::MainWindow(QWidget* const parent)
 			return " | " + string + (index == -1 ? "s: " : (" " + QString::number(index, 0x10).toUpper() + "/")) + QString::number(total, 0x10).toUpper();
 		};
 
-		const QString format_string = libsonassmd::Assembleable::getGame() == libsonassmd::Game::SONIC_1 ? "S1" : libsonassmd::Assembleable::getGame() == libsonassmd::Game::SONIC_2 ? "S2" : "S3K";
+		const QString format_string = libsonassmd::game == libsonassmd::Game::SONIC_1 ? "S1" : libsonassmd::game == libsonassmd::Game::SONIC_2 ? "S2" : "S3K";
 		const QString frame_string = do_string_thingy("Frame", sprite_viewer.selected_sprite_index(), sprite_mappings->frames.size());
 		const QString piece_string = sprite_viewer.selected_sprite_index() == -1 ? "" : do_string_thingy("Piece", sprite_viewer.selected_piece_index(), sprite_mappings->frames[sprite_viewer.selected_sprite_index()].pieces.size());
 		const QString tile_string = do_string_thingy("Tile", tile_viewer.selection().indexOf(true), tile_manager.total_tiles());
@@ -673,7 +673,7 @@ MainWindow::MainWindow(QWidget* const parent)
 						stream << QStringLiteral("; --------------------------------------------------------------------------------\n"
 												 "; Sprite mappings - output from ClownMapEd - %1 format\n"
 												 "; --------------------------------------------------------------------------------\n\n"
-												).arg(mapmacros ? QStringLiteral("MapMacros") : libsonassmd::Assembleable::getGame() == libsonassmd::Game::SONIC_1 ? QStringLiteral("Sonic 1/CD") : libsonassmd::Assembleable::getGame() == libsonassmd::Game::SONIC_2 ? QStringLiteral("Sonic 2") : QStringLiteral("Sonic 3 & Knuckles")).toStdString();
+												).arg(mapmacros ? QStringLiteral("MapMacros") : libsonassmd::game == libsonassmd::Game::SONIC_1 ? QStringLiteral("Sonic 1/CD") : libsonassmd::game == libsonassmd::Game::SONIC_2 ? QStringLiteral("Sonic 2") : QStringLiteral("Sonic 3 & Knuckles")).toStdString();
 
 						sprite_mappings_copy.toAssemblyStream(stream);
 					}
@@ -702,7 +702,7 @@ MainWindow::MainWindow(QWidget* const parent)
 						stream << QStringLiteral("; --------------------------------------------------------------------------------\n"
 												 "; Dynamic Pattern Loading Cues - output from ClownMapEd - %1 format\n"
 												 "; --------------------------------------------------------------------------------\n\n"
-												).arg(mapmacros ? QStringLiteral("MapMacros") : libsonassmd::Assembleable::getGame() == libsonassmd::Game::SONIC_1 ? QStringLiteral("Sonic 1") : QStringLiteral("Sonic 2/3&K/CD")).toStdString();
+												).arg(mapmacros ? QStringLiteral("MapMacros") : libsonassmd::game == libsonassmd::Game::SONIC_1 ? QStringLiteral("Sonic 1") : QStringLiteral("Sonic 2/3&K/CD")).toStdString();
 
 						dplc.toAssemblyStream(stream);
 					}
@@ -1587,7 +1587,7 @@ MainWindow::MainWindow(QWidget* const parent)
 
 	const auto set_game_format = [this, update_title](const libsonassmd::Game game)
 	{
-		libsonassmd::Assembleable::setGame(game);
+		libsonassmd::game = game;
 
 		ui->actionSonic_1->setChecked(game == libsonassmd::Game::SONIC_1);
 		ui->actionSonic_2->setChecked(game == libsonassmd::Game::SONIC_2);
@@ -1644,7 +1644,7 @@ MainWindow::MainWindow(QWidget* const parent)
 
 	const auto set_legacy_assembly_formats_enabled = [this]()
 	{
-		libsonassmd::Assembleable::enableMapMacros(!ui->actionLegacyFormats->isChecked());
+		libsonassmd::mapmacros = !ui->actionLegacyFormats->isChecked();
 	};
 
 	connect(ui->actionLegacyFormats, &QAction::changed, this, set_legacy_assembly_formats_enabled);
