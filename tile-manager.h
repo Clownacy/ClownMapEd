@@ -38,7 +38,7 @@ public:
 
 	void unloadTiles()
 	{
-		tiles.vector.clear();
+		tiles.clear();
 		tile_pixmaps.clear();
 
 		emit pixmapsChanged();
@@ -48,7 +48,7 @@ public:
 	{
 		tiles.fromBinaryStream(stream);
 
-		tile_pixmaps.resize(tiles.vector.size()); // TODO: Reserve instead?
+		tile_pixmaps.resize(tiles.size()); // TODO: Reserve instead?
 
 		regeneratePixmaps();
 
