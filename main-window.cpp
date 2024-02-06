@@ -446,44 +446,58 @@ MainWindow::MainWindow(QWidget* const parent)
 		if (file_path.isNull())
 			return;
 
-		if (is_assembly_file_path(file_path))
+		try
 		{
-			std::stringstream string_stream(std::ios::in | std::ios::out | std::ios::binary);
-			tile_manager.getTiles().toStream(string_stream, format);
+			const auto tiles = tile_manager.getTiles();
 
-			QFile file(file_path);
-			if (!file.open(QFile::OpenModeFlag::WriteOnly))
-				QMessageBox::critical(this, "Error", "Failed to save file: file could not be opened for writing.");
-
-			QTextStream stream(&file);
-
-			stream << QStringLiteral("; --------------------------------------------------------------------------------\n"
-			                         "; %1 tile graphics - output from ClownMapEd\n"
-			                         "; --------------------------------------------------------------------------------\n"
-			                         ).arg(compression_name);
-
-			const std::string::size_type bytes_per_line = 0x20;
-			const std::string &output_string = string_stream.str();
-			for (std::string::size_type i = 0; i < output_string.size(); i += bytes_per_line)
+			if (is_assembly_file_path(file_path))
 			{
-				stream << "\tdc.b ";
+				std::stringstream string_stream(std::ios::in | std::ios::out | std::ios::binary);
+				string_stream.exceptions(std::ios::badbit | std::ios::eofbit | std::ios::failbit);
 
-				for (std::string::size_type j = 0; j < qMin(bytes_per_line, output_string.size() - i); ++j)
+				tiles.toStream(string_stream, format);
+
+				QFile file(file_path);
+				if (!file.open(QFile::OpenModeFlag::WriteOnly))
 				{
-					if (j != 0)
-						stream << ',';
-
-					stream << '$' << Utilities::IntegerToZeroPaddedHexQString(static_cast<quint8>(output_string[i + j]));
+					QMessageBox::critical(this, "Error", "Failed to save file: file could not be opened for writing.");
+					return;
 				}
 
-				stream << "; " << i << '\n';
-			}
+				QTextStream stream(&file);
 
-			stream << "\teven\n";
+				stream << QStringLiteral("; --------------------------------------------------------------------------------\n"
+										 "; %1 tile graphics - output from ClownMapEd\n"
+										 "; --------------------------------------------------------------------------------\n"
+										 ).arg(compression_name);
+
+				const std::string::size_type bytes_per_line = 0x20;
+				const std::string &output_string = string_stream.str();
+				for (std::string::size_type i = 0; i < output_string.size(); i += bytes_per_line)
+				{
+					stream << "\tdc.b ";
+
+					for (std::string::size_type j = 0; j < qMin(bytes_per_line, output_string.size() - i); ++j)
+					{
+						if (j != 0)
+							stream << ',';
+
+						stream << '$' << Utilities::IntegerToZeroPaddedHexQString(static_cast<quint8>(output_string[i + j]));
+					}
+
+					stream << "; " << i << '\n';
+				}
+
+				stream << "\teven\n";
+			}
+			else
+			{
+				tiles.toFile(file_path.toStdString().c_str(), format);
+			}
 		}
-		else
+		catch (const std::exception &e)
 		{
-			tile_manager.getTiles().toFile(file_path.toStdString().c_str(), format);
+			QMessageBox::critical(this, "Error", QStringLiteral("Failed to save file. Exception details: ") + e.what());
 		}
 	};
 
@@ -598,7 +612,14 @@ MainWindow::MainWindow(QWidget* const parent)
 		if (!stream.is_open())
 			QMessageBox::critical(this, "Error", "Failed to save file: file could not be opened for writing.");
 
-		callback(stream, saving_assembly_file);
+		try
+		{
+			callback(stream, saving_assembly_file);
+		}
+		catch (const std::exception &e)
+		{
+			QMessageBox::critical(this, "Error", QStringLiteral("Failed to save file. Exception details: ") + e.what());
+		}
 	};
 
 	connect(ui->actionSave_Mappings, &QAction::triggered, this,
