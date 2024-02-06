@@ -467,9 +467,9 @@ MainWindow::MainWindow(QWidget* const parent)
 				QTextStream stream(&file);
 
 				stream << QStringLiteral("; --------------------------------------------------------------------------------\n"
-										 "; %1 tile graphics - output from ClownMapEd\n"
-										 "; --------------------------------------------------------------------------------\n"
-										 ).arg(compression_name);
+				                         "; %1 tile graphics - output from ClownMapEd\n"
+				                         "; --------------------------------------------------------------------------------\n"
+				                         ).arg(compression_name);
 
 				const std::string::size_type bytes_per_line = 0x20;
 				const std::string &output_string = string_stream.str();
@@ -638,9 +638,9 @@ MainWindow::MainWindow(QWidget* const parent)
 					if (saving_assembly_file)
 					{
 						stream << QStringLiteral("; --------------------------------------------------------------------------------\n"
-												 "; Sprite mappings - output from ClownMapEd - %1 format\n"
-												 "; --------------------------------------------------------------------------------\n\n"
-												).arg(mapmacros ? QStringLiteral("MapMacros") : libsonassmd::game == libsonassmd::Game::SONIC_1 ? QStringLiteral("Sonic 1/CD") : libsonassmd::game == libsonassmd::Game::SONIC_2 ? QStringLiteral("Sonic 2") : QStringLiteral("Sonic 3 & Knuckles")).toStdString();
+						                         "; Sprite mappings - output from ClownMapEd - %1 format\n"
+						                         "; --------------------------------------------------------------------------------\n\n"
+						                        ).arg(mapmacros ? QStringLiteral("MapMacros") : libsonassmd::game == libsonassmd::Game::SONIC_1 ? QStringLiteral("Sonic 1/CD") : libsonassmd::game == libsonassmd::Game::SONIC_2 ? QStringLiteral("Sonic 2") : QStringLiteral("Sonic 3 & Knuckles")).toStdString();
 
 						sprite_mappings_copy.toStream(stream, SpriteMappings::Format::ASSEMBLY);
 					}
@@ -667,9 +667,9 @@ MainWindow::MainWindow(QWidget* const parent)
 					if (saving_assembly_file)
 					{
 						stream << QStringLiteral("; --------------------------------------------------------------------------------\n"
-												 "; Dynamic Pattern Loading Cues - output from ClownMapEd - %1 format\n"
-												 "; --------------------------------------------------------------------------------\n\n"
-												).arg(mapmacros ? QStringLiteral("MapMacros") : libsonassmd::game == libsonassmd::Game::SONIC_1 ? QStringLiteral("Sonic 1") : QStringLiteral("Sonic 2/3&K/CD")).toStdString();
+						                         "; Dynamic Pattern Loading Cues - output from ClownMapEd - %1 format\n"
+						                         "; --------------------------------------------------------------------------------\n\n"
+						                        ).arg(mapmacros ? QStringLiteral("MapMacros") : libsonassmd::game == libsonassmd::Game::SONIC_1 ? QStringLiteral("Sonic 1") : QStringLiteral("Sonic 2/3&K/CD")).toStdString();
 
 						dplc.toStream(stream, DynamicPatternLoadCues::Format::ASSEMBLY);
 					}
