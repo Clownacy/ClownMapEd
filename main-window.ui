@@ -301,7 +301,7 @@
     <string>Kosinski&amp;+...</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Alt+P</string>
+    <string>Ctrl+Alt+L</string>
    </property>
   </action>
   <action name="actionLoad_Tiles_Comper">
@@ -314,10 +314,10 @@
   </action>
   <action name="actionLoad_Tiles_Moduled_Kosinski_Plus">
    <property name="text">
-    <string>Modu&amp;led Kosinski+...</string>
+    <string>Mod&amp;uled Kosinski+...</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Alt+L</string>
+    <string>Ctrl+Alt+U</string>
    </property>
   </action>
   <action name="actionNext_Sprite">
@@ -857,7 +857,7 @@
     <string>Kosinski&amp;+...</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Alt+Shift+P</string>
+    <string>Ctrl+Alt+Shift+L</string>
    </property>
   </action>
   <action name="actionModuled_Kosinski_2">
@@ -865,7 +865,7 @@
     <string>Modu&amp;led Kosinski+...</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Alt+Shift+L</string>
+    <string>Ctrl+Alt+Shift+U</string>
    </property>
   </action>
   <action name="actionComper">
