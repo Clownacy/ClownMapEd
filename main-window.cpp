@@ -833,7 +833,8 @@ MainWindow::MainWindow(QWidget* const parent)
 									CIEDE2000::LAB lab2 = {our_colour[0], our_colour[1], our_colour[2]};
 									const double distance = CIEDE2000::CIEDE2000(lab1, lab2);
 
-									if (distance < closest_distance)
+									// Only allow matching the transparency colour if it is exact.
+									if ((colour_index != 0 && distance < closest_distance) || their_colour == our_colour)
 									{
 										closest_distance = distance;
 										closest_colour_index = colour_index;
