@@ -1,4 +1,4 @@
-# clownmaped
+# ClownMapEd
 
 This is a clone of Xenowhirl's SonMapEd that is made with Qt5.
 
