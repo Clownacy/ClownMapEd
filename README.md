@@ -1,6 +1,6 @@
 # ClownMapEd
 
-This is a clone of Xenowhirl's SonMapEd that is made with Qt5.
+This is a clone of Xenowhirl's SonMapEd that is made with Qt.
 
 Enhancements:
 - High-DPI support
