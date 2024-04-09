@@ -822,7 +822,7 @@ MainWindow::MainWindow(QWidget* const parent)
 								const auto their_colour = Utilities::QColorToLAB(QColor(their_image.pixel(image_x, image_y)));
 
 								// Find the closest colour in the palette line to the imported pixel colour.
-								uint closest_colour_index;
+								uint closest_colour_index = 0;
 								double closest_distance = std::numeric_limits<double>::max();
 
 								for (uint colour_index = 0; colour_index < Palette::COLOURS_PER_LINE; ++colour_index)
