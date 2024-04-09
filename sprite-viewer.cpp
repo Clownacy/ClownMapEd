@@ -21,7 +21,7 @@ SpriteViewer::SpriteViewer(const TileManager &tile_manager, const SignalWrapper<
 			if (this->sprite_mappings.frames.size() == 0)
 				m_selected_sprite_index = -1;
 			else
-				m_selected_sprite_index = qBound(0u, m_selected_sprite_index, this->sprite_mappings.frames.size() - 1);
+				m_selected_sprite_index = qBound(0, m_selected_sprite_index, static_cast<int>(this->sprite_mappings.frames.size() - 1));
 
 			update();
 		}
@@ -171,9 +171,9 @@ void SpriteViewer::paintEvent(QPaintEvent* const event)
 	}
 }
 
-void SpriteViewer::setSelectedSprite(const uint sprite_index)
+void SpriteViewer::setSelectedSprite(const int sprite_index)
 {
-	m_selected_sprite_index = qBound(0u, sprite_index, sprite_mappings.frames.size() - 1);
+	m_selected_sprite_index = qBound(0, sprite_index, static_cast<int>(sprite_mappings.frames.size() - 1));
 	m_selected_piece_index = -1;
 	update();
 
@@ -182,7 +182,7 @@ void SpriteViewer::setSelectedSprite(const uint sprite_index)
 
 void SpriteViewer::setSelectedPiece(const int piece_index)
 {
-	const auto total_pieces = sprite_mappings.frames[m_selected_sprite_index].pieces.size();
+	const auto total_pieces = static_cast<int>(sprite_mappings.frames[m_selected_sprite_index].pieces.size());
 
 	if (piece_index == -2)
 		m_selected_piece_index = total_pieces - 1;

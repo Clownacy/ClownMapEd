@@ -608,7 +608,7 @@ MainWindow::MainWindow(QWidget* const parent)
 
 		const bool saving_assembly_file = is_assembly_file_path(file_path);
 
-		std::ofstream stream(file_path.toStdString(), saving_assembly_file ? 0 : std::ios::binary);
+		std::ofstream stream(file_path.toStdString(), saving_assembly_file ? static_cast<std::ios::openmode>(0) : std::ios::binary);
 		if (!stream.is_open())
 			QMessageBox::critical(this, "Error", "Failed to save file: file could not be opened for writing.");
 
@@ -1356,7 +1356,7 @@ MainWindow::MainWindow(QWidget* const parent)
 			const int selected_tile_index = tile_viewer.selection().indexOf(true);
 
 			const auto &frames = sprite_mappings->frames;
-			for (uint frame_index = 0; frame_index < frames.size(); ++frame_index)
+			for (int frame_index = 0; frame_index < static_cast<int>(frames.size()); ++frame_index)
 			{
 				const auto &frame = frames[frame_index];
 
@@ -1634,7 +1634,7 @@ MainWindow::MainWindow(QWidget* const parent)
 		const int selected_sprite_index = sprite_viewer.selected_sprite_index();
 		const bool no_sprites = sprite_mappings->frames.size() == 0;
 		const bool is_first_sprite = no_sprites || selected_sprite_index == 0;
-		const bool is_last_sprite = no_sprites || selected_sprite_index == sprite_mappings->frames.size() - 1;
+		const bool is_last_sprite = no_sprites || selected_sprite_index == static_cast<int>(sprite_mappings->frames.size() - 1);
 		const bool no_sprite_selected = no_sprites;
 
 		ui->actionExport_Sprite_Frame->setDisabled(no_sprite_selected);
@@ -1653,7 +1653,7 @@ MainWindow::MainWindow(QWidget* const parent)
 		const int selected_piece_index = sprite_viewer.selected_piece_index();
 		const bool no_pieces = no_sprites || sprite_mappings->frames[selected_sprite_index].pieces.size() == 0;
 		const bool is_first_piece = no_pieces || selected_piece_index == 0;
-		const bool is_last_piece = no_pieces || selected_piece_index == sprite_mappings->frames[selected_sprite_index].pieces.size() - 1;
+		const bool is_last_piece = no_pieces || selected_piece_index == static_cast<int>(sprite_mappings->frames[selected_sprite_index].pieces.size() - 1);
 		const bool no_piece_selected = no_pieces || selected_piece_index == -1;
 
 		ui->actionNext_Sprite_Piece->setDisabled(no_pieces);

@@ -43,7 +43,7 @@ void TileManager::regeneratePixmaps()
 {
 	invalid_tile_pixmaps = createPixmaps(createInvalidTilePixmap());
 
-	for (int tile_index = 0; tile_index < tiles.size(); ++tile_index)
+	for (int tile_index = 0; tile_index < static_cast<int>(tiles.size()); ++tile_index)
 		regeneratePixmap(tile_index);
 
 	emit pixmapsChanged();

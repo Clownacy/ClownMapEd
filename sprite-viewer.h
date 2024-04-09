@@ -15,7 +15,7 @@ class SpriteViewer : public QWidget
 public:
     SpriteViewer(const TileManager &tile_manager, const SignalWrapper<SpriteMappings> &sprite_mappings);
 
-	uint selected_sprite_index() const
+	int selected_sprite_index() const
 	{
 		return m_selected_sprite_index;
 	}
@@ -31,7 +31,7 @@ public:
 	}
 
 public slots:
-	void setSelectedSprite(uint sprite_index);
+	void setSelectedSprite(int sprite_index);
 	void setSelectedPiece(int piece_index);
 	void setBackgroundColour(const QColor &colour);
 
@@ -54,7 +54,7 @@ protected:
 	void paintEvent(QPaintEvent *event) override;
 
 private:
-	uint m_selected_sprite_index = -1;
+	int m_selected_sprite_index = -1;
 	int m_selected_piece_index = -1;
 	int m_starting_palette_line = 0;
 	bool m_hide_duplicate_tiles = false;
