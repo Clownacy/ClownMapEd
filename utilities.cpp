@@ -3,16 +3,6 @@
 namespace Utilities
 {
 
-QSizeF GetDPIScale(const QWidget* const widget)
-{
-	const auto dpi_to_scale = [](const int dpi)
-	{
-		return qRound(qreal(dpi) / 96);
-	};
-
-	return QSizeF(dpi_to_scale(widget->logicalDpiX()), dpi_to_scale(widget->logicalDpiY()));
-}
-
 std::array<qreal, 3> QColorTosRGB(const QColor &colour)
 {
 	// TODO: I only used qreal here because it's what colour.getRgbF() used in Qt5.
