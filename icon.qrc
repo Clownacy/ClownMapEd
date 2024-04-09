@@ -1,5 +1,5 @@
 <RCC>
     <qresource prefix="/Icon">
-        <file>ClownMapEd.png</file>
+        <file>assets/icon/icon-master.png</file>
     </qresource>
 </RCC>

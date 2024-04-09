@@ -12,7 +12,7 @@ About::About(QWidget *parent) :
 
 	this->setFixedSize(this->size());
 
-	ui->labelIcon->setPixmap(QPixmap(":/Icon/ClownMapEd.png"));
+	ui->labelIcon->setPixmap(QPixmap(":/Icon/assets/icon/icon-master.png"));
 }
 
 About::~About()

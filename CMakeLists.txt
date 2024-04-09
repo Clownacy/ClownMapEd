@@ -17,7 +17,7 @@ find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 set(PROJECT_SOURCES
-	"ClownMapEd.rc"
+	"assets/ClownMapEd.rc"
 	"icon.qrc"
 	"about.cpp"
 	"about.h"
@@ -120,3 +120,18 @@ target_link_libraries(ClownMapEd PRIVATE CIEDE2000)
 add_subdirectory("libsonassmd" EXCLUDE_FROM_ALL)
 
 target_link_libraries(ClownMapEd PRIVATE sonassmd)
+
+################
+# Installation #
+################
+
+install(TARGETS ClownMapEd DESTINATION "bin")
+install(FILES "assets/ClownMapEd.desktop" DESTINATION "share/applications")
+install(FILES "assets/icon/icon-128.png" DESTINATION "share/icons/hicolor/128x128/apps" RENAME "ClownMapEd.png")
+install(FILES "assets/icon/icon-64.png" DESTINATION "share/icons/hicolor/64x64/apps" RENAME "ClownMapEd.png")
+install(FILES "assets/icon/icon-48.png" DESTINATION "share/icons/hicolor/48x48/apps" RENAME "ClownMapEd.png")
+install(FILES "assets/icon/icon-40.png" DESTINATION "share/icons/hicolor/40x40/apps" RENAME "ClownMapEd.png")
+install(FILES "assets/icon/icon-32.png" DESTINATION "share/icons/hicolor/32x32/apps" RENAME "ClownMapEd.png")
+install(FILES "assets/icon/icon-24.png" DESTINATION "share/icons/hicolor/24x24/apps" RENAME "ClownMapEd.png")
+install(FILES "assets/icon/icon-20.png" DESTINATION "share/icons/hicolor/20x20/apps" RENAME "ClownMapEd.png")
+install(FILES "assets/icon/icon-16.png" DESTINATION "share/icons/hicolor/16x16/apps" RENAME "ClownMapEd.png")
