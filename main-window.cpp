@@ -781,22 +781,6 @@ MainWindow::MainWindow(QWidget* const parent)
 				return;
 			}
 
-			// TODO: SonMapEd might not bother doing this?
-			// Check that the imported image has tiles in the same place as the current sprite.
-			// A unique pink colour is used to mark 'unmapped' pixels.
-			for (int y = 0; y < our_image.height(); ++y)
-			{
-				for (int x = 0; x < our_image.width(); ++x)
-				{
-					if ((their_image.pixel(x, y) == qRgb(0xFF, 0, 0xFF)) != (our_image.pixel(x, y) == qRgb(0xFF, 0, 0xFF)))
-					{
-						// TODO: Use an error message that is similar to SonMapEd's.
-						QMessageBox::critical(this, "Error", "Failed to import image: the imported image does not match the layout of the sprite that it is replacing.");
-						return;
-					}
-				}
-			}
-
 			// Finally, import the image over the sprite.
 			tile_manager.modifyTiles(
 				[this, &frame, &their_image](std::vector<libsonassmd::Tile> &old_tiles)
