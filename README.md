@@ -1,13 +1,20 @@
 # ClownMapEd
 
-This is a clone of Xenowhirl's SonMapEd that is made with Qt.
+This is a sprite editor for the Mega Drive _Sonic the Hedgehog_ games. It is a clone of Xenowhirl's SonMapEd and is made with the Qt framework.
 
-Enhancements:
-- High-DPI support
-- Linux support
-- Improved data compression (achieved by leverating Flamewing's mdcomp library)
-- Vastly-improved Pattern Load Cue generation
+https://info.sonicretro.org/ClownMapEd
 
-https://info.sonicretro.org/SonMapEd
+## Enhancements
+
+- Support for high-DPI displays.
+- Support for alternate operating systems, such as macOS, Linux, and the BSDs.
+- Improved data compression.
+- Support for the 'Comper' and 'Kosinski' compression formats.
+- Produces optimised Dynamic Pattern Load Cue (DPLC) data.
+- Support for the 'MapMacros' format of mappings and DPLCs.
+- Improved colour matching when importing sprites.
+- Free/libre and open source software.
+
+## Screenshot
 
 ![Screenshot](/screenshot.png)
