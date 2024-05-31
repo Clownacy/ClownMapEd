@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <array>
 #include <cstddef>
+#include <filesystem>
 #include <istream>
 
 #include <QColor>
@@ -44,7 +45,7 @@ public:
 		emit pixmapsChanged();
 	}
 
-	void loadTilesFromFile(const char* const file_path, libsonassmd::Tiles::Format format)
+	void loadTilesFromFile(const std::filesystem::path &file_path, libsonassmd::Tiles::Format format)
 	{
 		tiles.fromFile(file_path, format);
 

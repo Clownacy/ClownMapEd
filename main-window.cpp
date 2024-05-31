@@ -203,7 +203,7 @@ MainWindow::MainWindow(QWidget* const parent)
 
 		try
 		{
-			tile_manager.loadTilesFromFile(file_path.toStdString().c_str(), format);
+			tile_manager.loadTilesFromFile(file_path.toStdString(), format);
 		}
 		catch (const std::exception &e)
 		{
@@ -296,7 +296,7 @@ MainWindow::MainWindow(QWidget* const parent)
 
 				try
 				{
-					new_mappings.fromFile(file_path.toStdString().c_str(), is_assembly_file_path(file_path) ? SpriteMappings::Format::ASSEMBLY : SpriteMappings::Format::BINARY);
+					new_mappings.fromFile(file_path.toStdString(), is_assembly_file_path(file_path) ? SpriteMappings::Format::ASSEMBLY : SpriteMappings::Format::BINARY);
 				}
 				catch (const std::exception &e)
 				{
@@ -327,7 +327,7 @@ MainWindow::MainWindow(QWidget* const parent)
 				{
 					DynamicPatternLoadCues dplc;
 
-					dplc.fromFile(file_path.toStdString().c_str(), is_assembly_file_path(file_path) ? DynamicPatternLoadCues::Format::ASSEMBLY : DynamicPatternLoadCues::Format::BINARY);
+					dplc.fromFile(file_path.toStdString(), is_assembly_file_path(file_path) ? DynamicPatternLoadCues::Format::ASSEMBLY : DynamicPatternLoadCues::Format::BINARY);
 
 					if (!sprite_mappings_copy.applyDPLCs(dplc))
 					{
@@ -492,7 +492,7 @@ MainWindow::MainWindow(QWidget* const parent)
 			}
 			else
 			{
-				tiles.toFile(file_path.toStdString().c_str(), format);
+				tiles.toFile(file_path.toStdString(), format);
 			}
 		}
 		catch (const std::exception &e)
