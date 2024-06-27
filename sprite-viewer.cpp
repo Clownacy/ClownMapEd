@@ -5,7 +5,6 @@
 
 #include "sprite-frame.h"
 #include "sprite-piece.h"
-#include "utilities.h"
 
 SpriteViewer::SpriteViewer(const TileManager &tile_manager, const SignalWrapper<SpriteMappings> &sprite_mappings)
 	: sprite_mappings(*sprite_mappings)

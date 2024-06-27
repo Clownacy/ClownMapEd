@@ -1,7 +1,5 @@
 #include "tile-viewer.h"
 
-#include <cstddef>
-
 #include <QtGlobal>
 #include <QMouseEvent>
 #include <QPainter>
