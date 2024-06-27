@@ -6,7 +6,7 @@
 #include <QVBoxLayout>
 
 #include "about.h"
-#include "licence.h"
+#include "licences.h"
 #include "palette.h"
 #include "palette-editor.h"
 #include "signal-wrapper.h"
