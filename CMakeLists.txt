@@ -30,7 +30,7 @@ set(PROJECT_SOURCES
 	"libsonassmd.h"
 	"licences.cpp"
 	"licences.h"
-	"licence.ui"
+	"licences.ui"
 	"main.cpp"
 	"main-window.cpp"
 	"main-window.h"

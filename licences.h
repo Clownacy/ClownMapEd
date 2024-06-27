@@ -1,10 +1,10 @@
-#ifndef LICENCE_H
-#define LICENCE_H
+#ifndef LICENCES_H
+#define LICENCES_H
 
 #include <QDialog>
 
 namespace Ui {
-class Licence;
+class Licences;
 }
 
 class Licence : public QDialog
@@ -16,7 +16,7 @@ public:
 	~Licence();
 
 private:
-	Ui::Licence *ui;
+	Ui::Licences *ui;
 };
 
 #endif // LICENCE_H
