@@ -4,15 +4,15 @@
 #include <algorithm>
 #include <array>
 #include <cstddef>
-#include <filesystem>
 #include <istream>
 
 #include <QColor>
+#include <QFile>
 #include <QObject>
 #include <QPixmap>
 #include <QVector>
 
-#include "libsonassmd/tiles.h"
+#include "libsonassmd.h"
 
 #include "palette.h"
 #include "signal-wrapper.h"
@@ -45,9 +45,9 @@ public:
 		emit pixmapsChanged();
 	}
 
-	void loadTilesFromFile(const std::filesystem::path &file_path, libsonassmd::Tiles::Format format)
+	void loadTilesFromFile(const QString &file_path, libsonassmd::Tiles::Format format)
 	{
-		tiles.fromFile(file_path, format);
+		tiles.fromFile(file_path.toStdString(), format);
 
 		tile_pixmaps.resize(tiles.size()); // TODO: Reserve instead?
 
@@ -91,7 +91,7 @@ private:
 	const Palette &palette;
 
 	std::array<QPixmap, static_cast<std::size_t>(PixmapType::MAX)> invalid_tile_pixmaps;
-	libsonassmd::Tiles tiles;
+	Tiles tiles;
 	QVector<std::array<std::array<QPixmap, static_cast<std::size_t>(PixmapType::MAX)>, Palette::TOTAL_LINES>> tile_pixmaps;
 };
 

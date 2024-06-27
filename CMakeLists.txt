@@ -27,6 +27,7 @@ set(PROJECT_SOURCES
 	"data-stream.h"
 	"dynamic-pattern-load-cues.cpp"
 	"dynamic-pattern-load-cues.h"
+	"libsonassmd.h"
 	"licence.cpp"
 	"licence.h"
 	"licence.ui"
