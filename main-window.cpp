@@ -868,6 +868,50 @@ MainWindow::MainWindow(QWidget* const parent)
 		}
 	);
 
+	//////////////////////////////
+	// Menubar: File/Load State //
+	//////////////////////////////
+
+#define DO_LOAD_STATE_BUTTON(NUMBER) \
+	connect(ui->actionLoad_Backup_##NUMBER, &QAction::triggered, this, \
+		[this]() \
+		{ \
+			LoadState(NUMBER); \
+		} \
+	);
+	DO_LOAD_STATE_BUTTON(1);
+	DO_LOAD_STATE_BUTTON(2);
+	DO_LOAD_STATE_BUTTON(3);
+	DO_LOAD_STATE_BUTTON(4);
+	DO_LOAD_STATE_BUTTON(5);
+	DO_LOAD_STATE_BUTTON(6);
+	DO_LOAD_STATE_BUTTON(7);
+	DO_LOAD_STATE_BUTTON(8);
+	DO_LOAD_STATE_BUTTON(9);
+#undef DO_LOAD_STATE_BUTTON
+
+	//////////////////////////////
+	// Menubar: File/Save State //
+	//////////////////////////////
+
+#define DO_SAVE_STATE_BUTTON(NUMBER) \
+	connect(ui->actionSave_Backup_##NUMBER, &QAction::triggered, this, \
+		[this]() \
+		{ \
+			SaveState(NUMBER); \
+		} \
+	);
+	DO_SAVE_STATE_BUTTON(1);
+	DO_SAVE_STATE_BUTTON(2);
+	DO_SAVE_STATE_BUTTON(3);
+	DO_SAVE_STATE_BUTTON(4);
+	DO_SAVE_STATE_BUTTON(5);
+	DO_SAVE_STATE_BUTTON(6);
+	DO_SAVE_STATE_BUTTON(7);
+	DO_SAVE_STATE_BUTTON(8);
+	DO_SAVE_STATE_BUTTON(9);
+#undef DO_SAVE_STATE_BUTTON
+
 	//////////////////////////
 	// Menubar: Edit/Sprite //
 	//////////////////////////

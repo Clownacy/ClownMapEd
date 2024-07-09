@@ -102,6 +102,34 @@
      </property>
      <addaction name="actionImport_Sprite_over_Active_Frame"/>
     </widget>
+    <widget class="QMenu" name="menuLoad_State">
+     <property name="title">
+      <string>Load State</string>
+     </property>
+     <addaction name="actionLoad_Backup_1"/>
+     <addaction name="actionLoad_Backup_2"/>
+     <addaction name="actionLoad_Backup_3"/>
+     <addaction name="actionLoad_Backup_4"/>
+     <addaction name="actionLoad_Backup_5"/>
+     <addaction name="actionLoad_Backup_6"/>
+     <addaction name="actionLoad_Backup_7"/>
+     <addaction name="actionLoad_Backup_8"/>
+     <addaction name="actionLoad_Backup_9"/>
+    </widget>
+    <widget class="QMenu" name="menuSave_State">
+     <property name="title">
+      <string>Save State</string>
+     </property>
+     <addaction name="actionSave_Backup_1"/>
+     <addaction name="actionSave_Backup_2"/>
+     <addaction name="actionSave_Backup_3"/>
+     <addaction name="actionSave_Backup_4"/>
+     <addaction name="actionSave_Backup_5"/>
+     <addaction name="actionSave_Backup_6"/>
+     <addaction name="actionSave_Backup_7"/>
+     <addaction name="actionSave_Backup_8"/>
+     <addaction name="actionSave_Backup_9"/>
+    </widget>
     <addaction name="menuLoad_Data_File"/>
     <addaction name="menu_Save_Data_File"/>
     <addaction name="menuUnload_Data"/>
@@ -109,8 +137,10 @@
     <addaction name="menuLoad_from_Image"/>
     <addaction name="menuSave_to_Image"/>
     <addaction name="separator"/>
-    <addaction name="actionExit"/>
+    <addaction name="menuLoad_State"/>
+    <addaction name="menuSave_State"/>
     <addaction name="separator"/>
+    <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -968,6 +998,150 @@
    </property>
    <property name="toolTip">
     <string>Create mappings and DPLCs without macros nor local labels, for compatibility with old disassemblies</string>
+   </property>
+  </action>
+  <action name="actionLoad_Backup_1">
+   <property name="text">
+    <string>Load Backup 1</string>
+   </property>
+   <property name="shortcut">
+    <string>F1</string>
+   </property>
+  </action>
+  <action name="actionLoad_Backup_2">
+   <property name="text">
+    <string>Load Backup 2</string>
+   </property>
+   <property name="shortcut">
+    <string>F2</string>
+   </property>
+  </action>
+  <action name="actionLoad_Backup_3">
+   <property name="text">
+    <string>Load Backup 3</string>
+   </property>
+   <property name="shortcut">
+    <string>F3</string>
+   </property>
+  </action>
+  <action name="actionLoad_Backup_4">
+   <property name="text">
+    <string>Load Backup 4</string>
+   </property>
+   <property name="shortcut">
+    <string>F4</string>
+   </property>
+  </action>
+  <action name="actionLoad_Backup_5">
+   <property name="text">
+    <string>Load Backup 5</string>
+   </property>
+   <property name="shortcut">
+    <string>F5</string>
+   </property>
+  </action>
+  <action name="actionLoad_Backup_6">
+   <property name="text">
+    <string>Load Backup 6</string>
+   </property>
+   <property name="shortcut">
+    <string>F6</string>
+   </property>
+  </action>
+  <action name="actionLoad_Backup_7">
+   <property name="text">
+    <string>Load Backup 7</string>
+   </property>
+   <property name="shortcut">
+    <string>F7</string>
+   </property>
+  </action>
+  <action name="actionLoad_Backup_8">
+   <property name="text">
+    <string>Load Backup 8</string>
+   </property>
+   <property name="shortcut">
+    <string>F8</string>
+   </property>
+  </action>
+  <action name="actionLoad_Backup_9">
+   <property name="text">
+    <string>Load Backup 9</string>
+   </property>
+   <property name="shortcut">
+    <string>F9</string>
+   </property>
+  </action>
+  <action name="actionSave_Backup_1">
+   <property name="text">
+    <string>Save Backup 1</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+F1</string>
+   </property>
+  </action>
+  <action name="actionSave_Backup_2">
+   <property name="text">
+    <string>Save Backup 2</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+F2</string>
+   </property>
+  </action>
+  <action name="actionSave_Backup_3">
+   <property name="text">
+    <string>Save Backup 3</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+F3</string>
+   </property>
+  </action>
+  <action name="actionSave_Backup_4">
+   <property name="text">
+    <string>Save Backup 4</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+F4</string>
+   </property>
+  </action>
+  <action name="actionSave_Backup_5">
+   <property name="text">
+    <string>Save Backup 5</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+F5</string>
+   </property>
+  </action>
+  <action name="actionSave_Backup_6">
+   <property name="text">
+    <string>Save Backup 6</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+F6</string>
+   </property>
+  </action>
+  <action name="actionSave_Backup_7">
+   <property name="text">
+    <string>Save Backup 7</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+F7</string>
+   </property>
+  </action>
+  <action name="actionSave_Backup_8">
+   <property name="text">
+    <string>Save Backup 8</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+F8</string>
+   </property>
+  </action>
+  <action name="actionSave_Backup_9">
+   <property name="text">
+    <string>Save Backup 9</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+F9</string>
    </property>
   </action>
  </widget>
