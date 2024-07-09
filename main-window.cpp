@@ -51,7 +51,7 @@ MainWindow::MainWindow(QWidget* const parent)
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 	// Make libsonassmd::Game compatible with QSettings.
-	// Qt6 does this by automatically.
+	// Qt6 does this automatically.
 	qRegisterMetaTypeStreamOperators<libsonassmd::Game>("libsonassmd::Game");
 #endif
 
