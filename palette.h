@@ -46,9 +46,10 @@ struct Palette
 	static constexpr int TOTAL_LINES = 4;
 	static constexpr int COLOURS_PER_LINE = Line::TOTAL_COLOURS;
 
+	Palette() {reset();}
 	void reset();
-	void toDataStream(DataStream &stream, int starting_palette_line, int ending_palette_line) const;
-	void fromDataStream(DataStream &stream, int starting_palette_line);
+	void toDataStream(DataStream &stream, int starting_palette_line = 0, int ending_palette_line = TOTAL_LINES) const;
+	void fromDataStream(DataStream &stream, int starting_palette_line = 0);
 
 	std::array<Line, TOTAL_LINES> lines;
 };

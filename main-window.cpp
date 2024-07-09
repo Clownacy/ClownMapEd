@@ -13,6 +13,7 @@
 #include <QKeyEvent>
 #include <QMessageBox>
 #include <QSettings>
+#include <QStandardPaths>
 #include <QTextStream>
 #include <QtMath>
 
@@ -41,12 +42,48 @@ MainWindow::MainWindow(QWidget* const parent)
 
 	QSettings settings;
 
-	palette.modify(
-		[](Palette &palette)
+	// Load the cached assets.
+	// TODO: Instead of manually cleaning-up, give these methods strong exception guarantrees?
+	// TODO: Alternatively, change 'fromFile' and co. to constructors and use assignments.
+	const QString directory = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+	// Load palette.
+	try
+	{
+		QFile file(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/palette.bin");
+		if (file.open(QFile::OpenModeFlag::ReadOnly))
 		{
-			palette.reset();
+			DataStream stream(&file);
+			palette->fromDataStream(stream);
 		}
-	);
+	}
+	catch (...)
+	{
+		palette->reset();
+	}
+	// Load mappings.
+	try
+	{
+		sprite_mappings->fromFile(directory + "/map.asm", libsonassmd::SpriteMappings::Format::ASSEMBLY);
+		sprite_viewer.setSelectedSprite(settings.value("SelectedSpriteIndex", 0).toInt());
+		sprite_viewer.setSelectedPiece(settings.value("SelectedPieceIndex", 0).toInt());
+	}
+	catch (...)
+	{
+		sprite_mappings.modify([](SpriteMappings &sprite_mappings)
+		{
+			sprite_mappings.frames.clear();
+			sprite_mappings.frames.shrink_to_fit();
+		});
+	}
+	// Load tiles.
+	try
+	{
+		tile_manager.loadTilesFromFile(directory + "/tiles.bin", libsonassmd::Tiles::Format::BINARY);
+	}
+	catch (...)
+	{
+		tile_manager.unloadTiles();
+	}
 
 	horizontal_layout.addWidget(&sprite_piece_picker);
 	horizontal_layout.addWidget(&palette_editor);
@@ -583,9 +620,7 @@ MainWindow::MainWindow(QWidget* const parent)
 			QMessageBox::critical(this, "Error", "Failed to save file: file could not be opened for writing.");
 
 		DataStream stream(&file);
-
-		for (int i = starting_palette_line; i < ending_palette_line; ++i)
-			palette->lines[i].toDataStream(stream);
+		palette->toDataStream(stream, starting_palette_line, ending_palette_line);
 	};
 
 	connect(ui->actionSave_Primary_Palette_Line, &QAction::triggered, this,
@@ -1692,6 +1727,19 @@ MainWindow::~MainWindow()
 	settings.setValue("StartingPaletteLine", tile_viewer.paletteLine());
 	settings.setValue("PatternLoadCues", ui->actionPattern_Load_Cues->isChecked());
 	settings.setValue("LegacyAssemblyFormats", !libsonassmd::mapmacros);
+	settings.setValue("SelectedSpriteIndex", sprite_viewer.selected_sprite_index());
+	settings.setValue("SelectedPieceIndex", sprite_viewer.selected_piece_index());
+
+	const QString directory = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+	QDir().mkpath(directory);
+	QFile file(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/palette.bin");
+	if (file.open(QFile::OpenModeFlag::WriteOnly))
+	{
+		DataStream stream(&file);
+		palette->toDataStream(stream);
+	}
+	sprite_mappings->toFile(directory + "/map.asm", libsonassmd::SpriteMappings::Format::ASSEMBLY);
+	tile_manager.getTiles().toFile(directory + "/tiles.bin", libsonassmd::Tiles::Format::BINARY);
 
 	delete ui;
 }
