@@ -20,6 +20,13 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
+// Make libsonassmd::Game compatible with QSettings.
+namespace libsonassmd {
+	Q_NAMESPACE
+	Q_ENUM_NS(Game)
+}
+Q_DECLARE_METATYPE(libsonassmd::Game)
+
 class MainWindow : public QMainWindow
 {
 	Q_OBJECT

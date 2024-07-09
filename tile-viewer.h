@@ -24,6 +24,11 @@ public:
 		update();
 	}
 
+	int paletteLine() const
+	{
+		return palette_line;
+	}
+
 	void setPaletteLine(const int palette_line)
 	{
 		this->palette_line = palette_line;

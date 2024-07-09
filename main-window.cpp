@@ -1,5 +1,5 @@
 #include "main-window.h"
-#include "./ui_main-window.h"
+#include "ui_main-window.h"
 
 #include <fstream>
 #include <sstream>
@@ -12,6 +12,7 @@
 #include <QFileDialog>
 #include <QKeyEvent>
 #include <QMessageBox>
+#include <QSettings>
 #include <QTextStream>
 #include <QtMath>
 
@@ -31,6 +32,14 @@ MainWindow::MainWindow(QWidget* const parent)
     , tile_viewer(tile_manager)
 {
 	ui->setupUi(this);
+
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+	// Make libsonassmd::Game compatible with QSettings.
+	// Qt6 does this by automatically.
+	qRegisterMetaTypeStreamOperators<libsonassmd::Game>("libsonassmd::Game");
+#endif
+
+	QSettings settings;
 
 	palette.modify(
 		[](Palette &palette)
@@ -1552,13 +1561,14 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionSonic_2, &QAction::triggered, this, [set_game_format](){set_game_format(libsonassmd::Game::SONIC_2);});
 	connect(ui->actionSonic_3_Knuckles, &QAction::triggered, this, [set_game_format](){set_game_format(libsonassmd::Game::SONIC_3_AND_KNUCKLES);});
 
-	set_game_format(libsonassmd::Game::SONIC_1);
+	set_game_format(settings.value("GameFormat", QVariant::fromValue(libsonassmd::Game::SONIC_1)).value<libsonassmd::Game>());
 
 	//////////////////////////////////////
 	// Menubar: Settings/Tile Rendering //
 	//////////////////////////////////////
 
 	connect(ui->actionHide_Duplicated_Tiles_in_Frames, &QAction::triggered, &sprite_viewer, &SpriteViewer::setHideDuplicateTiles);
+	ui->actionHide_Duplicated_Tiles_in_Frames->setChecked(settings.value("HideDuplicatedTilesInFrames", false).toBool());
 
 	const auto set_starting_palette_line = [this](const int line)
 	{
@@ -1577,31 +1587,28 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionRender_Starting_with_Palette_Line_3, &QAction::triggered, this, [set_starting_palette_line](){set_starting_palette_line(2);});
 	connect(ui->actionRender_Starting_with_Palette_Line_4, &QAction::triggered, this, [set_starting_palette_line](){set_starting_palette_line(3);});
 
-	set_starting_palette_line(0);
+	set_starting_palette_line(settings.value("StartingPaletteLine", 0).toInt());
 
 	///////////////////////
 	// Menubar: Settings //
 	///////////////////////
 
-	const auto set_pattern_load_cues_enabled = [this, update_title]()
+	const auto set_pattern_load_cues_enabled = [this, update_title](const bool enabled)
 	{
-		const bool enabled = ui->actionPattern_Load_Cues->isChecked();
 		ui->actionSave_Pattern_Cues->setEnabled(enabled);
 		update_title();
 	};
 
-	connect(ui->actionPattern_Load_Cues, &QAction::changed, this, set_pattern_load_cues_enabled);
+	connect(ui->actionPattern_Load_Cues, &QAction::toggled, this, set_pattern_load_cues_enabled);
+	ui->actionPattern_Load_Cues->setChecked(settings.value("PatternLoadCues", false).toBool());
 
-	set_pattern_load_cues_enabled();
-
-	const auto set_legacy_assembly_formats_enabled = [this]()
+	const auto set_legacy_assembly_formats_enabled = [](const bool enabled)
 	{
-		libsonassmd::mapmacros = !ui->actionLegacyFormats->isChecked();
+		libsonassmd::mapmacros = !enabled;
 	};
 
-	connect(ui->actionLegacyFormats, &QAction::changed, this, set_legacy_assembly_formats_enabled);
-
-	set_legacy_assembly_formats_enabled();
+	connect(ui->actionLegacyFormats, &QAction::toggled, this, set_legacy_assembly_formats_enabled);
+	ui->actionLegacyFormats->setChecked(settings.value("LegacyAssemblyFormats", false).toBool());
 
 	///////////////////
 	// Menubar: Help //
@@ -1679,5 +1686,12 @@ MainWindow::MainWindow(QWidget* const parent)
 
 MainWindow::~MainWindow()
 {
+	QSettings settings;
+	settings.setValue("GameFormat", QVariant::fromValue(libsonassmd::game));
+	settings.setValue("HideDuplicatedTilesInFrames", ui->actionHide_Duplicated_Tiles_in_Frames->isChecked());
+	settings.setValue("StartingPaletteLine", tile_viewer.paletteLine());
+	settings.setValue("PatternLoadCues", ui->actionPattern_Load_Cues->isChecked());
+	settings.setValue("LegacyAssemblyFormats", !libsonassmd::mapmacros);
+
 	delete ui;
 }
