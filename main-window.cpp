@@ -76,7 +76,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	//////////////////////////
 
 	ui->actionLoad_Backup_1->setShortcuts({QKeySequence("F1"), QKeySequence("Ctrl+L")});
-	ui->actionSave_Backup_1->setShortcuts({QKeySequence("Shift-F1"), QKeySequence("Ctrl+S")});
+	ui->actionSave_Backup_1->setShortcuts({QKeySequence("Shift+F1"), QKeySequence("Ctrl+S")});
 
 	/* I would use 7,8/9,0 instead of 6,7/8,9, but Windows has this dumbass anti-feature that disallows Shift+0 to ever be used. */
 	ui->actionPrevious_Sprite->setShortcuts({QKeySequence("8"), QKeySequence("[")});
