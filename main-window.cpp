@@ -339,20 +339,18 @@ MainWindow::MainWindow(QWidget* const parent)
 
 				try
 				{
-					new_mappings.fromFile(file_path, is_assembly_file_path(file_path) ? SpriteMappings::Format::ASSEMBLY : SpriteMappings::Format::BINARY);
+					sprite_mappings.modify(
+						[&file_path, &is_assembly_file_path](SpriteMappings &mappings)
+						{
+							mappings = SpriteMappings(file_path, is_assembly_file_path(file_path) ? SpriteMappings::Format::ASSEMBLY : SpriteMappings::Format::BINARY);;
+						}
+					);
 				}
 				catch (const std::exception &e)
 				{
 					QMessageBox::critical(this, "Error", QStringLiteral("Failed to load file. Exception details: ") + e.what());
 					return;
 				}
-
-				sprite_mappings.modify(
-					[&new_mappings](SpriteMappings &mappings)
-					{
-						mappings = std::move(new_mappings);
-					}
-				);
 
 				sprite_viewer.setSelectedSprite(0);
 			}
@@ -364,32 +362,22 @@ MainWindow::MainWindow(QWidget* const parent)
 		load_asm_or_bin_file(file_path,
 			[this, is_assembly_file_path](const QString &file_path)
 			{
-				SpriteMappings sprite_mappings_copy = *sprite_mappings;
-
 				try
 				{
-					DynamicPatternLoadCues dplc;
+					DynamicPatternLoadCues dplc(file_path, is_assembly_file_path(file_path) ? DynamicPatternLoadCues::Format::ASSEMBLY : DynamicPatternLoadCues::Format::BINARY);
 
-					dplc.fromFile(file_path, is_assembly_file_path(file_path) ? DynamicPatternLoadCues::Format::ASSEMBLY : DynamicPatternLoadCues::Format::BINARY);
-
-					if (!sprite_mappings_copy.applyDPLCs(dplc))
-					{
-						QMessageBox::critical(this, "Error", "Failed to load file: these cues are not compatible with the loaded mappings.");
-						return;
-					}
+					sprite_mappings.modify(
+						[&dplc](SpriteMappings &mappings)
+						{
+							mappings = SpriteMappings(mappings, dplc);
+						}
+					);
 				}
 				catch (const std::exception &e)
 				{
 					QMessageBox::critical(this, "Error", QStringLiteral("Failed to load file. Exception details: ") + e.what());
 					return;
 				}
-
-				sprite_mappings.modify(
-					[&sprite_mappings_copy](SpriteMappings &mappings)
-					{
-						mappings = sprite_mappings_copy;
-					}
-				);
 
 				sprite_viewer.setSelectedSprite(sprite_viewer.selected_sprite_index());
 
