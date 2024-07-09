@@ -47,44 +47,41 @@ MainWindow::MainWindow(QWidget* const parent)
 	// TODO: Alternatively, change 'fromFile' and co. to constructors and use assignments.
 	const QString directory = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
 	// Load palette.
-	try
+	palette.modify([](Palette &palette)
 	{
-		QFile file(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/palette.bin");
-		if (file.open(QFile::OpenModeFlag::ReadOnly))
+		try
 		{
-			DataStream stream(&file);
-			palette->fromDataStream(stream);
+			QFile file(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/palette.bin");
+			if (file.open(QFile::OpenModeFlag::ReadOnly))
+			{
+				DataStream stream(&file);
+				palette.fromDataStream(stream);
+			}
 		}
-	}
-	catch (...)
-	{
-		palette->reset();
-	}
+		catch (...)
+		{
+			palette.reset();
+		}
+	});
 	// Load mappings.
 	try
 	{
-		sprite_mappings->fromFile(directory + "/map.asm", libsonassmd::SpriteMappings::Format::ASSEMBLY);
+		sprite_mappings.modify([&directory](SpriteMappings &sprite_mappings)
+		{
+			sprite_mappings = SpriteMappings(directory + "/map.asm", SpriteMappings::Format::ASSEMBLY);
+		});
 		sprite_viewer.setSelectedSprite(settings.value("SelectedSpriteIndex", 0).toInt());
 		sprite_viewer.setSelectedPiece(settings.value("SelectedPieceIndex", 0).toInt());
 	}
-	catch (...)
-	{
-		sprite_mappings.modify([](SpriteMappings &sprite_mappings)
-		{
-			sprite_mappings.frames.clear();
-			sprite_mappings.frames.shrink_to_fit();
-		});
-	}
+	catch (...) {}
 	// Load tiles.
 	try
 	{
-		tile_manager.loadTilesFromFile(directory + "/tiles.bin", libsonassmd::Tiles::Format::BINARY);
+		tile_manager.loadTilesFromFile(directory + "/tiles.bin", Tiles::Format::BINARY);
 	}
-	catch (...)
-	{
-		tile_manager.unloadTiles();
-	}
+	catch (...) {}
 
+	// Set-up the window's contents.
 	horizontal_layout.addWidget(&sprite_piece_picker);
 	horizontal_layout.addWidget(&palette_editor);
 	horizontal_layout.addWidget(&sprite_viewer);

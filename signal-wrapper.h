@@ -15,17 +15,9 @@ template<typename T>
 class SignalWrapper : public SignalWrapperBase
 {
 public:
-	T* operator->()
-	{
-		return &data;
-	}
 	const T* operator->() const
 	{
 		return &data;
-	}
-	T& operator*()
-	{
-		return data;
 	}
 	const T& operator*() const
 	{
