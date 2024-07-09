@@ -23,6 +23,21 @@
 #include "sprite-frame.h"
 #include "utilities.h"
 
+static QString GetSlotPrefix(const int slot)
+{
+	return QStringLiteral("Slot") + QString::number(slot);
+}
+
+static QString GetSlotDirectory(const int slot)
+{
+	return QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + GetSlotPrefix(slot) + '/';
+}
+
+static bool StateExists(const int slot)
+{
+	return QDir().exists(GetSlotDirectory(slot) + "tiles.bin");
+}
+
 MainWindow::MainWindow(QWidget* const parent)
 	: QMainWindow(parent)
 	, ui(new Ui::MainWindow)
@@ -59,6 +74,9 @@ MainWindow::MainWindow(QWidget* const parent)
 	//////////////////////////
 	// Additional Shortcuts //
 	//////////////////////////
+
+	ui->actionLoad_Backup_1->setShortcuts({QKeySequence("F1"), QKeySequence("Ctrl+L")});
+	ui->actionSave_Backup_1->setShortcuts({QKeySequence("Shift-F1"), QKeySequence("Ctrl+S")});
 
 	/* I would use 7,8/9,0 instead of 6,7/8,9, but Windows has this dumbass anti-feature that disallows Shift+0 to ever be used. */
 	ui->actionPrevious_Sprite->setShortcuts({QKeySequence("8"), QKeySequence("[")});
@@ -878,7 +896,9 @@ MainWindow::MainWindow(QWidget* const parent)
 		{ \
 			LoadState(NUMBER); \
 		} \
-	);
+	); \
+	ui->actionLoad_Backup_##NUMBER->setDisabled(!StateExists(NUMBER));
+
 	DO_LOAD_STATE_BUTTON(1);
 	DO_LOAD_STATE_BUTTON(2);
 	DO_LOAD_STATE_BUTTON(3);
@@ -1737,16 +1757,6 @@ MainWindow::~MainWindow()
 	delete ui;
 }
 
-static QString GetSlotPrefix(const int slot)
-{
-	return QStringLiteral("Slot") + QString::number(slot);
-}
-
-static QString GetSlotDirectory(const int slot)
-{
-	return QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + GetSlotPrefix(slot) + '/';
-}
-
 void MainWindow::SaveState(const int slot)
 {
 	QSettings settings;
@@ -1765,6 +1775,29 @@ void MainWindow::SaveState(const int slot)
 	}
 	sprite_mappings->toFile(directory + "map.asm", SpriteMappings::Format::ASSEMBLY);
 	tile_manager.getTiles().toFile(directory + "tiles.bin", Tiles::Format::BINARY);
+
+	if (slot != 0)
+	{
+		const auto &slot_from_number = [this](const int slot) constexpr
+		{
+			switch (slot)
+			{
+				case 1: return ui->actionLoad_Backup_1;
+				case 2: return ui->actionLoad_Backup_2;
+				case 3: return ui->actionLoad_Backup_3;
+				case 4: return ui->actionLoad_Backup_4;
+				case 5: return ui->actionLoad_Backup_5;
+				case 6: return ui->actionLoad_Backup_6;
+				case 7: return ui->actionLoad_Backup_7;
+				case 8: return ui->actionLoad_Backup_8;
+				case 9: return ui->actionLoad_Backup_9;
+			}
+
+			throw std::out_of_range("Slot number was not between 1 and 9");
+		};
+
+		slot_from_number(slot)->setDisabled(false);
+	}
 }
 
 void MainWindow::LoadState(const int slot)
