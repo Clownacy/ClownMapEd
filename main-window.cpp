@@ -42,45 +42,6 @@ MainWindow::MainWindow(QWidget* const parent)
 
 	QSettings settings;
 
-	// Load the cached assets.
-	// TODO: Instead of manually cleaning-up, give these methods strong exception guarantrees?
-	// TODO: Alternatively, change 'fromFile' and co. to constructors and use assignments.
-	const QString directory = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-	// Load palette.
-	palette.modify([](Palette &palette)
-	{
-		try
-		{
-			QFile file(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/palette.bin");
-			if (file.open(QFile::OpenModeFlag::ReadOnly))
-			{
-				DataStream stream(&file);
-				palette.fromDataStream(stream);
-			}
-		}
-		catch (...)
-		{
-			palette.reset();
-		}
-	});
-	// Load mappings.
-	try
-	{
-		sprite_mappings.modify([&directory](SpriteMappings &sprite_mappings)
-		{
-			sprite_mappings = SpriteMappings(directory + "/map.asm", SpriteMappings::Format::ASSEMBLY);
-		});
-		sprite_viewer.setSelectedSprite(settings.value("SelectedSpriteIndex", 0).toInt());
-		sprite_viewer.setSelectedPiece(settings.value("SelectedPieceIndex", 0).toInt());
-	}
-	catch (...) {}
-	// Load tiles.
-	try
-	{
-		tile_manager.loadTilesFromFile(directory + "/tiles.bin", Tiles::Format::BINARY);
-	}
-	catch (...) {}
-
 	// Set-up the window's contents.
 	horizontal_layout.addWidget(&sprite_piece_picker);
 	horizontal_layout.addWidget(&palette_editor);
@@ -1613,22 +1574,29 @@ MainWindow::MainWindow(QWidget* const parent)
 	// Menubar: Settings //
 	///////////////////////
 
+	const auto &SetUpCheckBox = [this, &settings](QAction* const action, const std::function<void(bool)> &callback, const QString &setting_key)
+	{
+		connect(action, &QAction::toggled, this, callback);
+		const bool setting_value = settings.value(setting_key, false).toBool();
+		action->setChecked(setting_value);
+		callback(setting_value);
+	};
+
 	const auto set_pattern_load_cues_enabled = [this, update_title](const bool enabled)
 	{
 		ui->actionSave_Pattern_Cues->setEnabled(enabled);
+		ui->actionUnload_Pattern_Cues->setEnabled(enabled);
 		update_title();
 	};
 
-	connect(ui->actionPattern_Load_Cues, &QAction::toggled, this, set_pattern_load_cues_enabled);
-	ui->actionPattern_Load_Cues->setChecked(settings.value("PatternLoadCues", false).toBool());
+	SetUpCheckBox(ui->actionPattern_Load_Cues, set_pattern_load_cues_enabled, "PatternLoadCues");
 
 	const auto set_legacy_assembly_formats_enabled = [](const bool enabled)
 	{
 		libsonassmd::mapmacros = !enabled;
 	};
 
-	connect(ui->actionLegacyFormats, &QAction::toggled, this, set_legacy_assembly_formats_enabled);
-	ui->actionLegacyFormats->setChecked(settings.value("LegacyAssemblyFormats", false).toBool());
+	SetUpCheckBox(ui->actionLegacyFormats, set_legacy_assembly_formats_enabled, "LegacyAssemblyFormats");
 
 	///////////////////
 	// Menubar: Help //
@@ -1636,6 +1604,46 @@ MainWindow::MainWindow(QWidget* const parent)
 
 	connect(ui->actionAbout, &QAction::triggered, &about, &QDialog::show);
 	connect(ui->actionLicences, &QAction::triggered, &licences, &QDialog::show);
+
+	/////////////////////////////
+	// Load the cached assets. //
+	/////////////////////////////
+
+	const QString directory = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+	// Load palette.
+	palette.modify([](Palette &palette)
+	{
+		try
+		{
+			QFile file(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/palette.bin");
+			if (file.open(QFile::OpenModeFlag::ReadOnly))
+			{
+				DataStream stream(&file);
+				palette.fromDataStream(stream);
+			}
+		}
+		catch (...)
+		{
+			palette.reset();
+		}
+	});
+	// Load mappings.
+	try
+	{
+		sprite_mappings.modify([&directory](SpriteMappings &sprite_mappings)
+		{
+			sprite_mappings = SpriteMappings(directory + "/map.asm", SpriteMappings::Format::ASSEMBLY);
+		});
+		sprite_viewer.setSelectedSprite(settings.value("SelectedSpriteIndex", 0).toInt());
+		sprite_viewer.setSelectedPiece(settings.value("SelectedPieceIndex", 0).toInt());
+	}
+	catch (...) {}
+	// Load tiles.
+	try
+	{
+		tile_manager.loadTilesFromFile(directory + "/tiles.bin", Tiles::Format::BINARY);
+	}
+	catch (...) {}
 
 	////////////////////////
 	// Menubar Activation //
@@ -1711,7 +1719,7 @@ MainWindow::~MainWindow()
 	settings.setValue("HideDuplicatedTilesInFrames", ui->actionHide_Duplicated_Tiles_in_Frames->isChecked());
 	settings.setValue("StartingPaletteLine", tile_viewer.paletteLine());
 	settings.setValue("PatternLoadCues", ui->actionPattern_Load_Cues->isChecked());
-	settings.setValue("LegacyAssemblyFormats", !libsonassmd::mapmacros);
+	settings.setValue("LegacyAssemblyFormats", ui->actionLegacyFormats->isChecked());
 	settings.setValue("SelectedSpriteIndex", sprite_viewer.selected_sprite_index());
 	settings.setValue("SelectedPieceIndex", sprite_viewer.selected_piece_index());
 
