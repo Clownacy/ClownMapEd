@@ -48,6 +48,9 @@ private:
 	QHBoxLayout horizontal_layout;
 	About about = About(this);
 	Licence licences = Licence(this);
+
+	void SaveState(int slot);
+	void LoadState(int slot);
 };
 
 #endif // MAIN_WINDOW_H

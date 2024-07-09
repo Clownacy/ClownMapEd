@@ -1609,41 +1609,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	// Load the cached assets. //
 	/////////////////////////////
 
-	const QString directory = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-	// Load palette.
-	palette.modify([](Palette &palette)
-	{
-		try
-		{
-			QFile file(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/palette.bin");
-			if (file.open(QFile::OpenModeFlag::ReadOnly))
-			{
-				DataStream stream(&file);
-				palette.fromDataStream(stream);
-			}
-		}
-		catch (...)
-		{
-			palette.reset();
-		}
-	});
-	// Load mappings.
-	try
-	{
-		sprite_mappings.modify([&directory](SpriteMappings &sprite_mappings)
-		{
-			sprite_mappings = SpriteMappings(directory + "/map.asm", SpriteMappings::Format::ASSEMBLY);
-		});
-		sprite_viewer.setSelectedSprite(settings.value("SelectedSpriteIndex", 0).toInt());
-		sprite_viewer.setSelectedPiece(settings.value("SelectedPieceIndex", 0).toInt());
-	}
-	catch (...) {}
-	// Load tiles.
-	try
-	{
-		tile_manager.loadTilesFromFile(directory + "/tiles.bin", Tiles::Format::BINARY);
-	}
-	catch (...) {}
+	LoadState(0);
 
 	////////////////////////
 	// Menubar Activation //
@@ -1714,25 +1680,87 @@ MainWindow::MainWindow(QWidget* const parent)
 
 MainWindow::~MainWindow()
 {
+	// Save settings.
 	QSettings settings;
 	settings.setValue("GameFormat", QVariant::fromValue(libsonassmd::game));
 	settings.setValue("HideDuplicatedTilesInFrames", ui->actionHide_Duplicated_Tiles_in_Frames->isChecked());
 	settings.setValue("StartingPaletteLine", tile_viewer.paletteLine());
 	settings.setValue("PatternLoadCues", ui->actionPattern_Load_Cues->isChecked());
 	settings.setValue("LegacyAssemblyFormats", ui->actionLegacyFormats->isChecked());
-	settings.setValue("SelectedSpriteIndex", sprite_viewer.selected_sprite_index());
-	settings.setValue("SelectedPieceIndex", sprite_viewer.selected_piece_index());
 
-	const QString directory = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+	SaveState(0);
+
+	delete ui;
+}
+
+static QString GetSlotPrefix(const int slot)
+{
+	return QStringLiteral("Slot") + QString::number(slot);
+}
+
+static QString GetSlotDirectory(const int slot)
+{
+	return QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + GetSlotPrefix(slot) + '/';
+}
+
+void MainWindow::SaveState(const int slot)
+{
+	QSettings settings;
+	const QString prefix = GetSlotPrefix(slot);
+	settings.setValue(prefix + "SelectedSpriteIndex", sprite_viewer.selected_sprite_index());
+	settings.setValue(prefix + "SelectedPieceIndex", sprite_viewer.selected_piece_index());
+
+	// Save cached assets.
+	const QString directory = GetSlotDirectory(slot);
 	QDir().mkpath(directory);
-	QFile file(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/palette.bin");
+	QFile file(directory + "palette.bin");
 	if (file.open(QFile::OpenModeFlag::WriteOnly))
 	{
 		DataStream stream(&file);
 		palette->toDataStream(stream);
 	}
-	sprite_mappings->toFile(directory + "/map.asm", libsonassmd::SpriteMappings::Format::ASSEMBLY);
-	tile_manager.getTiles().toFile(directory + "/tiles.bin", libsonassmd::Tiles::Format::BINARY);
+	sprite_mappings->toFile(directory + "map.asm", libsonassmd::SpriteMappings::Format::ASSEMBLY);
+	tile_manager.getTiles().toFile(directory + "tiles.bin", libsonassmd::Tiles::Format::BINARY);
+}
 
-	delete ui;
+void MainWindow::LoadState(const int slot)
+{
+	QSettings settings;
+	const QString directory = GetSlotDirectory(slot);
+
+	// Load palette.
+	palette.modify([&directory](Palette &palette)
+	{
+		try
+		{
+			QFile file(directory + "palette.bin");
+			if (file.open(QFile::OpenModeFlag::ReadOnly))
+			{
+				DataStream stream(&file);
+				palette.fromDataStream(stream);
+			}
+		}
+		catch (...)
+		{
+			palette.reset();
+		}
+	});
+	// Load mappings.
+	try
+	{
+		sprite_mappings.modify([&directory](SpriteMappings &sprite_mappings)
+		{
+			sprite_mappings = SpriteMappings(directory + "map.asm", SpriteMappings::Format::ASSEMBLY);
+		});
+		const QString prefix = GetSlotPrefix(slot);
+		sprite_viewer.setSelectedSprite(settings.value(prefix + "SelectedSpriteIndex", 0).toInt());
+		sprite_viewer.setSelectedPiece(settings.value(prefix + "SelectedPieceIndex", 0).toInt());
+	}
+	catch (...) {}
+	// Load tiles.
+	try
+	{
+		tile_manager.loadTilesFromFile(directory + "tiles.bin", Tiles::Format::BINARY);
+	}
+	catch (...) {}
 }
