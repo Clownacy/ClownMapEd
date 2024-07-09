@@ -200,7 +200,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	// Menubar: File/Load Data File //
 	//////////////////////////////////
 
-	const auto load_tile_file = [this](const QString &file_path, const libsonassmd::Tiles::Format format)
+	const auto load_tile_file = [this](const QString &file_path, const Tiles::Format format)
 	{
 		if (file_path.isNull())
 			return;
@@ -220,37 +220,37 @@ MainWindow::MainWindow(QWidget* const parent)
 
 	const auto load_uncompressed_tile_file = [load_tile_file](const QString &file_path)
 	{
-		load_tile_file(file_path, libsonassmd::Tiles::Format::BINARY);
+		load_tile_file(file_path, Tiles::Format::BINARY);
 	};
 
 	const auto load_nemesis_tile_file = [load_tile_file](const QString &file_path)
 	{
-		load_tile_file(file_path, libsonassmd::Tiles::Format::NEMESIS);
+		load_tile_file(file_path, Tiles::Format::NEMESIS);
 	};
 
 	const auto load_kosinski_tile_file = [load_tile_file](const QString &file_path)
 	{
-		load_tile_file(file_path, libsonassmd::Tiles::Format::KOSINSKI);
+		load_tile_file(file_path, Tiles::Format::KOSINSKI);
 	};
 
 	const auto load_moduled_kosinski_tile_file = [load_tile_file](const QString &file_path)
 	{
-		load_tile_file(file_path, libsonassmd::Tiles::Format::MODULED_KOSINSKI);
+		load_tile_file(file_path, Tiles::Format::MODULED_KOSINSKI);
 	};
 
 	const auto load_kosinski_plus_tile_file = [load_tile_file](const QString &file_path)
 	{
-		load_tile_file(file_path, libsonassmd::Tiles::Format::KOSINSKI_PLUS);
+		load_tile_file(file_path, Tiles::Format::KOSINSKI_PLUS);
 	};
 
 	const auto load_moduled_kosinski_plus_tile_file = [load_tile_file](const QString &file_path)
 	{
-		load_tile_file(file_path, libsonassmd::Tiles::Format::MODULED_KOSINSKI_PLUS);
+		load_tile_file(file_path, Tiles::Format::MODULED_KOSINSKI_PLUS);
 	};
 
 	const auto load_comper_tile_file = [load_tile_file](const QString &file_path)
 	{
-		load_tile_file(file_path, libsonassmd::Tiles::Format::COMPER);
+		load_tile_file(file_path, Tiles::Format::COMPER);
 	};
 
 	const auto load_palette_file = [this](const QString &file_path, const int starting_palette_line)
@@ -431,7 +431,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	// Menubar: File/Save Data File //
 	//////////////////////////////////
 
-	const auto save_tile_file = [this, is_assembly_file_path](const QString &compression_name, const QString &file_extension, const libsonassmd::Tiles::Format format)
+	const auto save_tile_file = [this, is_assembly_file_path](const QString &compression_name, const QString &file_extension, const Tiles::Format format)
 	{
 		const QString file_path = QFileDialog::getSaveFileName(this, "Save " + compression_name + " Tile Graphics File", QString(), compression_name + " Tile Graphics Files (*." + file_extension + " *.bin *.asm);;All Files (*.*)", nullptr, QFileDialog::DontConfirmOverwrite);
 
@@ -496,21 +496,21 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionUncompressed, &QAction::triggered, this,
 		[save_tile_file]()
 		{
-			save_tile_file("Uncompressed", "unc", libsonassmd::Tiles::Format::BINARY);
+			save_tile_file("Uncompressed", "unc", Tiles::Format::BINARY);
 		}
 	);
 
 	connect(ui->actionNemesis, &QAction::triggered, this,
 		[save_tile_file]()
 		{
-			save_tile_file("Nemesis-Compressed", "nem", libsonassmd::Tiles::Format::NEMESIS);
+			save_tile_file("Nemesis-Compressed", "nem", Tiles::Format::NEMESIS);
 		}
 	);
 
 	connect(ui->actionKosinski, &QAction::triggered, this,
 		[save_tile_file]()
 		{
-			save_tile_file("Kosinski-Compressed", "kos", libsonassmd::Tiles::Format::KOSINSKI);
+			save_tile_file("Kosinski-Compressed", "kos", Tiles::Format::KOSINSKI);
 		}
 	);
 
@@ -523,14 +523,14 @@ MainWindow::MainWindow(QWidget* const parent)
 				return;
 			}
 
-			save_tile_file("Moduled Kosinski-Compressed", "kosm", libsonassmd::Tiles::Format::MODULED_KOSINSKI);
+			save_tile_file("Moduled Kosinski-Compressed", "kosm", Tiles::Format::MODULED_KOSINSKI);
 		}
 	);
 
 	connect(ui->actionKosinski_2, &QAction::triggered, this,
 		[save_tile_file]()
 		{
-			save_tile_file("Kosinski+-Compressed", "kosp", libsonassmd::Tiles::Format::KOSINSKI_PLUS);
+			save_tile_file("Kosinski+-Compressed", "kosp", Tiles::Format::KOSINSKI_PLUS);
 		}
 	);
 
@@ -543,14 +543,14 @@ MainWindow::MainWindow(QWidget* const parent)
 				return;
 			}
 
-			save_tile_file("Moduled Kosinski+-Compressed", "kospm", libsonassmd::Tiles::Format::MODULED_KOSINSKI_PLUS);
+			save_tile_file("Moduled Kosinski+-Compressed", "kospm", Tiles::Format::MODULED_KOSINSKI_PLUS);
 		}
 	);
 
 	connect(ui->actionComper, &QAction::triggered, this,
 		[save_tile_file]()
 		{
-			save_tile_file("Comper-Compressed", "comp", libsonassmd::Tiles::Format::COMPER);
+			save_tile_file("Comper-Compressed", "comp", Tiles::Format::COMPER);
 		}
 	);
 
@@ -1719,8 +1719,8 @@ void MainWindow::SaveState(const int slot)
 		DataStream stream(&file);
 		palette->toDataStream(stream);
 	}
-	sprite_mappings->toFile(directory + "map.asm", libsonassmd::SpriteMappings::Format::ASSEMBLY);
-	tile_manager.getTiles().toFile(directory + "tiles.bin", libsonassmd::Tiles::Format::BINARY);
+	sprite_mappings->toFile(directory + "map.asm", SpriteMappings::Format::ASSEMBLY);
+	tile_manager.getTiles().toFile(directory + "tiles.bin", Tiles::Format::BINARY);
 }
 
 void MainWindow::LoadState(const int slot)
