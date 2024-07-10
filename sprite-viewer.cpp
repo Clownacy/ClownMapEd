@@ -190,7 +190,7 @@ void SpriteViewer::selectNextPiece()
 {
 	if (!selected_piece_index.has_value())
 		setSelectedPiece(0);
-	else if (*selected_piece_index == totalPiecesInSelectedSprite())
+	else if (*selected_piece_index == totalPiecesInSelectedSprite() - 1)
 		setSelectedPiece(std::nullopt);
 	else
 		setSelectedPiece(*selected_piece_index + 1);
