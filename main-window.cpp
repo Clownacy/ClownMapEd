@@ -1620,10 +1620,10 @@ MainWindow::MainWindow(QWidget* const parent)
 	// Menubar: Settings/Tile Rendering //
 	//////////////////////////////////////
 
-	connect(ui->actionOrient_Tiles_Vertically, &QAction::triggered, &tile_viewer, &TileViewer::setVerticalOrientation);
+	connect(ui->actionOrient_Tiles_Vertically, &QAction::toggled, &tile_viewer, &TileViewer::setVerticalOrientation);
 	ui->actionOrient_Tiles_Vertically->setChecked(settings.value("OrientTilesVertically", false).toBool());
 
-	connect(ui->actionHide_Duplicated_Tiles_in_Frames, &QAction::triggered, &sprite_viewer, &SpriteViewer::setHideDuplicateTiles);
+	connect(ui->actionHide_Duplicated_Tiles_in_Frames, &QAction::toggled, &sprite_viewer, &SpriteViewer::setHideDuplicateTiles);
 	ui->actionHide_Duplicated_Tiles_in_Frames->setChecked(settings.value("HideDuplicatedTilesInFrames", false).toBool());
 
 	const auto set_starting_palette_line = [this](const int line)
