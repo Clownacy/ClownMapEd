@@ -998,7 +998,7 @@ MainWindow::MainWindow(QWidget* const parent)
 			sprite_mappings.modify(
 				[this](SpriteMappings &mappings)
 				{
-					mappings.frames.insert(mappings.frames.cbegin() + (sprite_viewer.selected_sprite_index().value_or(-1) + 1), SpriteFrame());
+					mappings.frames.emplace(mappings.frames.cbegin() + (sprite_viewer.selected_sprite_index().value_or(-1) + 1));
 				}
 			);
 
@@ -1143,7 +1143,7 @@ MainWindow::MainWindow(QWidget* const parent)
 					auto &frames = mappings.frames;
 					auto &pieces = frames[selected_sprite_index].pieces;
 
-					frames.insert(frames.cbegin() + next_sprite_index, SpriteFrame());
+					frames.emplace(frames.cbegin() + next_sprite_index);
 					frames[next_sprite_index].pieces.push_back(pieces[selected_piece_index]);
 					pieces.erase(pieces.cbegin() + selected_piece_index);
 
