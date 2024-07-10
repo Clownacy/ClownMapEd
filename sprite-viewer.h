@@ -17,19 +17,19 @@ class SpriteViewer : public QWidget
 public:
     SpriteViewer(const TileManager &tile_manager, const SignalWrapper<SpriteMappings> &sprite_mappings);
 
-	std::optional<int> selected_sprite_index() const
+	std::optional<int> selectedSpriteIndex() const
 	{
-		return m_selected_sprite_index;
+		return selected_sprite_index;
 	}
 
-	std::optional<int> selected_piece_index() const
+	std::optional<int> selectedPieceIndex() const
 	{
-		return m_selected_piece_index;
+		return selected_piece_index;
 	}
 
-	int starting_palette_line() const
+	int startingPaletteLine() const
 	{
-		return m_starting_palette_line;
+		return starting_palette_line;
 	}
 
 public slots:
@@ -41,13 +41,13 @@ public slots:
 
 	void setStartingPaletteLine(const int palette_line)
 	{
-		m_starting_palette_line = palette_line;
+		starting_palette_line = palette_line;
 		update();
 	}
 
 	void setHideDuplicateTiles(const bool enabled)
 	{
-		m_hide_duplicate_tiles = enabled;
+		hide_duplicate_tiles = enabled;
 		update();
 	}
 
@@ -58,16 +58,16 @@ protected:
 	void paintEvent(QPaintEvent *event) override;
 
 private:
-	std::optional<int> m_selected_sprite_index;
-	std::optional<int> m_selected_piece_index;
-	int m_starting_palette_line = 0;
-	bool m_hide_duplicate_tiles = false;
+	std::optional<int> selected_sprite_index;
+	std::optional<int> selected_piece_index;
+	int starting_palette_line = 0;
+	bool hide_duplicate_tiles = false;
 	const SpriteMappings &sprite_mappings;
 	const TileManager &tile_manager;
 
 	int totalPiecesInSelectedSprite() const
 	{
-		return static_cast<int>(sprite_mappings.frames[m_selected_sprite_index.value()].pieces.size());
+		return static_cast<int>(sprite_mappings.frames[selected_sprite_index.value()].pieces.size());
 	}
 };
 

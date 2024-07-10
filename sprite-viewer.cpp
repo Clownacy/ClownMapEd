@@ -18,9 +18,9 @@ SpriteViewer::SpriteViewer(const TileManager &tile_manager, const SignalWrapper<
 		[this]()
 		{
 			if (this->sprite_mappings.frames.size() == 0)
-				m_selected_sprite_index = std::nullopt;
+				selected_sprite_index = std::nullopt;
 			else
-				m_selected_sprite_index = !m_selected_sprite_index.has_value() ? 0 : qBound(0, m_selected_sprite_index.value(), static_cast<int>(this->sprite_mappings.frames.size() - 1));
+				selected_sprite_index = !selected_sprite_index.has_value() ? 0 : qBound(0, selected_sprite_index.value(), static_cast<int>(this->sprite_mappings.frames.size() - 1));
 
 			update();
 		}
@@ -40,14 +40,14 @@ void SpriteViewer::paintEvent(QPaintEvent* const event)
 
 	const std::vector<SpriteFrame> &frames = sprite_mappings.frames;
 
-	if (!m_selected_sprite_index.has_value())
+	if (!selected_sprite_index.has_value())
 		return;
 
 	//////////////////////////////////////////
 	// Draw outline around selected sprite. //
 	//////////////////////////////////////////
 
-	const SpriteFrame &selected_sprite = frames[*m_selected_sprite_index];
+	const SpriteFrame &selected_sprite = frames[*selected_sprite_index];
 	const QColor background_colour = palette().color(QPalette::Window);
 
 	QBrush brush;
@@ -60,10 +60,10 @@ void SpriteViewer::paintEvent(QPaintEvent* const event)
 	// Helper to perform an operation using each selected sprite piece.
 	const auto process_selected_pieces = [this](const std::function<void(const SpritePiece &piece)> &callback)
 	{
-		auto &frame = sprite_mappings.frames[*m_selected_sprite_index];
+		auto &frame = sprite_mappings.frames[*selected_sprite_index];
 
-		if (m_selected_piece_index.has_value())
-			callback(frame.pieces[*m_selected_piece_index]);
+		if (selected_piece_index.has_value())
+			callback(frame.pieces[*selected_piece_index]);
 		else
 			for (auto &piece : frame.pieces)
 				callback(piece);
@@ -139,38 +139,38 @@ void SpriteViewer::paintEvent(QPaintEvent* const event)
 	///////////////////
 
 	// Draw selected sprite.
-	if (!m_selected_piece_index.has_value())
-		draw(selected_sprite, painter, m_hide_duplicate_tiles, tile_manager, TileManager::PixmapType::NO_BACKGROUND, m_starting_palette_line);
+	if (!selected_piece_index.has_value())
+		draw(selected_sprite, painter, hide_duplicate_tiles, tile_manager, TileManager::PixmapType::NO_BACKGROUND, starting_palette_line);
 	else
-		draw(selected_sprite, painter, m_hide_duplicate_tiles, tile_manager, TileManager::PixmapType::TRANSPARENT, m_starting_palette_line, 0, 0, std::make_pair(*m_selected_piece_index, TileManager::PixmapType::NO_BACKGROUND));
+		draw(selected_sprite, painter, hide_duplicate_tiles, tile_manager, TileManager::PixmapType::TRANSPARENT, starting_palette_line, 0, 0, std::make_pair(*selected_piece_index, TileManager::PixmapType::NO_BACKGROUND));
 
 	int x_offset;
 
 	// Draw sprites to the left of the selected sprite.
 	x_offset = 0;
 
-	for (uint i = *m_selected_sprite_index; i-- > 0; )
+	for (uint i = *selected_sprite_index; i-- > 0; )
 	{
 		x_offset += qMin(-16, calculateRect(frames[i + 1]).left());
 		x_offset -= calculateRect(frames[i]).right();
-		draw(frames[i], painter, m_hide_duplicate_tiles, tile_manager, TileManager::PixmapType::TRANSPARENT, m_starting_palette_line, x_offset);
+		draw(frames[i], painter, hide_duplicate_tiles, tile_manager, TileManager::PixmapType::TRANSPARENT, starting_palette_line, x_offset);
 	}
 
 	// Draw sprites to the right of the selected sprite.
 	x_offset = 0;
 
-	for (uint i = *m_selected_sprite_index + 1; i < frames.size(); ++i)
+	for (uint i = *selected_sprite_index + 1; i < frames.size(); ++i)
 	{
 		x_offset += qMax(16, calculateRect(frames[i - 1]).right());
 		x_offset -= calculateRect(frames[i]).left();
-		draw(frames[i], painter, m_hide_duplicate_tiles, tile_manager, TileManager::PixmapType::TRANSPARENT, m_starting_palette_line, x_offset);
+		draw(frames[i], painter, hide_duplicate_tiles, tile_manager, TileManager::PixmapType::TRANSPARENT, starting_palette_line, x_offset);
 	}
 }
 
 void SpriteViewer::setSelectedSprite(const std::optional<int> sprite_index)
 {
-	m_selected_sprite_index = !sprite_index.has_value() ? std::optional<int>() : qBound(0, *sprite_index, static_cast<int>(sprite_mappings.frames.size() - 1));
-	m_selected_piece_index = std::nullopt;
+	selected_sprite_index = !sprite_index.has_value() ? std::optional<int>() : qBound(0, *sprite_index, static_cast<int>(sprite_mappings.frames.size() - 1));
+	selected_piece_index = std::nullopt;
 	update();
 
 	emit selectedSpriteChanged();
@@ -180,7 +180,7 @@ void SpriteViewer::setSelectedPiece(const std::optional<int> piece_index)
 {
 	Q_ASSERT(!piece_index.has_value() || (piece_index >= 0 && piece_index < totalPiecesInSelectedSprite()));
 
-	m_selected_piece_index = piece_index;
+	selected_piece_index = piece_index;
 	update();
 
 	emit selectedSpriteChanged();
@@ -188,22 +188,22 @@ void SpriteViewer::setSelectedPiece(const std::optional<int> piece_index)
 
 void SpriteViewer::selectNextPiece()
 {
-	if (!m_selected_piece_index.has_value())
+	if (!selected_piece_index.has_value())
 		setSelectedPiece(0);
-	else if (*m_selected_piece_index == totalPiecesInSelectedSprite())
+	else if (*selected_piece_index == totalPiecesInSelectedSprite())
 		setSelectedPiece(std::nullopt);
 	else
-		setSelectedPiece(*m_selected_piece_index + 1);
+		setSelectedPiece(*selected_piece_index + 1);
 }
 
 void SpriteViewer::selectPreviousPiece()
 {
-	if (!m_selected_piece_index.has_value())
+	if (!selected_piece_index.has_value())
 		setSelectedPiece(totalPiecesInSelectedSprite() - 1);
-	else if (*m_selected_piece_index == 0)
+	else if (*selected_piece_index == 0)
 		setSelectedPiece(std::nullopt);
 	else
-		setSelectedPiece(*m_selected_piece_index - 1);
+		setSelectedPiece(*selected_piece_index - 1);
 }
 
 void SpriteViewer::setBackgroundColour(const QColor &colour)

@@ -127,12 +127,12 @@ MainWindow::MainWindow(QWidget* const parent)
 			{
 				const auto do_frame_or_piece = [this](const std::function<void(const SpritePiece &piece)> &callback)
 				{
-					const auto frame_index = sprite_viewer.selected_sprite_index();
+					const auto frame_index = sprite_viewer.selectedSpriteIndex();
 
 					if (frame_index.has_value())
 					{
 						const auto &frames = sprite_mappings->frames;
-						const auto piece_index = sprite_viewer.selected_piece_index();
+						const auto piece_index = sprite_viewer.selectedPieceIndex();
 
 						if (!piece_index.has_value())
 						{
@@ -173,13 +173,13 @@ MainWindow::MainWindow(QWidget* const parent)
 			sprite_mappings.modify(
 				[this, width, height](SpriteMappings &mappings)
 				{
-					if (!sprite_viewer.selected_sprite_index().has_value())
+					if (!sprite_viewer.selectedSpriteIndex().has_value())
 					{
 						mappings.frames.push_back(SpriteFrame());
 						sprite_viewer.setSelectedSprite(0);
 					}
 
-					auto &pieces = mappings.frames[*sprite_viewer.selected_sprite_index()].pieces;
+					auto &pieces = mappings.frames[*sprite_viewer.selectedSpriteIndex()].pieces;
 					pieces.push_back({0, 0, width, height, false, 0, false, false, sprite_piece_picker.selected_tile()}); // TODO: emplace_back
 					sprite_viewer.setSelectedPiece(pieces.size() - 1);
 					sprite_piece_picker.setSelectedTile(sprite_piece_picker.selected_tile() + width * height);
@@ -200,8 +200,8 @@ MainWindow::MainWindow(QWidget* const parent)
 		};
 
 		const QString format_string = libsonassmd::game == libsonassmd::Game::SONIC_1 ? "S1" : libsonassmd::game == libsonassmd::Game::SONIC_2 ? "S2" : "S3K";
-		const QString frame_string = do_string_thingy("Frame", sprite_viewer.selected_sprite_index(), sprite_mappings->frames.size());
-		const QString piece_string = !sprite_viewer.selected_sprite_index().has_value() ? "" : do_string_thingy("Piece", sprite_viewer.selected_piece_index(), sprite_mappings->frames[*sprite_viewer.selected_sprite_index()].pieces.size());
+		const QString frame_string = do_string_thingy("Frame", sprite_viewer.selectedSpriteIndex(), sprite_mappings->frames.size());
+		const QString piece_string = !sprite_viewer.selectedSpriteIndex().has_value() ? "" : do_string_thingy("Piece", sprite_viewer.selectedPieceIndex(), sprite_mappings->frames[*sprite_viewer.selectedSpriteIndex()].pieces.size());
 		const auto tile = tile_viewer.selection().indexOf(true);
 		const QString tile_string = do_string_thingy("Tile", tile == -1 ? std::optional<int>() : tile, tile_manager.total_tiles());
 		const QString dplc_string = ui->actionPattern_Load_Cues->isChecked() ? " | Cues On" : "";
@@ -360,7 +360,7 @@ MainWindow::MainWindow(QWidget* const parent)
 				}
 
 				// TODO: Is this needed?
-				sprite_viewer.setSelectedSprite(sprite_viewer.selected_sprite_index());
+				sprite_viewer.setSelectedSprite(sprite_viewer.selectedSpriteIndex());
 
 				ui->actionPattern_Load_Cues->setChecked(true);
 			}
@@ -730,7 +730,7 @@ MainWindow::MainWindow(QWidget* const parent)
 			);
 
 			// TODO: Is this line needed?
-			sprite_viewer.setSelectedSprite(sprite_viewer.selected_sprite_index());
+			sprite_viewer.setSelectedSprite(sprite_viewer.selectedSpriteIndex());
 			ui->actionPattern_Load_Cues->setChecked(false);
 		}
 	);
@@ -761,7 +761,7 @@ MainWindow::MainWindow(QWidget* const parent)
 		// Render the sprite onto the image.
 		QPainter painter(&image);
 
-		draw(frame, painter, !render_as_is, tile_manager, render_as_is ? TileManager::PixmapType::NO_BACKGROUND : TileManager::PixmapType::WITH_BACKGROUND, sprite_viewer.starting_palette_line(), -frame_rect.left(), -frame_rect.top());
+		draw(frame, painter, !render_as_is, tile_manager, render_as_is ? TileManager::PixmapType::NO_BACKGROUND : TileManager::PixmapType::WITH_BACKGROUND, sprite_viewer.startingPaletteLine(), -frame_rect.left(), -frame_rect.top());
 
 		return image;
 	};
@@ -782,7 +782,7 @@ MainWindow::MainWindow(QWidget* const parent)
 				return;
 			}
 
-			const SpriteFrame &frame = sprite_mappings->frames[sprite_viewer.selected_sprite_index().value()];
+			const SpriteFrame &frame = sprite_mappings->frames[sprite_viewer.selectedSpriteIndex().value()];
 			const QImage our_image = frame_to_qimage(frame, false);
 
 			if (their_image.size() != our_image.size())
@@ -822,7 +822,7 @@ MainWindow::MainWindow(QWidget* const parent)
 
 								for (uint colour_index = 0; colour_index < Palette::COLOURS_PER_LINE; ++colour_index)
 								{
-									const auto our_colour = Utilities::QColorToLAB(palette->lines[(tile.palette_line + sprite_viewer.starting_palette_line()) % Palette::TOTAL_LINES].colours[colour_index].toQColor224());
+									const auto our_colour = Utilities::QColorToLAB(palette->lines[(tile.palette_line + sprite_viewer.startingPaletteLine()) % Palette::TOTAL_LINES].colours[colour_index].toQColor224());
 
 									CIEDE2000::LAB lab1 = {their_colour[0], their_colour[1], their_colour[2]};
 									CIEDE2000::LAB lab2 = {our_colour[0], our_colour[1], our_colour[2]};
@@ -856,7 +856,7 @@ MainWindow::MainWindow(QWidget* const parent)
 		if (file_path.isNull())
 			return;
 
-		const auto &frame = sprite_mappings->frames[sprite_viewer.selected_sprite_index().value()];
+		const auto &frame = sprite_mappings->frames[sprite_viewer.selectedSpriteIndex().value()];
 		const auto &frame_rect = calculateRect(frame);
 
 		QImage image(frame_rect.width(), frame_rect.height(), QImage::Format_RGB32);
@@ -868,7 +868,7 @@ MainWindow::MainWindow(QWidget* const parent)
 		// Render the sprite onto the image.
 		QPainter painter(&image);
 
-		draw(frame, painter, !render_as_is, tile_manager, render_as_is ? TileManager::PixmapType::NO_BACKGROUND : TileManager::PixmapType::WITH_BACKGROUND, sprite_viewer.starting_palette_line(), -frame_rect.left(), -frame_rect.top());
+		draw(frame, painter, !render_as_is, tile_manager, render_as_is ? TileManager::PixmapType::NO_BACKGROUND : TileManager::PixmapType::WITH_BACKGROUND, sprite_viewer.startingPaletteLine(), -frame_rect.left(), -frame_rect.top());
 
 		// Save the image to disk.
 		if (!image.save(file_path))
@@ -939,8 +939,8 @@ MainWindow::MainWindow(QWidget* const parent)
 	// Menubar: Edit/Sprite //
 	//////////////////////////
 
-	connect(ui->actionNext_Sprite, &QAction::triggered, this, [this](){sprite_viewer.setSelectedSprite(sprite_viewer.selected_sprite_index().value() + 1);});
-	connect(ui->actionPrevious_Sprite, &QAction::triggered, this, [this](){sprite_viewer.setSelectedSprite(sprite_viewer.selected_sprite_index().value() - 1);});
+	connect(ui->actionNext_Sprite, &QAction::triggered, this, [this](){sprite_viewer.setSelectedSprite(sprite_viewer.selectedSpriteIndex().value() + 1);});
+	connect(ui->actionPrevious_Sprite, &QAction::triggered, this, [this](){sprite_viewer.setSelectedSprite(sprite_viewer.selectedSpriteIndex().value() - 1);});
 
 	connect(ui->actionSwap_Sprite_with_Next, &QAction::triggered, this,
 		[this]()
@@ -949,14 +949,14 @@ MainWindow::MainWindow(QWidget* const parent)
 				[this](SpriteMappings &mappings)
 				{
 					auto &frames = mappings.frames;
-					const int selected_sprite_index = sprite_viewer.selected_sprite_index().value();
+					const int selected_sprite_index = sprite_viewer.selectedSpriteIndex().value();
 
 					Utilities::Move(frames, selected_sprite_index, selected_sprite_index + 1);
 					sprite_viewer.setSelectedSprite(selected_sprite_index + 1);
 				}
 			);
 
-			sprite_viewer.setSelectedSprite(sprite_viewer.selected_sprite_index());
+			sprite_viewer.setSelectedSprite(sprite_viewer.selectedSpriteIndex());
 	}
 	);
 
@@ -967,14 +967,14 @@ MainWindow::MainWindow(QWidget* const parent)
 				[this](SpriteMappings &mappings)
 				{
 					auto &frames = mappings.frames;
-					const int selected_sprite_index = sprite_viewer.selected_sprite_index().value();
+					const int selected_sprite_index = sprite_viewer.selectedSpriteIndex().value();
 
 					Utilities::Move(frames, selected_sprite_index, selected_sprite_index - 1);
 					sprite_viewer.setSelectedSprite(selected_sprite_index - 1);
 				}
 			);
 
-			sprite_viewer.setSelectedSprite(sprite_viewer.selected_sprite_index());
+			sprite_viewer.setSelectedSprite(sprite_viewer.selectedSpriteIndex());
 		}
 	);
 
@@ -998,11 +998,11 @@ MainWindow::MainWindow(QWidget* const parent)
 			sprite_mappings.modify(
 				[this](SpriteMappings &mappings)
 				{
-					mappings.frames.emplace(mappings.frames.cbegin() + (sprite_viewer.selected_sprite_index().value_or(-1) + 1));
+					mappings.frames.emplace(mappings.frames.cbegin() + (sprite_viewer.selectedSpriteIndex().value_or(-1) + 1));
 				}
 			);
 
-			sprite_viewer.setSelectedSprite(sprite_viewer.selected_sprite_index().value() + 1);
+			sprite_viewer.setSelectedSprite(sprite_viewer.selectedSpriteIndex().value() + 1);
 		}
 	);
 
@@ -1013,7 +1013,7 @@ MainWindow::MainWindow(QWidget* const parent)
 				[this](SpriteMappings &mappings)
 				{
 					auto &frames = mappings.frames;
-					const int selected_sprite_index = sprite_viewer.selected_sprite_index().value();
+					const int selected_sprite_index = sprite_viewer.selectedSpriteIndex().value();
 
 					frames.insert(frames.cbegin() + selected_sprite_index + 1, frames[selected_sprite_index]);
 					sprite_viewer.setSelectedSprite(selected_sprite_index + 1);
@@ -1028,11 +1028,11 @@ MainWindow::MainWindow(QWidget* const parent)
 			sprite_mappings.modify(
 				[this](SpriteMappings &mappings)
 				{
-					mappings.frames.erase(mappings.frames.cbegin() + sprite_viewer.selected_sprite_index().value());
+					mappings.frames.erase(mappings.frames.cbegin() + sprite_viewer.selectedSpriteIndex().value());
 				}
 			);
 
-			sprite_viewer.setSelectedSprite(sprite_viewer.selected_sprite_index());
+			sprite_viewer.setSelectedSprite(sprite_viewer.selectedSpriteIndex());
 		}
 	);
 
@@ -1057,13 +1057,13 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionDelete_Sprite_Piece, &QAction::triggered, this,
 		[this]()
 		{
-			const int piece_to_delete = sprite_viewer.selected_piece_index().value();
+			const int piece_to_delete = sprite_viewer.selectedPieceIndex().value();
 			sprite_viewer.selectPreviousPiece();
 
 			sprite_mappings.modify(
 				[this, piece_to_delete](SpriteMappings &mappings)
 				{
-					auto &pieces = mappings.frames[sprite_viewer.selected_sprite_index().value()].pieces;
+					auto &pieces = mappings.frames[sprite_viewer.selectedSpriteIndex().value()].pieces;
 
 					pieces.erase(pieces.cbegin() + piece_to_delete);
 				}
@@ -1077,8 +1077,8 @@ MainWindow::MainWindow(QWidget* const parent)
 			sprite_mappings.modify(
 				[this](SpriteMappings &mappings)
 				{
-					auto &pieces = mappings.frames[sprite_viewer.selected_sprite_index().value()].pieces;
-					const int selected_piece_index = sprite_viewer.selected_piece_index().value();
+					auto &pieces = mappings.frames[sprite_viewer.selectedSpriteIndex().value()].pieces;
+					const int selected_piece_index = sprite_viewer.selectedPieceIndex().value();
 
 					pieces.insert(pieces.cbegin() + selected_piece_index + 1, pieces[selected_piece_index]);
 					sprite_viewer.setSelectedPiece(selected_piece_index + 1);
@@ -1093,9 +1093,9 @@ MainWindow::MainWindow(QWidget* const parent)
 			sprite_mappings.modify(
 				[this](SpriteMappings &mappings)
 				{
-					const int selected_sprite_index = sprite_viewer.selected_sprite_index().value();
+					const int selected_sprite_index = sprite_viewer.selectedSpriteIndex().value();
 					const int next_sprite_index = selected_sprite_index + 1;
-					const int selected_piece_index = sprite_viewer.selected_piece_index().value();
+					const int selected_piece_index = sprite_viewer.selectedPieceIndex().value();
 					auto &frames = mappings.frames;
 					auto &pieces = frames[selected_sprite_index].pieces;
 
@@ -1115,9 +1115,9 @@ MainWindow::MainWindow(QWidget* const parent)
 			sprite_mappings.modify(
 				[this](SpriteMappings &mappings)
 				{
-					const int selected_sprite_index = sprite_viewer.selected_sprite_index().value();
+					const int selected_sprite_index = sprite_viewer.selectedSpriteIndex().value();
 					const int previous_sprite_index = selected_sprite_index - 1;
-					const int selected_piece_index = sprite_viewer.selected_piece_index().value();
+					const int selected_piece_index = sprite_viewer.selectedPieceIndex().value();
 					auto &frames = mappings.frames;
 					auto &pieces = frames[selected_sprite_index].pieces;
 
@@ -1137,9 +1137,9 @@ MainWindow::MainWindow(QWidget* const parent)
 			sprite_mappings.modify(
 				[this](SpriteMappings &mappings)
 				{
-					const int selected_sprite_index = sprite_viewer.selected_sprite_index().value();
+					const int selected_sprite_index = sprite_viewer.selectedSpriteIndex().value();
 					const int next_sprite_index = selected_sprite_index + 1;
-					const int selected_piece_index = sprite_viewer.selected_piece_index().value();
+					const int selected_piece_index = sprite_viewer.selectedPieceIndex().value();
 					auto &frames = mappings.frames;
 					auto &pieces = frames[selected_sprite_index].pieces;
 
@@ -1160,8 +1160,8 @@ MainWindow::MainWindow(QWidget* const parent)
 			sprite_mappings.modify(
 				[this](SpriteMappings &mappings)
 				{
-					auto &pieces = mappings.frames[sprite_viewer.selected_sprite_index().value()].pieces;
-					const int selected_piece_index = sprite_viewer.selected_piece_index().value();
+					auto &pieces = mappings.frames[sprite_viewer.selectedSpriteIndex().value()].pieces;
+					const int selected_piece_index = sprite_viewer.selectedPieceIndex().value();
 					const int next_piece_index = selected_piece_index + 1;
 
 					Utilities::Move(pieces, selected_piece_index, next_piece_index);
@@ -1178,8 +1178,8 @@ MainWindow::MainWindow(QWidget* const parent)
 			sprite_mappings.modify(
 				[this](SpriteMappings &mappings)
 				{
-					auto &pieces = mappings.frames[sprite_viewer.selected_sprite_index().value()].pieces;
-					const int selected_piece_index = sprite_viewer.selected_piece_index().value();
+					auto &pieces = mappings.frames[sprite_viewer.selectedSpriteIndex().value()].pieces;
+					const int selected_piece_index = sprite_viewer.selectedPieceIndex().value();
 					const int previous_piece_index = selected_piece_index - 1;
 
 					Utilities::Move(pieces, selected_piece_index, previous_piece_index);
@@ -1196,8 +1196,8 @@ MainWindow::MainWindow(QWidget* const parent)
 			sprite_mappings.modify(
 				[this](SpriteMappings &mappings)
 				{
-					auto &pieces = mappings.frames[sprite_viewer.selected_sprite_index().value()].pieces;
-					const int selected_piece_index = sprite_viewer.selected_piece_index().value();
+					auto &pieces = mappings.frames[sprite_viewer.selectedSpriteIndex().value()].pieces;
+					const int selected_piece_index = sprite_viewer.selectedPieceIndex().value();
 					const int last_piece_index = pieces.size() - 1;
 
 					Utilities::Move(pieces, selected_piece_index, last_piece_index);
@@ -1214,8 +1214,8 @@ MainWindow::MainWindow(QWidget* const parent)
 			sprite_mappings.modify(
 				[this](SpriteMappings &mappings)
 				{
-					auto &pieces = mappings.frames[sprite_viewer.selected_sprite_index().value()].pieces;
-					const int selected_piece_index = sprite_viewer.selected_piece_index().value();
+					auto &pieces = mappings.frames[sprite_viewer.selectedSpriteIndex().value()].pieces;
+					const int selected_piece_index = sprite_viewer.selectedPieceIndex().value();
 					const int first_piece_index = 0;
 
 					Utilities::Move(pieces, selected_piece_index, first_piece_index);
@@ -1235,8 +1235,8 @@ MainWindow::MainWindow(QWidget* const parent)
 		sprite_mappings.modify(
 			[this, &callback](SpriteMappings &mappings)
 			{
-				auto &frame = mappings.frames[sprite_viewer.selected_sprite_index().value()];
-				const auto piece_index = sprite_viewer.selected_piece_index();
+				auto &frame = mappings.frames[sprite_viewer.selectedSpriteIndex().value()];
+				const auto piece_index = sprite_viewer.selectedPieceIndex();
 
 				if (piece_index.has_value())
 				{
@@ -1255,8 +1255,8 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionFlip_Horizontally, &QAction::triggered, this,
 		[this, transform_frame_or_piece]()
 		{
-			const auto &frame = sprite_mappings->frames[sprite_viewer.selected_sprite_index().value()];
-			const QRect &rect = !sprite_viewer.selected_piece_index().has_value() ? calculateRect(frame) : calculateRect(frame.pieces[sprite_viewer.selected_piece_index().value()]);
+			const auto &frame = sprite_mappings->frames[sprite_viewer.selectedSpriteIndex().value()];
+			const QRect &rect = !sprite_viewer.selectedPieceIndex().has_value() ? calculateRect(frame) : calculateRect(frame.pieces[sprite_viewer.selectedPieceIndex().value()]);
 
 			transform_frame_or_piece(
 				[&rect](SpritePiece &piece)
@@ -1271,8 +1271,8 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionFlip_Vertically, &QAction::triggered, this,
 		[this, transform_frame_or_piece]()
 		{
-			const auto &frame = sprite_mappings->frames[sprite_viewer.selected_sprite_index().value()];
-			const QRect &rect = !sprite_viewer.selected_piece_index().has_value() ? calculateRect(frame) : calculateRect(frame.pieces[sprite_viewer.selected_piece_index().value()]);
+			const auto &frame = sprite_mappings->frames[sprite_viewer.selectedSpriteIndex().value()];
+			const QRect &rect = !sprite_viewer.selectedPieceIndex().has_value() ? calculateRect(frame) : calculateRect(frame.pieces[sprite_viewer.selectedPieceIndex().value()]);
 
 			transform_frame_or_piece(
 				[&rect](SpritePiece &piece)
@@ -1390,7 +1390,7 @@ MainWindow::MainWindow(QWidget* const parent)
 			);
 
 			// TODO: Is this necessary?
-			sprite_viewer.setSelectedSprite(sprite_viewer.selected_sprite_index());
+			sprite_viewer.setSelectedSprite(sprite_viewer.selectedSpriteIndex());
 		}
 	);
 
@@ -1409,7 +1409,7 @@ MainWindow::MainWindow(QWidget* const parent)
 				// The problem with this is that it only toggles between the first
 				// two sprites to use the selected tile, when it would be better if
 				// it cycled between every sprite that uses the tile instead.
-				if (frame_index != sprite_viewer.selected_sprite_index())
+				if (frame_index != sprite_viewer.selectedSpriteIndex())
 				{
 					for (uint piece_index = 0; piece_index < frame.pieces.size(); ++piece_index)
 					{
@@ -1470,7 +1470,7 @@ MainWindow::MainWindow(QWidget* const parent)
 					);
 
 					// TODO: Is this necessary?
-					sprite_viewer.setSelectedSprite(sprite_viewer.selected_sprite_index());
+					sprite_viewer.setSelectedSprite(sprite_viewer.selectedSpriteIndex());
 			}
 			);
 
@@ -1509,7 +1509,7 @@ MainWindow::MainWindow(QWidget* const parent)
 			set_tile_selection_and_update_piece_picker(
 				[this](QVector<bool> &selected)
 				{
-					for (const auto &piece : std::as_const(sprite_mappings->frames[sprite_viewer.selected_sprite_index().value()].pieces))
+					for (const auto &piece : std::as_const(sprite_mappings->frames[sprite_viewer.selectedSpriteIndex().value()].pieces))
 						for (int i = 0; i < piece.width * piece.height; ++i)
 							selected[piece.tile_index + i] = true;
 				}
@@ -1687,7 +1687,7 @@ MainWindow::MainWindow(QWidget* const parent)
 
 	const auto update_menubar = [this]()
 	{
-		const auto selected_sprite_index = sprite_viewer.selected_sprite_index();
+		const auto selected_sprite_index = sprite_viewer.selectedSpriteIndex();
 		const bool no_sprites = sprite_mappings->frames.size() == 0;
 		const bool is_first_sprite = no_sprites || selected_sprite_index == 0;
 		const bool is_last_sprite = no_sprites || selected_sprite_index == static_cast<int>(sprite_mappings->frames.size() - 1);
@@ -1706,7 +1706,7 @@ MainWindow::MainWindow(QWidget* const parent)
 		ui->actionDuplicate_Sprite->setDisabled(no_sprite_selected);
 		ui->actionDelete_Sprite->setDisabled(no_sprite_selected);
 
-		const auto selected_piece_index = sprite_viewer.selected_piece_index();
+		const auto selected_piece_index = sprite_viewer.selectedPieceIndex();
 		const bool no_pieces = no_sprites || !selected_sprite_index.has_value() || sprite_mappings->frames[*selected_sprite_index].pieces.size() == 0;
 		const bool is_first_piece = no_pieces || selected_piece_index == 0;
 		const bool is_last_piece = no_pieces || selected_piece_index == static_cast<int>(sprite_mappings->frames[*selected_sprite_index].pieces.size() - 1);
@@ -1767,8 +1767,8 @@ void MainWindow::SaveState(const int slot)
 {
 	QSettings settings;
 	const QString prefix = GetSlotPrefix(slot);
-	settings.setValue(prefix + "SelectedSpriteIndex", sprite_viewer.selected_sprite_index().value_or(-1));
-	settings.setValue(prefix + "SelectedPieceIndex", sprite_viewer.selected_piece_index().value_or(-1));
+	settings.setValue(prefix + "SelectedSpriteIndex", sprite_viewer.selectedSpriteIndex().value_or(-1));
+	settings.setValue(prefix + "SelectedPieceIndex", sprite_viewer.selectedPieceIndex().value_or(-1));
 
 	// Save cached assets.
 	const QString directory = GetSlotDirectory(slot);
