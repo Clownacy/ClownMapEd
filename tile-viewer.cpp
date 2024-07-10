@@ -1,6 +1,5 @@
 #include "tile-viewer.h"
 
-#include <QtAlgorithms>
 #include <QtGlobal>
 #include <QMouseEvent>
 #include <QPainter>
@@ -80,11 +79,16 @@ void TileViewer::setSelection(const bool scroll_to_selection, const std::functio
 
 void TileViewer::getGridDimensions(int &columns, int &rows)
 {
-	columns = width() / TILE_WIDTH_SCALED;
-	rows = qMax(1, qMin(Utilities::DivideCeiling(height(), TILE_HEIGHT_SCALED), Utilities::DivideCeiling(tile_manager.total_tiles(), columns)));
-
 	if (vertical_orientation)
-		qSwap(columns, rows);
+	{
+		columns = height() / TILE_HEIGHT_SCALED;
+		rows = qMax(1, qMin(Utilities::DivideCeiling(width(), TILE_WIDTH_SCALED), Utilities::DivideCeiling(tile_manager.total_tiles(), columns)));
+	}
+	else
+	{
+		columns = width() / TILE_WIDTH_SCALED;
+		rows = qMax(1, qMin(Utilities::DivideCeiling(height(), TILE_HEIGHT_SCALED), Utilities::DivideCeiling(tile_manager.total_tiles(), columns)));
+	}
 }
 
 void TileViewer::paintEvent(QPaintEvent* const event)
