@@ -79,16 +79,13 @@ void TileViewer::setSelection(const bool scroll_to_selection, const std::functio
 
 void TileViewer::getGridDimensions(int &columns, int &rows)
 {
-	if (vertical_orientation)
-	{
-		columns = height() / TILE_HEIGHT_SCALED;
-		rows = qMax(1, qMin(Utilities::DivideCeiling(width(), TILE_WIDTH_SCALED), Utilities::DivideCeiling(tile_manager.total_tiles(), columns)));
-	}
-	else
-	{
-		columns = width() / TILE_WIDTH_SCALED;
-		rows = qMax(1, qMin(Utilities::DivideCeiling(height(), TILE_HEIGHT_SCALED), Utilities::DivideCeiling(tile_manager.total_tiles(), columns)));
-	}
+	const int space_width = vertical_orientation ? height() : width();
+	const int space_height = vertical_orientation ? width() : height();
+	const int tile_width = vertical_orientation ? TILE_HEIGHT_SCALED : TILE_WIDTH_SCALED;
+	const int tile_height = vertical_orientation ? TILE_WIDTH_SCALED : TILE_HEIGHT_SCALED;
+
+	columns = space_width / tile_width;
+	rows = qMax(1, qMin(Utilities::DivideCeiling(space_height, tile_height), Utilities::DivideCeiling(tile_manager.total_tiles(), columns)));
 }
 
 void TileViewer::paintEvent(QPaintEvent* const event)
