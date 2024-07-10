@@ -1,5 +1,6 @@
 #include "tile-viewer.h"
 
+#include <QtAlgorithms>
 #include <QtGlobal>
 #include <QMouseEvent>
 #include <QPainter>
@@ -80,7 +81,10 @@ void TileViewer::setSelection(const bool scroll_to_selection, const std::functio
 void TileViewer::getGridDimensions(int &columns, int &rows)
 {
 	columns = width() / TILE_WIDTH_SCALED;
-	rows = qMin(Utilities::DivideCeiling(height(), TILE_HEIGHT_SCALED), Utilities::DivideCeiling(tile_manager.total_tiles(), columns));
+	rows = qMax(1, qMin(Utilities::DivideCeiling(height(), TILE_HEIGHT_SCALED), Utilities::DivideCeiling(tile_manager.total_tiles(), columns)));
+
+	if (vertical_orientation)
+		qSwap(columns, rows);
 }
 
 void TileViewer::paintEvent(QPaintEvent* const event)
@@ -113,12 +117,16 @@ void TileViewer::paintEvent(QPaintEvent* const event)
 		}
 	};
 
-	const auto do_visible_tiles = [do_visible_rows](const std::function<void(int, const QRect&)> &callback)
+	const auto do_visible_tiles = [this, &do_visible_rows](const std::function<void(int, const QRect&)> &callback)
 	{
-		do_visible_rows([callback](const int tile_index, const int y, const int length_of_row)
+		do_visible_rows([this, &callback](const int tile_index, const int y, const int length_of_row)
 			{
 				for (int x = 0; x < length_of_row; ++x)
-					callback(tile_index + x, QRect(x * TILE_WIDTH_SCALED, y * TILE_HEIGHT_SCALED, TILE_WIDTH_SCALED, TILE_HEIGHT_SCALED));
+				{
+					const int actual_x = vertical_orientation ? y : x;
+					const int actual_y = vertical_orientation ? x : y;
+					callback(tile_index + x, QRect(actual_x * TILE_WIDTH_SCALED, actual_y * TILE_HEIGHT_SCALED, TILE_WIDTH_SCALED, TILE_HEIGHT_SCALED));
+				}
 			}
 		);
 	};
@@ -128,13 +136,14 @@ void TileViewer::paintEvent(QPaintEvent* const event)
 
 	// Initialise colour values to 0.
 	do_visible_rows(
-		[&painter](const int tile_index, const int y, const int length_of_row)
+		[this, &painter](const int tile_index, const int y, const int length_of_row)
 		{
 			Q_UNUSED(tile_index);
 
-			const QRect rect(0, y * TILE_HEIGHT_SCALED, length_of_row * TILE_WIDTH_SCALED, TILE_HEIGHT_SCALED);
-
-			painter.drawRect(rect);
+			if (vertical_orientation)
+				painter.drawRect(QRect{y * TILE_WIDTH_SCALED, 0, TILE_WIDTH_SCALED, length_of_row * TILE_HEIGHT_SCALED});
+			else
+				painter.drawRect(QRect{0, y * TILE_HEIGHT_SCALED, length_of_row * TILE_WIDTH_SCALED, TILE_HEIGHT_SCALED});
 		}
 	);
 

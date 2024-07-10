@@ -58,6 +58,17 @@ public:
 		update();
 	}
 
+	bool verticalOrientation() const
+	{
+		return vertical_orientation;
+	}
+
+	void setVerticalOrientation(const bool enabled)
+	{
+		vertical_orientation = enabled;
+		update();
+	}
+
 	void getGridDimensions(int &width, int &height);
 
 signals:
@@ -75,6 +86,7 @@ private:
 	bool selection_flip_flop = false;
 	int palette_line = 0;
 	int m_scroll = 0;
+	bool vertical_orientation = false;
 };
 
 #endif // TILE_VIEWER_H

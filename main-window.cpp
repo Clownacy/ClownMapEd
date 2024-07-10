@@ -1618,6 +1618,9 @@ MainWindow::MainWindow(QWidget* const parent)
 	// Menubar: Settings/Tile Rendering //
 	//////////////////////////////////////
 
+	connect(ui->actionOrient_Tiles_Vertically, &QAction::triggered, &tile_viewer, &TileViewer::setVerticalOrientation);
+	ui->actionOrient_Tiles_Vertically->setChecked(settings.value("OrientTilesVertically", false).toBool());
+
 	connect(ui->actionHide_Duplicated_Tiles_in_Frames, &QAction::triggered, &sprite_viewer, &SpriteViewer::setHideDuplicateTiles);
 	ui->actionHide_Duplicated_Tiles_in_Frames->setChecked(settings.value("HideDuplicatedTilesInFrames", false).toBool());
 
@@ -1753,6 +1756,7 @@ MainWindow::~MainWindow()
 	// Save settings.
 	QSettings settings;
 	settings.setValue("GameFormat", QVariant::fromValue(libsonassmd::game));
+	settings.setValue("OrientTilesVertically", ui->actionOrient_Tiles_Vertically->isChecked());
 	settings.setValue("HideDuplicatedTilesInFrames", ui->actionHide_Duplicated_Tiles_in_Frames->isChecked());
 	settings.setValue("StartingPaletteLine", tile_viewer.paletteLine());
 	settings.setValue("PatternLoadCues", ui->actionPattern_Load_Cues->isChecked());

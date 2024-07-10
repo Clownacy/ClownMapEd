@@ -224,6 +224,8 @@
      <property name="title">
       <string>Tile &amp;Rendering</string>
      </property>
+     <addaction name="actionOrient_Tiles_Vertically"/>
+     <addaction name="separator"/>
      <addaction name="actionHide_Duplicated_Tiles_in_Frames"/>
      <addaction name="separator"/>
      <addaction name="actionRender_Starting_with_Palette_Line_1"/>
@@ -1142,6 +1144,17 @@
    </property>
    <property name="shortcut">
     <string>Shift+F9</string>
+   </property>
+  </action>
+  <action name="actionOrient_Tiles_Vertically">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Orient Tiles Vertically</string>
+   </property>
+   <property name="shortcut">
+    <string>O</string>
    </property>
   </action>
  </widget>
