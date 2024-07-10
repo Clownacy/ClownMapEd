@@ -166,6 +166,8 @@ MainWindow::MainWindow(QWidget* const parent)
 	};
 
 	connect(&sprite_viewer, &SpriteViewer::selectedSpriteChanged, this, tile_viewer_select_sprite);
+	// This seems like a bit of a hack; is there any way to make the tile manager retain its selection even when there are no tiles?
+	connect(&tile_manager, &TileManager::pixmapsChanged, this, tile_viewer_select_sprite);
 
 	connect(&sprite_piece_picker, &SpritePiecePicker::pieceSelected, this,
 		[this](const int width, const int height)
