@@ -1,4 +1,4 @@
-- Update tile count in title bar after loading tiles
+- Update tile count in title bar after loading tiles.
 - Support for Sonic 3 & Knuckles' unique DPLC format (used by non-player objects).
 - Sprite spacing (figure out what algorithm SonMapEd uses).
 - Add scrollbar to tile viewer.
@@ -6,14 +6,9 @@
 - 'Select unmapped tiles' shows that auto-scrolling is still screwy (Sonic 2 Sonic sprites).
 - Tall sprites make the sprite viewer taller.
 - Extra controls: https://forums.sonicretro.org/index.php?threads/sonmaped-sprite-mappings-editor.8736/
-- Save states.
-- Remember current sprites across restarts.
 - Make tile viewer selection XOR with the background colour too.
 - Dragging and dropping palette colours (should affect the colours of sprites too? This would allow for converting sprites from one palette to another).
 - Proper error handling for encountering the end of a mappings file unexpectedly.
-- SonMapEd doesn't ask to overwrite files.
 - Add licence information to each source file.
 - See suggestions in the Sonic Retro thread.
-  - Orient tiles vertically.
 - Make duplicate sprites and DPLCs share data (make offset table entries point to the same data).
-
