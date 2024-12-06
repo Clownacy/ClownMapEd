@@ -38,6 +38,37 @@ static bool StateExists(const int slot)
 	return QDir().exists(GetSlotDirectory(slot) + "tiles.bin");
 }
 
+static QString GameFormatToSetting(const libsonassmd::Game game)
+{
+	switch (game)
+	{
+		case libsonassmd::Game::SONIC_1:
+			return "SONIC_1";
+
+		case libsonassmd::Game::SONIC_2:
+			return "SONIC_2";
+
+		case libsonassmd::Game::SONIC_3_AND_KNUCKLES:
+			return "SONIC_3_AND_KNUCKLES";
+	}
+
+	// Pick a sane default.
+	return "SONIC_1";
+}
+
+static libsonassmd::Game GameFormatFromSetting(const QString &string)
+{
+	if (string == "SONIC_1")
+		return libsonassmd::Game::SONIC_1;
+	else if (string == "SONIC_2")
+		return libsonassmd::Game::SONIC_2;
+	else if (string == "SONIC_3_AND_KNUCKLES")
+		return libsonassmd::Game::SONIC_3_AND_KNUCKLES;
+
+	// Pick a sane default.
+	return libsonassmd::Game::SONIC_1;
+}
+
 MainWindow::MainWindow(QWidget* const parent)
 	: QMainWindow(parent)
 	, ui(new Ui::MainWindow)
@@ -48,12 +79,6 @@ MainWindow::MainWindow(QWidget* const parent)
     , tile_viewer(tile_manager)
 {
 	ui->setupUi(this);
-
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-	// Make libsonassmd::Game compatible with QSettings.
-	// Qt6 does this automatically.
-	qRegisterMetaTypeStreamOperators<libsonassmd::Game>("libsonassmd::Game");
-#endif
 
 	QSettings settings;
 
@@ -1614,7 +1639,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionSonic_2, &QAction::triggered, this, [set_game_format](){set_game_format(libsonassmd::Game::SONIC_2);});
 	connect(ui->actionSonic_3_Knuckles, &QAction::triggered, this, [set_game_format](){set_game_format(libsonassmd::Game::SONIC_3_AND_KNUCKLES);});
 
-	set_game_format(settings.value("GameFormat", QVariant::fromValue(libsonassmd::Game::SONIC_1)).value<libsonassmd::Game>());
+	set_game_format(GameFormatFromSetting(settings.value("GameFormat", "SONIC_1").toString()));
 
 	//////////////////////////////////////
 	// Menubar: Settings/Tile Rendering //
@@ -1757,7 +1782,7 @@ MainWindow::~MainWindow()
 {
 	// Save settings.
 	QSettings settings;
-	settings.setValue("GameFormat", QVariant::fromValue(libsonassmd::game));
+	settings.setValue("GameFormat", GameFormatToSetting(libsonassmd::game));
 	settings.setValue("OrientTilesVertically", ui->actionOrient_Tiles_Vertically->isChecked());
 	settings.setValue("HideDuplicatedTilesInFrames", ui->actionHide_Duplicated_Tiles_in_Frames->isChecked());
 	settings.setValue("StartingPaletteLine", tile_viewer.paletteLine());
