@@ -1,6 +1,9 @@
 mkdir makeAppImage-build
 if [ ! -f makeAppImage-build/linuxdeploy-x86_64.AppImage ]; then
 	wget -O makeAppImage-build/linuxdeploy-x86_64.AppImage https://github.com/linuxdeploy/linuxdeploy/releases/download/2.0.0-alpha-1-20241106/linuxdeploy-x86_64.AppImage
+	if [ $? -ne 0 ]; then
+		curl -L -o makeAppImage-build/linuxdeploy-x86_64.AppImage https://github.com/linuxdeploy/linuxdeploy/releases/download/2.0.0-alpha-1-20241106/linuxdeploy-x86_64.AppImage
+	fi
 fi
 chmod +x makeAppImage-build/linuxdeploy-x86_64.AppImage
 rm -r makeAppImage-build/AppDir
