@@ -127,7 +127,8 @@ target_link_libraries(ClownMapEd PRIVATE sonassmd)
 ################
 
 install(TARGETS ClownMapEd DESTINATION "bin")
-install(FILES "assets/ClownMapEd.desktop" DESTINATION "share/applications")
+install(FILES "assets/com.clownacy.ClownMapEd.appdata.xml" DESTINATION "share/applications")
+install(FILES "assets/com.clownacy.ClownMapEd.desktop" DESTINATION "share/applications")
 install(FILES "assets/icon/icon-128.png" DESTINATION "share/icons/hicolor/128x128/apps" RENAME "ClownMapEd.png")
 install(FILES "assets/icon/icon-64.png" DESTINATION "share/icons/hicolor/64x64/apps" RENAME "ClownMapEd.png")
 install(FILES "assets/icon/icon-48.png" DESTINATION "share/icons/hicolor/48x48/apps" RENAME "ClownMapEd.png")
