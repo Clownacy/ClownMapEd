@@ -1,0 +1,5 @@
+# AppImage build directory.
+/build
+
+# Produced files.
+/ClownMapEd-*x86-64.AppImage.*

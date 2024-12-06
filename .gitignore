@@ -1,8 +1,5 @@
 # Typical CMake build directory.
 /build
 
-# AppImage build directory.
-/build-makeAppImage
-
 # QtCreator-generated file.
 /CMakeLists.txt.user
