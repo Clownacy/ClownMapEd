@@ -9,8 +9,7 @@ license=('AGPL-3.0-or-later' 'MIT' '0BSD' 'LGPL-3.0-or-later')
 depends=('qt6-base')
 makedepends=('cmake')
 source=(
-#  "git+https://github.com/Clownacy/ClownMapEd.git#tag=${pkgver}"
-  "git+https://github.com/Clownacy/ClownMapEd.git#commit=4119c13889b28c572077da8ee87572eaa8b95b58"
+  "git+https://github.com/Clownacy/ClownMapEd.git#tag=${pkgver}"
   "git+https://github.com/gfiumara/CIEDE2000.git#commit=af1de42515f3916c16e75980a4635962489af56a"
   "git+https://github.com/Clownacy/libsonassmd.git#commit=3781df7aca6df1f473515b23f5433d74588b0e79"
   "git+https://github.com/MainMemory/FW-KENSC-ShellExt.git#commit=5f6464c6903a6b02ec095f45954df915fd54a59e"
@@ -18,7 +17,7 @@ source=(
   "git+https://github.com/Clownacy/clowncommon.git#commit=37d1efd90725a7c30dce5f38ea14f1bc3c29a52f"
 )
 sha256sums=(
-  'ef702ff028dad01e5fa5202b7ce1c61b72de543fcddc7239f4a1e88bcfaca594'
+  '956f77ca25afd7ef61da021350e690f18bee18fb904c630d974d0b3de50ef129'
   'ed94b6b04df35728fdbbe5176c3769fce07965ecb30f58a6d67f8d488972f2a7'
   '07f11e0db5652c9e5cf3bd78936d444656a89bb064391b41a844d8ba72c1acac'
   '09b7d06b39928a8126d128975d5de9a5da33b2ea4bfbb9910d6b5cbd4c5f6541'
