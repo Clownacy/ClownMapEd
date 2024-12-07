@@ -41,4 +41,4 @@ mkdir build/AppDir
 DESTDIR=AppDir cmake --build build --target install
 
 # Produce the AppImage, and bundle it with update metadata.
-LINUXDEPLOY_OUTPUT_VERSION=v1.2 LDAI_UPDATE_INFORMATION="gh-releases-zsync|Clownacy|clownmaped|latest|ClownMapEd-*x86_64.AppImage.zsync" build/linuxdeploy-x86_64.AppImage --appdir build/AppDir --output appimage --plugin qt
+LINUXDEPLOY_OUTPUT_VERSION=v1.2.0.1 LDAI_UPDATE_INFORMATION="gh-releases-zsync|Clownacy|clownmaped|latest|ClownMapEd-*x86_64.AppImage.zsync" build/linuxdeploy-x86_64.AppImage --appdir build/AppDir --output appimage --plugin qt
