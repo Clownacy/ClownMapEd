@@ -1,6 +1,6 @@
 # Maintainer: Clownacy <clownacy at yahoo dot com>
 pkgname=clownmaped
-pkgver=v1.2
+pkgver=v1.2.0.1
 pkgrel=1
 pkgdesc='Mega Drive Sonic the Hedgehog sprite editor'
 arch=('x86_64' 'i686' 'armv7h' 'aarch64')
@@ -9,17 +9,17 @@ license=('AGPL-3.0-or-later' 'MIT' '0BSD' 'LGPL-3.0-or-later')
 depends=('qt6-base')
 makedepends=('cmake')
 source=(
-  "git+https://github.com/Clownacy/ClownMapEd.git#commit=1cf021c6d07f56b5444659fbf0d7c9a584bacb84"
+  "git+https://github.com/Clownacy/ClownMapEd.git#commit=fcd606fd3e9b47767fd5da3cbfe99d55852c6293"
   "git+https://github.com/gfiumara/CIEDE2000.git#commit=af1de42515f3916c16e75980a4635962489af56a"
-  "git+https://github.com/Clownacy/libsonassmd.git#commit=3781df7aca6df1f473515b23f5433d74588b0e79"
+  "git+https://github.com/Clownacy/libsonassmd.git#commit=f53e98f258796f89ac74ff2d36fc6c9a791915c4"
   "git+https://github.com/MainMemory/FW-KENSC-ShellExt.git#commit=5f6464c6903a6b02ec095f45954df915fd54a59e"
   "git+https://github.com/Clownacy/clownassembler.git#commit=53542a8084b80452059364a014520e4b6688eb7d"
   "git+https://github.com/Clownacy/clowncommon.git#commit=37d1efd90725a7c30dce5f38ea14f1bc3c29a52f"
 )
 sha256sums=(
-  '10682eb4a0d7dbb86f3706677d14c8ede41f0afa8bda2d1bb8f94714c67e6a4a'
+  'd5b55fd2ca77b9f6495231bdc396391a800c11e16e814dbb9c9e50482ff9fb53'
   'ed94b6b04df35728fdbbe5176c3769fce07965ecb30f58a6d67f8d488972f2a7'
-  '07f11e0db5652c9e5cf3bd78936d444656a89bb064391b41a844d8ba72c1acac'
+  'e1fddabe8d6c3793af10a72c6e992a5119dc8c7800ba6f5720c31dc31f186bd7'
   '09b7d06b39928a8126d128975d5de9a5da33b2ea4bfbb9910d6b5cbd4c5f6541'
   '81c1d37431d551b5db58e85d179e033288d5e8f3878ec3eab8f4d04e92a66a9a'
   '3889459af1aa96bf2d8be3ab9cf46387960283a2ecde833c24dfa5d4a217b69b'
