@@ -812,10 +812,10 @@ MainWindow::MainWindow(QWidget* const parent)
 			const SpriteFrame &frame = sprite_mappings->frames[sprite_viewer.selectedSpriteIndex().value()];
 			const QImage our_image = frame_to_qimage(frame, false);
 
-			if (their_image.size() != our_image.size())
+			if (their_image.width() != our_image.width() || their_image.height() != our_image.height())
 			{
 				// TODO: Use an error message that is similar to SonMapEd's.
-				QMessageBox::critical(this, "Error", "Failed to import image: the imported image is a different size to the sprite that it is replacing.");
+				QMessageBox::critical(this, "Error", QStringLiteral("Failed to import image: the imported image (%1x%2) is a different size to the sprite that it is replacing (%3x%4).").arg(QString::number(their_image.width()), QString::number(their_image.height()), QString::number(our_image.width()), QString::number(our_image.height())));
 				return;
 			}
 
