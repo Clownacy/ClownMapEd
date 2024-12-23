@@ -42,6 +42,7 @@ void TileManager::modifyTiles(const std::function<void(std::vector<libsonassmd::
 void TileManager::regeneratePixmaps()
 {
 	invalid_tile_pixmaps = createPixmaps(createInvalidTilePixmap());
+	tile_pixmaps.resize(tiles.size());
 
 	for (int tile_index = 0; tile_index < static_cast<int>(tiles.size()); ++tile_index)
 		regeneratePixmap(tile_index);

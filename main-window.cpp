@@ -863,6 +863,10 @@ MainWindow::MainWindow(QWidget* const parent)
 									}
 								}
 
+								// The sprite might be using out-of-bound tiles, so create room for the new tiles if we have to.
+								if (tile.index >= old_tiles.size())
+									old_tiles.resize(tile.index + 1);
+
 								old_tiles[tile.index].pixels[y][x] = closest_colour_index;
 							}
 						}
