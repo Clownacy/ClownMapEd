@@ -1400,8 +1400,8 @@ MainWindow::MainWindow(QWidget* const parent)
 					sprite_mappings.modify(
 						[this, &selected](SpriteMappings &mappings)
 						{
-							int selected_tile;
-							while ((selected_tile = selected.lastIndexOf(true)) != -1)
+							int selected_tile = -1;
+							while ((selected_tile = selected.lastIndexOf(true, selected_tile)) != -1)
 							{
 								// Un-select the tile, to prevent an infinite loop.
 								selected[selected_tile] = false;
