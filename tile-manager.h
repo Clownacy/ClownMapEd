@@ -68,7 +68,7 @@ public:
 	void deleteTile(int tile_index);
 	void duplicateTile(int tile_index, int insert_index);
 	void clearTile(int tile_index);
-	void modifyTiles(const std::function<void(std::vector<libsonassmd::Tile>&)> &callback);
+	void modifyTiles(const std::function<void(Tiles&)> &callback);
 	auto& getTiles() const
 	{
 		return tiles;

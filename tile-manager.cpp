@@ -33,7 +33,7 @@ void TileManager::clearTile(const int tile_index)
 	emit pixmapsChanged();
 }
 
-void TileManager::modifyTiles(const std::function<void(std::vector<libsonassmd::Tile>&)> &callback)
+void TileManager::modifyTiles(const std::function<void(Tiles&)> &callback)
 {
 	callback(tiles);
 	regeneratePixmaps();

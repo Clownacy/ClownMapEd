@@ -1394,29 +1394,37 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionDelete_Selected_Tiles, &QAction::triggered, this,
 		[this]()
 		{
-			tile_viewer.setSelection(false,
-				[this](QVector<bool> &selected)
+			// Cache this, because various signals will cause it to be changed later.
+			const QVector<bool> selection = tile_viewer.selection();
+
+			tile_manager.modifyTiles(
+				[&](Tiles &tiles)
 				{
+					Tiles new_tiles;
+					new_tiles.reserve(selection.size());
+
 					sprite_mappings.modify(
-						[this, &selected](SpriteMappings &mappings)
+						[&](SpriteMappings &mappings)
 						{
-							int selected_tile = -1;
-							while ((selected_tile = selected.lastIndexOf(true, selected_tile)) != -1)
+							for (int i = 0; i < selection.size(); ++i)
 							{
-								// Un-select the tile, to prevent an infinite loop.
-								selected[selected_tile] = false;
-
-								// Remove the tile.
-								tile_manager.deleteTile(selected_tile);
-
-								// Correct sprite piece tile indices to account for the removed tile.
-								for (auto &frame : mappings.frames)
-									for (auto &piece : frame.pieces)
-										if (piece.tile_index > selected_tile)
-											--piece.tile_index;
+								if (selection[i])
+								{
+									// Correct sprite piece tile indices to account for the removed tile.
+									for (auto &frame : mappings.frames)
+										for (auto &piece : frame.pieces)
+											if (piece.tile_index > new_tiles.size())
+												--piece.tile_index;
+								}
+								else
+								{
+									new_tiles.push_back(tiles[i]);
+								}
 							}
 						}
 					);
+
+					tiles = std::move(new_tiles);
 				}
 			);
 
