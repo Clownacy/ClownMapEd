@@ -1492,18 +1492,25 @@ MainWindow::MainWindow(QWidget* const parent)
 					sprite_mappings.modify(
 						[this, &selected](SpriteMappings &mappings)
 						{
-							int selected_tile = -1;
-							while (selected_tile != 0 && (selected_tile = selected.lastIndexOf(true, selected_tile - 1)) != -1)
+							int selected_tile = 0;
+							while ((selected_tile = selected.lastIndexOf(true, selected_tile - 1)) != -1)
 							{
 								// Duplicate the tile.
-								const int insertion_index = selected.indexOf(false, selected_tile);
-								tile_manager.duplicateTile(selected_tile, insertion_index == -1 ? selected.size() : insertion_index);
+								int insertion_index = selected.indexOf(false, selected_tile);
+
+								if (insertion_index == -1)
+									insertion_index = selected.size();
+
+								tile_manager.duplicateTile(selected_tile, insertion_index);
 
 								// Correct sprite piece tile indices to account for the inserted tile.
 								for (auto &frame : mappings.frames)
 									for (auto &piece : frame.pieces)
 										if (piece.tile_index >= insertion_index)
 											++piece.tile_index;
+
+								if (selected_tile == 0)
+									break;
 							}
 						}
 					);
