@@ -296,20 +296,8 @@ MainWindow::MainWindow(QWidget* const parent)
 		load_tile_file(stream, Tiles::Format::COMPER);
 	};
 
-	const auto load_palette_file = [this](const QString &file_path, const int starting_palette_line)
+	const auto load_palette_file = [this](DataStream &stream, const int starting_palette_line)
 	{
-		if (file_path.isNull())
-			return;
-
-		QFile file(file_path);
-		if (!file.open(QFile::ReadOnly))
-		{
-			QMessageBox::critical(this, "Error", "Failed to load file: file could not be opened for reading.");
-			return;
-		}
-
-		DataStream stream(&file);
-
 		palette.modify(
 			[&stream, starting_palette_line](Palette &palette)
 			{
@@ -415,6 +403,34 @@ MainWindow::MainWindow(QWidget* const parent)
 #endif
 	};
 
+	const auto load_file_data_stream = [this]([[maybe_unused]] const QString &caption, const QString &filters, const std::function<void(DataStream &stream)> &callback)
+	{
+#ifdef EMSCRIPTEN
+		QFileDialog::getOpenFileContent(filters,
+			[callback](const QString &file_name, const QByteArray &file_buffer)
+			{
+				DataStream file_stream(file_buffer);
+				callback(file_stream);
+			}, this
+		);
+#else
+		const QString file_path = QFileDialog::getOpenFileName(this, caption, QString(), filters);
+
+		if (file_path.isNull())
+			return;
+
+		QFile file(file_path);
+		if (!file.open(QFile::ReadOnly))
+		{
+			QMessageBox::critical(this, "Error", "Failed to load file: file could not be opened for reading.");
+			return;
+		}
+
+		DataStream stream(&file);
+		callback(stream);
+#endif
+	};
+
 	connect(ui->actionLoad_Tiles_Uncompressed, &QAction::triggered, this,
 		[this, load_file, load_uncompressed_tile_file]()
 		{
@@ -493,16 +509,30 @@ MainWindow::MainWindow(QWidget* const parent)
 	);
 
 	connect(ui->actionLoad_Primary_Palette, &QAction::triggered, this,
-		[this, load_palette_file]()
+		[this, load_file_data_stream, load_palette_file]()
 		{
-			load_palette_file(QFileDialog::getOpenFileName(this, "Open Palette File", QString(), "Palette Files (*.bin);;All Files (*.*)"), 0);
+			load_file_data_stream(
+				"Open Palette File",
+				"Palette Files (*.bin);;All Files (*.*)",
+				[load_palette_file](DataStream &stream)
+				{
+					load_palette_file(stream, 0);
+				}
+			);
 		}
 	);
 
 	connect(ui->actionLoad_Secondary_Palette_Lines, &QAction::triggered, this,
-		[this, load_palette_file]()
+		[this, load_file_data_stream, load_palette_file]()
 		{
-			load_palette_file(QFileDialog::getOpenFileName(this, "Open Palette File", QString(), "Palette Files (*.bin);;All Files (*.*)"), 1);
+			load_file_data_stream(
+				"Open Palette File",
+				"Palette Files (*.bin);;All Files (*.*)",
+				[load_palette_file](DataStream &stream)
+				{
+					load_palette_file(stream, 1);
+				}
+			);
 		}
 	);
 
