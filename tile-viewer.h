@@ -54,7 +54,7 @@ public:
 
 	void setScroll(const int scroll)
 	{
-		m_scroll = qBound(0, scroll, tile_manager.total_tiles() - 1);
+		m_scroll = qBound(0, scroll, qMax(0, tile_manager.total_tiles() - 1));
 		update();
 	}
 
