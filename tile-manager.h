@@ -45,7 +45,7 @@ public:
 
 	void loadTilesFromFile(const QString &file_path, libsonassmd::Tiles::Format format)
 	{
-		tiles = Tiles(file_path.toStdString(), format);
+		tiles = Tiles(file_path, format);
 
 		tile_pixmaps.resize(tiles.size()); // TODO: Reserve instead?
 
