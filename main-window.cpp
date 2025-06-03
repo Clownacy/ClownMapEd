@@ -2,9 +2,9 @@
 #include "ui_main-window.h"
 
 #include <fstream>
-#include <sstream>
 #include <functional>
 #include <limits>
+#include <sstream>
 #include <utility>
 
 #include <QDataStream>
@@ -246,14 +246,11 @@ MainWindow::MainWindow(QWidget* const parent)
 	// Menubar: File/Load Data File //
 	//////////////////////////////////
 
-	const auto load_tile_file = [this](const QString &file_path, const Tiles::Format format)
+	const auto load_tile_file = [this](std::istream &stream, const Tiles::Format format)
 	{
-		if (file_path.isNull())
-			return;
-
 		try
 		{
-			tile_manager.loadTilesFromFile(file_path, format);
+			tile_manager.loadTilesFromFile(stream, format);
 		}
 		catch (const std::exception &e)
 		{
@@ -264,39 +261,39 @@ MainWindow::MainWindow(QWidget* const parent)
 		tile_viewer.setScroll(0);
 	};
 
-	const auto load_uncompressed_tile_file = [load_tile_file](const QString &file_path)
+	const auto load_uncompressed_tile_file = [load_tile_file](std::istream &stream)
 	{
-		load_tile_file(file_path, Tiles::Format::BINARY);
+		load_tile_file(stream, Tiles::Format::BINARY);
 	};
 
-	const auto load_nemesis_tile_file = [load_tile_file](const QString &file_path)
+	const auto load_nemesis_tile_file = [load_tile_file](std::istream &stream)
 	{
-		load_tile_file(file_path, Tiles::Format::NEMESIS);
+		load_tile_file(stream, Tiles::Format::NEMESIS);
 	};
 
-	const auto load_kosinski_tile_file = [load_tile_file](const QString &file_path)
+	const auto load_kosinski_tile_file = [load_tile_file](std::istream &stream)
 	{
-		load_tile_file(file_path, Tiles::Format::KOSINSKI);
+		load_tile_file(stream, Tiles::Format::KOSINSKI);
 	};
 
-	const auto load_moduled_kosinski_tile_file = [load_tile_file](const QString &file_path)
+	const auto load_moduled_kosinski_tile_file = [load_tile_file](std::istream &stream)
 	{
-		load_tile_file(file_path, Tiles::Format::MODULED_KOSINSKI);
+		load_tile_file(stream, Tiles::Format::MODULED_KOSINSKI);
 	};
 
-	const auto load_kosinski_plus_tile_file = [load_tile_file](const QString &file_path)
+	const auto load_kosinski_plus_tile_file = [load_tile_file](std::istream &stream)
 	{
-		load_tile_file(file_path, Tiles::Format::KOSINSKI_PLUS);
+		load_tile_file(stream, Tiles::Format::KOSINSKI_PLUS);
 	};
 
-	const auto load_moduled_kosinski_plus_tile_file = [load_tile_file](const QString &file_path)
+	const auto load_moduled_kosinski_plus_tile_file = [load_tile_file](std::istream &stream)
 	{
-		load_tile_file(file_path, Tiles::Format::MODULED_KOSINSKI_PLUS);
+		load_tile_file(stream, Tiles::Format::MODULED_KOSINSKI_PLUS);
 	};
 
-	const auto load_comper_tile_file = [load_tile_file](const QString &file_path)
+	const auto load_comper_tile_file = [load_tile_file](std::istream &stream)
 	{
-		load_tile_file(file_path, Tiles::Format::COMPER);
+		load_tile_file(stream, Tiles::Format::COMPER);
 	};
 
 	const auto load_palette_file = [this](const QString &file_path, const int starting_palette_line)
@@ -394,52 +391,104 @@ MainWindow::MainWindow(QWidget* const parent)
 		);
 	};
 
-	connect(ui->actionLoad_Tiles_Uncompressed, &QAction::triggered, this,
-		[this, load_uncompressed_tile_file]()
+	const auto load_file = [this]([[maybe_unused]] const QString &caption, const QString &filters, const std::function<void(std::istream &stream)> &callback)
+	{
+#ifdef EMSCRIPTEN
+		QFileDialog::getOpenFileContent(filters,
+			[callback](const QString &file_name, const QByteArray &file_buffer)
+			{
+				std::stringstream file_stream(file_stream.in | file_stream.out | file_stream.binary);
+				file_stream.write(file_buffer.data(), file_buffer.size());
+				callback(file_stream);
+			}, this
+		);
+#else
+		std::ifstream file_stream(QFileDialog::getOpenFileName(this, caption, QString(), filters).toStdString(), file_stream.binary);
+
+		if (!file_stream.is_open())
 		{
-			load_uncompressed_tile_file(QFileDialog::getOpenFileName(this, "Open Tile Graphics File", QString(), "Uncompressed Tile Graphics Files (*.bin *.unc);;All Files (*.*)"));
+			QMessageBox::critical(this, "Error", "Failed to load file: file could not be opened for reading.");
+			return;
+		}
+
+		callback(file_stream);
+#endif
+	};
+
+	connect(ui->actionLoad_Tiles_Uncompressed, &QAction::triggered, this,
+		[this, load_file, load_uncompressed_tile_file]()
+		{
+			load_file(
+				"Open Tile Graphics File",
+				"Uncompressed Tile Graphics Files (*.bin *.unc);;All Files (*.*)",
+				load_uncompressed_tile_file
+			);
 		}
 	);
 
 	connect(ui->actionLoad_Tiles_Nemesis, &QAction::triggered, this,
-		[this, load_nemesis_tile_file]()
+		[this, load_file, load_nemesis_tile_file]()
 		{
-			load_nemesis_tile_file(QFileDialog::getOpenFileName(this, "Open Nemesis-Compressed Tile Graphics File", QString(), "Nemesis-Compressed Tile Graphics Files (*.bin *.nem);;All Files (*.*)"));
+			load_file(
+				"Open Nemesis-Compressed Tile Graphics File",
+				"Nemesis-Compressed Tile Graphics Files (*.bin *.nem);;All Files (*.*)",
+				load_nemesis_tile_file
+			);
 		}
 	);
 
 	connect(ui->actionLoad_Tiles_Kosinski, &QAction::triggered, this,
-		[this, load_kosinski_tile_file]()
+		[this, load_file, load_kosinski_tile_file]()
 		{
-			load_kosinski_tile_file(QFileDialog::getOpenFileName(this, "Open Kosinski-Compressed Tile Graphics File", QString(), "Kosinski-Compressed Tile Graphics Files (*.bin *.kos);;All Files (*.*)"));
+			load_file(
+				"Open Kosinski-Compressed Tile Graphics File",
+				"Kosinski-Compressed Tile Graphics Files (*.bin *.kos);;All Files (*.*)",
+				load_kosinski_tile_file
+			);
 		}
 	);
 
 	connect(ui->actionLoad_Tiles_Moduled_Kosinski, &QAction::triggered, this,
-		[this, load_moduled_kosinski_tile_file]()
+		[this, load_file, load_moduled_kosinski_tile_file]()
 		{
-			load_moduled_kosinski_tile_file(QFileDialog::getOpenFileName(this, "Open Moduled Kosinski-Compressed Tile Graphics File", QString(), "Moduled Kosinski-Compressed Tile Graphics Files (*.bin *.kosm);;All Files (*.*)"));
+			load_file(
+				"Open Moduled Kosinski-Compressed Tile Graphics File",
+				"Moduled Kosinski-Compressed Tile Graphics Files (*.bin *.kosm);;All Files (*.*)",
+				load_moduled_kosinski_tile_file
+			);
 		}
 	);
 
 	connect(ui->actionLoad_Tiles_Kosinski_Plus, &QAction::triggered, this,
-		[this, load_kosinski_plus_tile_file]()
+		[this, load_file, load_kosinski_plus_tile_file]()
 		{
-			load_kosinski_plus_tile_file(QFileDialog::getOpenFileName(this, "Open Kosinski+-Compressed Tile Graphics File", QString(), "Kosinski+-Compressed Tile Graphics Files (*.bin *.kosp);;All Files (*.*)"));
+			load_file(
+				"Open Kosinski+-Compressed Tile Graphics File",
+				"Kosinski+-Compressed Tile Graphics Files (*.bin *.kosp);;All Files (*.*)",
+				load_kosinski_plus_tile_file
+			);
 		}
 	);
 
 	connect(ui->actionLoad_Tiles_Moduled_Kosinski_Plus, &QAction::triggered, this,
-		[this, load_moduled_kosinski_plus_tile_file]()
+		[this, load_file, load_moduled_kosinski_plus_tile_file]()
 		{
-			load_moduled_kosinski_plus_tile_file(QFileDialog::getOpenFileName(this, "Open Moduled Kosinski+-Compressed Tile Graphics File", QString(), "Moduled Kosinski+-Compressed Tile Graphics Files (*.bin *.kospm);;All Files (*.*)"));
+			load_file(
+				"Open Moduled Kosinski+-Compressed Tile Graphics File",
+				"Moduled Kosinski+-Compressed Tile Graphics Files (*.bin *.kospm);;All Files (*.*)",
+				load_moduled_kosinski_plus_tile_file
+			);
 		}
 	);
 
 	connect(ui->actionLoad_Tiles_Comper, &QAction::triggered, this,
-		[this, load_comper_tile_file]()
+		[this, load_file, load_comper_tile_file]()
 		{
-			load_comper_tile_file(QFileDialog::getOpenFileName(this, "Open Comper-Compressed Tile Graphics File", QString(), "Comper-Compressed Tile Graphics Files (*.bin *.comp);;All Files (*.*)"));
+			load_file(
+				"Open Comper-Compressed Tile Graphics File",
+				"Comper-Compressed Tile Graphics Files (*.bin *.comp);;All Files (*.*)",
+				load_comper_tile_file
+			);
 		}
 	);
 

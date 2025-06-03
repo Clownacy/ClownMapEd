@@ -43,9 +43,10 @@ public:
 		emit pixmapsChanged();
 	}
 
-	void loadTilesFromFile(const QString &file_path, libsonassmd::Tiles::Format format)
+	template<typename T>
+	void loadTilesFromFile(T &&file, libsonassmd::Tiles::Format format)
 	{
-		tiles = Tiles(file_path, format);
+		tiles = Tiles(std::forward<T>(file), format);
 
 		tile_pixmaps.resize(tiles.size()); // TODO: Reserve instead?
 
