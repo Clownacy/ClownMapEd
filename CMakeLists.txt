@@ -101,6 +101,12 @@ if(QT_VERSION_MAJOR EQUAL 6)
 	qt_finalize_executable(ClownMapEd)
 endif()
 
+# TODO: Make this project not use exceptions in the first place; they're weird.
+if(EMSCRIPTEN)
+	target_compile_options(ClownMapEd PUBLIC -sNO_DISABLE_EXCEPTION_CATCHING)
+	target_link_options(ClownMapEd PUBLIC -sNO_DISABLE_EXCEPTION_CATCHING)
+endif()
+
 #############
 # CIEDE2000 #
 #############
