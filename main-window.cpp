@@ -314,27 +314,27 @@ MainWindow::MainWindow(QWidget* const parent)
 	};
 
 	// TODO: This lambda is pointless now: get rid of it.
-	const auto load_asm_or_bin_file = [](const QString &file_path, const std::function<void(const QString &file_path)> &callback)
+	const auto load_asm_or_bin_file = [](const QString &file_path, std::istream &file_stream, const std::function<void(const QString &file_path, std::istream &file_stream)> &callback)
 	{
 		if (file_path.isNull())
 			return;
 
-		callback(file_path);
+		callback(file_path, file_stream);
 	};
 
-	const auto load_sprite_mappings_file = [this, load_asm_or_bin_file, is_assembly_file_path](const QString &file_path)
+	const auto load_sprite_mappings_file = [this, load_asm_or_bin_file, is_assembly_file_path](const QString &file_path, std::istream &file_stream)
 	{
-		load_asm_or_bin_file(file_path,
-			[this, is_assembly_file_path](const QString &file_path)
+		load_asm_or_bin_file(file_path, file_stream,
+			[this, is_assembly_file_path](const QString &file_path, std::istream &file_stream)
 			{
 				SpriteMappings new_mappings;
 
 				try
 				{
 					sprite_mappings.modify(
-						[&file_path, &is_assembly_file_path](SpriteMappings &mappings)
+						[&](SpriteMappings &mappings)
 						{
-							mappings = SpriteMappings(file_path, is_assembly_file_path(file_path) ? SpriteMappings::Format::ASSEMBLY : SpriteMappings::Format::BINARY);;
+							mappings = SpriteMappings(file_stream, is_assembly_file_path(file_path) ? SpriteMappings::Format::ASSEMBLY : SpriteMappings::Format::BINARY);;
 						}
 					);
 				}
@@ -349,14 +349,14 @@ MainWindow::MainWindow(QWidget* const parent)
 		);
 	};
 
-	const auto load_dynamic_pattern_load_cue_file = [this, load_asm_or_bin_file, is_assembly_file_path](const QString &file_path)
+	const auto load_dynamic_pattern_load_cue_file = [this, load_asm_or_bin_file, is_assembly_file_path](const QString &file_path, std::istream &file_stream)
 	{
-		load_asm_or_bin_file(file_path,
-			[this, is_assembly_file_path](const QString &file_path)
+		load_asm_or_bin_file(file_path, file_stream,
+			[this, is_assembly_file_path](const QString &file_path, std::istream &file_stream)
 			{
 				try
 				{
-					DynamicPatternLoadCues dplc(file_path, is_assembly_file_path(file_path) ? DynamicPatternLoadCues::Format::ASSEMBLY : DynamicPatternLoadCues::Format::BINARY);
+					DynamicPatternLoadCues dplc(file_stream, is_assembly_file_path(file_path) ? DynamicPatternLoadCues::Format::ASSEMBLY : DynamicPatternLoadCues::Format::BINARY);
 
 					sprite_mappings.modify(
 						[&dplc](SpriteMappings &mappings)
@@ -379,7 +379,7 @@ MainWindow::MainWindow(QWidget* const parent)
 		);
 	};
 
-	const auto load_file = [this]([[maybe_unused]] const QString &caption, const QString &filters, const std::function<void(std::istream &stream)> &callback)
+	const auto load_file = [this]([[maybe_unused]] const QString &caption, const QString &filters, const std::function<void(const QString &file_path, std::istream &file_stream)> &callback)
 	{
 #ifdef EMSCRIPTEN
 		QFileDialog::getOpenFileContent(filters,
@@ -387,11 +387,12 @@ MainWindow::MainWindow(QWidget* const parent)
 			{
 				std::stringstream file_stream(file_stream.in | file_stream.out | file_stream.binary);
 				file_stream.write(file_buffer.data(), file_buffer.size());
-				callback(file_stream);
+				callback(file_name, file_stream);
 			}, this
 		);
 #else
-		std::ifstream file_stream(QFileDialog::getOpenFileName(this, caption, QString(), filters).toStdString(), file_stream.binary);
+		const QString file_path = QFileDialog::getOpenFileName(this, caption, QString(), filters);
+		std::ifstream file_stream(file_path.toStdString(), file_stream.binary);
 
 		if (!file_stream.is_open())
 		{
@@ -399,7 +400,7 @@ MainWindow::MainWindow(QWidget* const parent)
 			return;
 		}
 
-		callback(file_stream);
+		callback(file_path, file_stream);
 #endif
 	};
 
@@ -437,7 +438,10 @@ MainWindow::MainWindow(QWidget* const parent)
 			load_file(
 				"Open Tile Graphics File",
 				"Uncompressed Tile Graphics Files (*.bin *.unc);;All Files (*.*)",
-				load_uncompressed_tile_file
+				[load_uncompressed_tile_file]([[maybe_unused]] const QString &file_path, std::istream &file_stream)
+				{
+					load_uncompressed_tile_file(file_stream);
+				}
 			);
 		}
 	);
@@ -448,7 +452,10 @@ MainWindow::MainWindow(QWidget* const parent)
 			load_file(
 				"Open Nemesis-Compressed Tile Graphics File",
 				"Nemesis-Compressed Tile Graphics Files (*.bin *.nem);;All Files (*.*)",
-				load_nemesis_tile_file
+				[load_nemesis_tile_file]([[maybe_unused]] const QString &file_path, std::istream &file_stream)
+				{
+					load_nemesis_tile_file(file_stream);
+				}
 			);
 		}
 	);
@@ -459,7 +466,10 @@ MainWindow::MainWindow(QWidget* const parent)
 			load_file(
 				"Open Kosinski-Compressed Tile Graphics File",
 				"Kosinski-Compressed Tile Graphics Files (*.bin *.kos);;All Files (*.*)",
-				load_kosinski_tile_file
+				[load_kosinski_tile_file]([[maybe_unused]] const QString &file_path, std::istream &file_stream)
+				{
+					load_kosinski_tile_file(file_stream);
+				}
 			);
 		}
 	);
@@ -470,7 +480,10 @@ MainWindow::MainWindow(QWidget* const parent)
 			load_file(
 				"Open Moduled Kosinski-Compressed Tile Graphics File",
 				"Moduled Kosinski-Compressed Tile Graphics Files (*.bin *.kosm);;All Files (*.*)",
-				load_moduled_kosinski_tile_file
+				[load_moduled_kosinski_tile_file]([[maybe_unused]] const QString &file_path, std::istream &file_stream)
+				{
+					load_moduled_kosinski_tile_file(file_stream);
+				}
 			);
 		}
 	);
@@ -481,7 +494,10 @@ MainWindow::MainWindow(QWidget* const parent)
 			load_file(
 				"Open Kosinski+-Compressed Tile Graphics File",
 				"Kosinski+-Compressed Tile Graphics Files (*.bin *.kosp);;All Files (*.*)",
-				load_kosinski_plus_tile_file
+				[load_kosinski_plus_tile_file]([[maybe_unused]] const QString &file_path, std::istream &file_stream)
+				{
+					load_kosinski_plus_tile_file(file_stream);
+				}
 			);
 		}
 	);
@@ -492,7 +508,10 @@ MainWindow::MainWindow(QWidget* const parent)
 			load_file(
 				"Open Moduled Kosinski+-Compressed Tile Graphics File",
 				"Moduled Kosinski+-Compressed Tile Graphics Files (*.bin *.kospm);;All Files (*.*)",
-				load_moduled_kosinski_plus_tile_file
+				[load_moduled_kosinski_plus_tile_file]([[maybe_unused]] const QString &file_path, std::istream &file_stream)
+				{
+					load_moduled_kosinski_plus_tile_file(file_stream);
+				}
 			);
 		}
 	);
@@ -503,7 +522,10 @@ MainWindow::MainWindow(QWidget* const parent)
 			load_file(
 				"Open Comper-Compressed Tile Graphics File",
 				"Comper-Compressed Tile Graphics Files (*.bin *.comp);;All Files (*.*)",
-				load_comper_tile_file
+				[load_comper_tile_file]([[maybe_unused]] const QString &file_path, std::istream &file_stream)
+				{
+					load_comper_tile_file(file_stream);
+				}
 			);
 		}
 	);
@@ -537,17 +559,25 @@ MainWindow::MainWindow(QWidget* const parent)
 	);
 
 	connect(ui->actionLoad_Mappings, &QAction::triggered, this,
-		[this, load_sprite_mappings_file]()
+		[this, load_file, load_sprite_mappings_file]()
 		{
-			load_sprite_mappings_file(QFileDialog::getOpenFileName(this, "Open Sprite Mappings File", QString(), "Sprite Mapping Files (*.bin *.asm);;All Files (*.*)"));
+			load_file(
+				"Open Sprite Mappings File",
+				"Sprite Mapping Files (*.bin *.asm);;All Files (*.*)",
+				load_sprite_mappings_file
+			);
 		}
 	);
 
 	connect(ui->actionLoad_Sprite_Pattern_Cues, &QAction::triggered, this,
-		[this, load_dynamic_pattern_load_cue_file]()
+		[this, load_file, load_dynamic_pattern_load_cue_file]()
 		{
 			// TODO: Filters.
-			load_dynamic_pattern_load_cue_file(QFileDialog::getOpenFileName(this, "Open Dynamic Pattern Loading Cue File", QString(), "Pattern Cue Files (*.bin *.asm);;All Files (*.*)"));
+			load_file(
+				"Open Dynamic Pattern Loading Cue File",
+				"Pattern Cue Files (*.bin *.asm);;All Files (*.*)",
+				load_dynamic_pattern_load_cue_file
+			);
 		}
 	);
 
@@ -875,81 +905,102 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionImport_Sprite_over_Active_Frame, &QAction::triggered, this,
 		[this, frame_to_qimage]()
 		{
-			const QString file_path = QFileDialog::getOpenFileName(this, "Import Sprite Frame", QString(), "Image (*.png *.bmp)");
-
-			if (file_path.isNull())
-				return;
-
-			QImage their_image(file_path);
-
-			if (their_image.isNull())
+			const auto load_image_from_file = [this](const QString &caption, const QString &filters, const std::function<void(QImage &image)> &callback)
 			{
-				QMessageBox::critical(this, "Error", "Failed to import image: file could not be loaded.");
-				return;
-			}
-
-			const SpriteFrame &frame = sprite_mappings->frames[sprite_viewer.selectedSpriteIndex().value()];
-			const QImage our_image = frame_to_qimage(frame, false);
-
-			if (their_image.width() != our_image.width() || their_image.height() != our_image.height())
-			{
-				// TODO: Use an error message that is similar to SonMapEd's.
-				QMessageBox::critical(this, "Error", QStringLiteral("Failed to import image: the imported image (%1x%2) is a different size to the sprite that it is replacing (%3x%4).").arg(QString::number(their_image.width()), QString::number(their_image.height()), QString::number(our_image.width()), QString::number(our_image.height())));
-				return;
-			}
-
-			// Finally, import the image over the sprite.
-			tile_manager.modifyTiles(
-				[this, &frame, &their_image](std::vector<libsonassmd::Tile> &old_tiles)
-				{
-					// TODO: This doesn't account for overlapping pieces, which is a mistake that SonMapEd also makes. Is there anything that can be done about this?
-					const QVector<SpritePiece::Tile> new_tiles = getUniqueTiles(frame);
-					const int frame_left = calculateRect(frame).left();
-					const int frame_top = calculateRect(frame).top();
-
-					// Overwrite each unique tile.
-					for (const auto &tile : new_tiles)
+#ifdef EMSCRIPTEN
+				QFileDialog::getOpenFileContent(filters,
+					[callback]([[maybe_unused]] const QString &file_path, const QByteArray &file_buffer)
 					{
-						for (int y = 0; y < TileManager::TILE_HEIGHT; ++y)
+						QImage image;
+						image.loadFromData(file_buffer);
+						callback(image);
+					}, this
+				);
+#else
+				QImage image;
+
+				const QString file_path = QFileDialog::getOpenFileName(this, caption, QString(), filters);
+
+				if (!file_path.isNull())
+					image.load(file_path);
+
+				callback(image);
+#endif
+			};
+
+			load_image_from_file("Import Sprite Frame", "Image (*.png *.bmp)",
+				[this, frame_to_qimage](QImage &their_image)
+				{
+					if (their_image.isNull())
+					{
+						QMessageBox::critical(this, "Error", "Failed to import image: file could not be loaded.");
+						return;
+					}
+
+					const SpriteFrame &frame = sprite_mappings->frames[sprite_viewer.selectedSpriteIndex().value()];
+					const QImage our_image = frame_to_qimage(frame, false);
+
+					if (their_image.width() != our_image.width() || their_image.height() != our_image.height())
+					{
+						// TODO: Use an error message that is similar to SonMapEd's.
+						QMessageBox::critical(this, "Error", QStringLiteral("Failed to import image: the imported image (%1x%2) is a different size to the sprite that it is replacing (%3x%4).").arg(QString::number(their_image.width()), QString::number(their_image.height()), QString::number(our_image.width()), QString::number(our_image.height())));
+						return;
+					}
+
+					// Finally, import the image over the sprite.
+					tile_manager.modifyTiles(
+						[this, &frame, &their_image](std::vector<libsonassmd::Tile> &old_tiles)
 						{
-							const int image_y = tile.y + (tile.y_flip ? TileManager::TILE_HEIGHT - y - 1 : y) - frame_top;
+							// TODO: This doesn't account for overlapping pieces, which is a mistake that SonMapEd also makes. Is there anything that can be done about this?
+							const QVector<SpritePiece::Tile> new_tiles = getUniqueTiles(frame);
+							const int frame_left = calculateRect(frame).left();
+							const int frame_top = calculateRect(frame).top();
 
-							for (int x = 0; x < TileManager::TILE_HEIGHT; ++x)
+							// Overwrite each unique tile.
+							for (const auto &tile : new_tiles)
 							{
-								const int image_x = tile.x + (tile.x_flip ? TileManager::TILE_WIDTH - x - 1 : x) - frame_left;
-
-								// This big block of code is responsible for converting a single pixel.
-
-								const auto their_colour = Utilities::QColorToLAB(QColor(their_image.pixel(image_x, image_y)));
-
-								// Find the closest colour in the palette line to the imported pixel colour.
-								uint closest_colour_index = 0;
-								double closest_distance = std::numeric_limits<double>::max();
-
-								for (uint colour_index = 0; colour_index < Palette::COLOURS_PER_LINE; ++colour_index)
+								for (int y = 0; y < TileManager::TILE_HEIGHT; ++y)
 								{
-									const auto our_colour = Utilities::QColorToLAB(palette->lines[(tile.palette_line + sprite_viewer.startingPaletteLine()) % Palette::TOTAL_LINES].colours[colour_index].toQColor224());
+									const int image_y = tile.y + (tile.y_flip ? TileManager::TILE_HEIGHT - y - 1 : y) - frame_top;
 
-									CIEDE2000::LAB lab1 = {their_colour[0], their_colour[1], their_colour[2]};
-									CIEDE2000::LAB lab2 = {our_colour[0], our_colour[1], our_colour[2]};
-									const double distance = CIEDE2000::CIEDE2000(lab1, lab2);
-
-									// Only allow matching the transparency colour if it is exact.
-									if ((colour_index != 0 && distance < closest_distance) || their_colour == our_colour)
+									for (int x = 0; x < TileManager::TILE_HEIGHT; ++x)
 									{
-										closest_distance = distance;
-										closest_colour_index = colour_index;
+										const int image_x = tile.x + (tile.x_flip ? TileManager::TILE_WIDTH - x - 1 : x) - frame_left;
+
+										// This big block of code is responsible for converting a single pixel.
+
+										const auto their_colour = Utilities::QColorToLAB(QColor(their_image.pixel(image_x, image_y)));
+
+										// Find the closest colour in the palette line to the imported pixel colour.
+										uint closest_colour_index = 0;
+										double closest_distance = std::numeric_limits<double>::max();
+
+										for (uint colour_index = 0; colour_index < Palette::COLOURS_PER_LINE; ++colour_index)
+										{
+											const auto our_colour = Utilities::QColorToLAB(palette->lines[(tile.palette_line + sprite_viewer.startingPaletteLine()) % Palette::TOTAL_LINES].colours[colour_index].toQColor224());
+
+											CIEDE2000::LAB lab1 = {their_colour[0], their_colour[1], their_colour[2]};
+											CIEDE2000::LAB lab2 = {our_colour[0], our_colour[1], our_colour[2]};
+											const double distance = CIEDE2000::CIEDE2000(lab1, lab2);
+
+											// Only allow matching the transparency colour if it is exact.
+											if ((colour_index != 0 && distance < closest_distance) || their_colour == our_colour)
+											{
+												closest_distance = distance;
+												closest_colour_index = colour_index;
+											}
+										}
+
+										// The sprite might be using out-of-bound tiles, so create room for the new tiles if we have to.
+										if (tile.index >= old_tiles.size())
+											old_tiles.resize(tile.index + 1);
+
+										old_tiles[tile.index].pixels[y][x] = closest_colour_index;
 									}
 								}
-
-								// The sprite might be using out-of-bound tiles, so create room for the new tiles if we have to.
-								if (tile.index >= old_tiles.size())
-									old_tiles.resize(tile.index + 1);
-
-								old_tiles[tile.index].pixels[y][x] = closest_colour_index;
 							}
 						}
-					}
+					);
 				}
 			);
 		}
