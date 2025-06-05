@@ -589,13 +589,21 @@ MainWindow::MainWindow(QWidget* const parent)
 
 	[[maybe_unused]] const auto ask_if_assembly = [this]()
 	{
-		return QMessageBox::question(this, "Format", "Save as assembly?") == QMessageBox::Yes;
+		return QMessageBox::question(this, "Format", "Save as assembly instead of binary?") == QMessageBox::Yes;
 	};
 
-	const auto save_file_std_stream = [this, ask_if_assembly, is_assembly_file_path]([[maybe_unused]] const QString &hint_filename, const QString &caption, const QString &filters, const std::function<void(std::ostream &file_stream, bool is_assembly_file)> &callback, [[maybe_unused]] const bool should_ask_if_assembly = false, std::ios::openmode flags = {})
+	const auto save_file_std_stream = [this, ask_if_assembly, is_assembly_file_path]([[maybe_unused]] QString hint_filename, const QString &caption, const QString &filters, const std::function<void(std::ostream &file_stream, bool is_assembly_file)> &callback, [[maybe_unused]] const bool should_ask_if_assembly = false, std::ios::openmode flags = {})
 	{
 #ifdef EMSCRIPTEN
 		const bool is_assembly_file = should_ask_if_assembly && ask_if_assembly();
+
+		if (is_assembly_file)
+		{
+			const auto dot = hint_filename.lastIndexOf('.');
+
+			if (dot != -1)
+				hint_filename = hint_filename.first(dot) + ".asm";
+		}
 
 		std::stringstream stream(flags | std::ios::in | std::ios::out);
 		callback(stream, is_assembly_file);
@@ -822,7 +830,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionSave_Mappings, &QAction::triggered, this,
 		[this, save_asm_or_bin_file]()
 		{
-			save_asm_or_bin_file("mappings.asm", "Save Sprite Mappings File", "Sprite Mapping Files (*.bin *.asm);;All Files (*.*)",
+			save_asm_or_bin_file("mappings.bin", "Save Sprite Mappings File", "Sprite Mapping Files (*.bin *.asm);;All Files (*.*)",
 				[this](std::ostream &stream, const bool saving_assembly_file)
 				{
 					const bool mapmacros = !ui->actionLegacyFormats->isChecked();
@@ -853,7 +861,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionSave_Pattern_Cues, &QAction::triggered, this,
 		[this, save_asm_or_bin_file]()
 		{
-			save_asm_or_bin_file("dplc.asm", "Save Dynamic Pattern Loading Cue File", "Pattern Cue Files (*.bin *.asm);;All Files (*.*)",
+			save_asm_or_bin_file("dplc.bin", "Save Dynamic Pattern Loading Cue File", "Pattern Cue Files (*.bin *.asm);;All Files (*.*)",
 				[this](std::ostream &stream, const bool saving_assembly_file)
 				{
 					const bool mapmacros = !ui->actionLegacyFormats->isChecked();
