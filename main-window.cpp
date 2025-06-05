@@ -587,66 +587,82 @@ MainWindow::MainWindow(QWidget* const parent)
 	// Menubar: File/Save Data File //
 	//////////////////////////////////
 
-	const auto save_tile_file = [this, is_assembly_file_path](const QString &compression_name, const QString &file_extension, const Tiles::Format format)
+	const auto save_file_std_stream = [this](const std::ios::openmode flags, const QString &caption, const QString &filters, const std::function<void(const QString &file_path, std::ostream &file_stream)> &callback)
 	{
-		const QString file_path = QFileDialog::getSaveFileName(this, "Save " + compression_name + " Tile Graphics File", QString(), compression_name + " Tile Graphics Files (*." + file_extension + " *.bin *.asm);;All Files (*.*)", nullptr, QFileDialog::DontConfirmOverwrite);
+#ifndef EMSCRIPTEN
+		std::stringstream stream(flags | std::ios::in | std::ios::out);
+		callback("dummy", stream); // TODO: Is there any way to get the correct path here?
+		const auto stream_string = stream.str();
+		QFileDialog::saveFileContent(QByteArray(stream_string.data(), stream_string.size()), "", this);
+#else
+		const QString file_path = QFileDialog::getSaveFileName(this, caption, QString(), filters, nullptr, QFileDialog::DontConfirmOverwrite);
 
 		if (file_path.isNull())
 			return;
 
-		try
+		std::ofstream stream(file_path.toStdString(), flags);
+
+		if (!stream.is_open())
 		{
-			const auto &tiles = tile_manager.getTiles();
+			QMessageBox::critical(this, "Error", "Failed to save file: file could not be opened for writing.");
+			return;
+		}
 
-			if (is_assembly_file_path(file_path))
+		callback(file_path, stream);
+#endif
+	};
+
+	const auto save_tile_file = [this, save_file_std_stream, is_assembly_file_path](const QString &compression_name, const QString &file_extension, const Tiles::Format format)
+	{
+		save_file_std_stream(format == Tiles::Format::ASSEMBLY ? std::ios::openmode() : std::ios::binary, "Save " + compression_name + " Tile Graphics File", compression_name + " Tile Graphics Files (*." + file_extension + " *.bin *.asm);;All Files (*.*)",
+			[&](const QString &file_path, std::ostream &file_stream)
 			{
-				std::stringstream string_stream(std::ios::in | std::ios::out | std::ios::binary);
-				string_stream.exceptions(std::ios::badbit | std::ios::eofbit | std::ios::failbit);
-
-				tiles.toStream(string_stream, format);
-
-				QFile file(file_path);
-				if (!file.open(QFile::OpenModeFlag::WriteOnly))
+				try
 				{
-					QMessageBox::critical(this, "Error", "Failed to save file: file could not be opened for writing.");
-					return;
-				}
+					const auto &tiles = tile_manager.getTiles();
 
-				QTextStream stream(&file);
-
-				stream << QStringLiteral("; --------------------------------------------------------------------------------\n"
-				                         "; %1 tile graphics - output from ClownMapEd\n"
-				                         "; --------------------------------------------------------------------------------\n"
-				                         ).arg(compression_name);
-
-				const std::string::size_type bytes_per_line = 0x20;
-				const std::string &output_string = string_stream.str();
-				for (std::string::size_type i = 0; i < output_string.size(); i += bytes_per_line)
-				{
-					stream << "\tdc.b ";
-
-					for (std::string::size_type j = 0; j < qMin(bytes_per_line, output_string.size() - i); ++j)
+					if (is_assembly_file_path(file_path))
 					{
-						if (j != 0)
-							stream << ',';
+						std::stringstream string_stream(std::ios::in | std::ios::out | std::ios::binary);
+						string_stream.exceptions(std::ios::badbit | std::ios::eofbit | std::ios::failbit);
 
-						stream << '$' << Utilities::IntegerToZeroPaddedHexQString(static_cast<quint8>(output_string[i + j]));
+						tiles.toStream(string_stream, format);
+
+						file_stream << QStringLiteral("; --------------------------------------------------------------------------------\n"
+												 "; %1 tile graphics - output from ClownMapEd\n"
+												 "; --------------------------------------------------------------------------------\n"
+												 ).arg(compression_name).toStdString();
+
+						const std::string::size_type bytes_per_line = 0x20;
+						const std::string &output_string = string_stream.str();
+						for (std::string::size_type i = 0; i < output_string.size(); i += bytes_per_line)
+						{
+							file_stream << "\tdc.b ";
+
+							for (std::string::size_type j = 0; j < qMin(bytes_per_line, output_string.size() - i); ++j)
+							{
+								if (j != 0)
+									file_stream << ',';
+
+								file_stream << '$' << Utilities::IntegerToZeroPaddedHexQString(static_cast<quint8>(output_string[i + j])).toStdString();
+							}
+
+							file_stream << "; " << i << '\n';
+						}
+
+						file_stream << "\teven\n";
 					}
-
-					stream << "; " << i << '\n';
+					else
+					{
+						tiles.toStream(file_stream, format);
+					}
 				}
-
-				stream << "\teven\n";
+				catch (const std::exception &e)
+				{
+					QMessageBox::critical(this, "Error", QStringLiteral("Failed to save file. Exception details: ") + e.what());
+				}
 			}
-			else
-			{
-				tiles.toFile(file_path, format);
-			}
-		}
-		catch (const std::exception &e)
-		{
-			QMessageBox::critical(this, "Error", QStringLiteral("Failed to save file. Exception details: ") + e.what());
-		}
+		);
 	};
 
 	connect(ui->actionUncompressed, &QAction::triggered, this,
