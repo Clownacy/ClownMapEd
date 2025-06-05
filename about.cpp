@@ -12,9 +12,7 @@ About::About(QWidget *parent) :
 	setModal(true);
 	setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
 
-	this->setFixedSize(this->size());
-
-	ui->labelIcon->setPixmap(QPixmap(":/Icon/assets/icon/icon-master.png"));
+	layout()->setSizeConstraint(QLayout::SetFixedSize);
 
 	// Replace the version placeholder with the real version.
 	ui->label->setText(ui->label->text().replace("[VERSION]", QApplication::applicationVersion()));
