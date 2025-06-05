@@ -589,7 +589,7 @@ MainWindow::MainWindow(QWidget* const parent)
 
 	[[maybe_unused]] const auto ask_if_assembly = [this]()
 	{
-		return QMessageBox::question(this, "Format", "Save as assembly?");
+		return QMessageBox::question(this, "Format", "Save as assembly?") == QMessageBox::Yes;
 	};
 
 	const auto save_file_std_stream = [this, ask_if_assembly, is_assembly_file_path]([[maybe_unused]] const QString &hint_filename, const QString &caption, const QString &filters, const std::function<void(std::ostream &file_stream, bool is_assembly_file)> &callback, [[maybe_unused]] const bool should_ask_if_assembly = false, std::ios::openmode flags = {})
