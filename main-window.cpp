@@ -587,7 +587,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	// Menubar: File/Save Data File //
 	//////////////////////////////////
 
-	const auto save_file_std_stream = [this]([[maybe_unused]] const QString &hint_filename, const QString &caption, const QString &filters, const std::function<void(const QString &file_path, std::ostream &file_stream)> &callback, const std::ios::openmode flags = {})
+	const auto save_file_std_stream = [this, is_assembly_file_path]([[maybe_unused]] const QString &hint_filename, const QString &caption, const QString &filters, const std::function<void(const QString &file_path, std::ostream &file_stream)> &callback, std::ios::openmode flags = {})
 	{
 #ifdef EMSCRIPTEN
 		std::stringstream stream(flags | std::ios::in | std::ios::out);
@@ -599,6 +599,9 @@ MainWindow::MainWindow(QWidget* const parent)
 
 		if (file_path.isNull())
 			return;
+
+		if (is_assembly_file_path(file_path))
+			flags &= ~std::ios::binary;
 
 		std::ofstream stream(file_path.toStdString(), flags);
 
@@ -612,7 +615,7 @@ MainWindow::MainWindow(QWidget* const parent)
 #endif
 	};
 
-	const auto save_file_data_stream = [this]([[maybe_unused]] const QString &hint_filename, const QString &caption, const QString &filters, const std::function<void(const QString &file_path, DataStream &file_stream)> &callback)
+	const auto save_file_data_stream = [this, is_assembly_file_path]([[maybe_unused]] const QString &hint_filename, const QString &caption, const QString &filters, const std::function<void(const QString &file_path, DataStream &file_stream)> &callback)
 	{
 #ifdef EMSCRIPTEN
 		QByteArray buffer;
@@ -625,8 +628,13 @@ MainWindow::MainWindow(QWidget* const parent)
 		if (file_path.isNull())
 			return;
 
+		QFile::OpenMode flags = QFile::OpenModeFlag::WriteOnly;
+
+		if (is_assembly_file_path(file_path))
+			flags.setFlag(QFile::OpenModeFlag::Text);
+
 		QFile file(file_path);
-		if (!file.open(QFile::OpenModeFlag::WriteOnly))
+		if (!file.open(flags))
 			QMessageBox::critical(this, "Error", "Failed to save file: file could not be opened for writing.");
 
 		DataStream stream(&file);
@@ -684,7 +692,7 @@ MainWindow::MainWindow(QWidget* const parent)
 				{
 					QMessageBox::critical(this, "Error", QStringLiteral("Failed to save file. Exception details: ") + e.what());
 				}
-			}, format == Tiles::Format::ASSEMBLY ? std::ios::openmode() : std::ios::binary // TODO: Also when using '.asm'!!!
+			}, format == Tiles::Format::ASSEMBLY ? std::ios::openmode() : std::ios::binary
 		);
 	};
 
@@ -796,7 +804,7 @@ MainWindow::MainWindow(QWidget* const parent)
 				{
 					QMessageBox::critical(this, "Error", QStringLiteral("Failed to save file. Exception details: ") + e.what());
 				}
-			}, std::ios::binary // TODO: Not always binary!!!
+			}, std::ios::binary
 		);
 	};
 
