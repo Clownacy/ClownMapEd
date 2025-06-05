@@ -587,11 +587,18 @@ MainWindow::MainWindow(QWidget* const parent)
 	// Menubar: File/Save Data File //
 	//////////////////////////////////
 
-	const auto save_file_std_stream = [this, is_assembly_file_path]([[maybe_unused]] const QString &hint_filename, const QString &caption, const QString &filters, const std::function<void(const QString &file_path, std::ostream &file_stream)> &callback, std::ios::openmode flags = {})
+	[[maybe_unused]] const auto ask_if_assembly = [this]()
+	{
+		return QMessageBox::question(this, "Format", "Save as assembly?");
+	};
+
+	const auto save_file_std_stream = [this, ask_if_assembly, is_assembly_file_path]([[maybe_unused]] const QString &hint_filename, const QString &caption, const QString &filters, const std::function<void(std::ostream &file_stream, bool is_assembly_file)> &callback, [[maybe_unused]] const bool should_ask_if_assembly = false, std::ios::openmode flags = {})
 	{
 #ifdef EMSCRIPTEN
+		const bool is_assembly_file = should_ask_if_assembly && ask_if_assembly();
+
 		std::stringstream stream(flags | std::ios::in | std::ios::out);
-		callback("dummy", stream); // TODO: Is there any way to get the correct path here?
+		callback(stream, is_assembly_file);
 		const auto stream_string = stream.str();
 		QFileDialog::saveFileContent(QByteArray(stream_string.data(), stream_string.size()), hint_filename, this);
 #else
@@ -600,7 +607,9 @@ MainWindow::MainWindow(QWidget* const parent)
 		if (file_path.isNull())
 			return;
 
-		if (is_assembly_file_path(file_path))
+		const bool is_assembly_file = is_assembly_file_path(file_path);
+
+		if (is_assembly_file)
 			flags &= ~std::ios::binary;
 
 		std::ofstream stream(file_path.toStdString(), flags);
@@ -611,16 +620,18 @@ MainWindow::MainWindow(QWidget* const parent)
 			return;
 		}
 
-		callback(file_path, stream);
+		callback(stream, is_assembly_file);
 #endif
 	};
 
-	const auto save_file_data_stream = [this, is_assembly_file_path]([[maybe_unused]] const QString &hint_filename, const QString &caption, const QString &filters, const std::function<void(const QString &file_path, DataStream &file_stream)> &callback)
+	const auto save_file_data_stream = [this, ask_if_assembly, is_assembly_file_path]([[maybe_unused]] const QString &hint_filename, const QString &caption, const QString &filters, const std::function<void(DataStream &file_stream, bool is_assembly_file)> &callback, [[maybe_unused]] const bool should_ask_if_assembly = false)
 	{
 #ifdef EMSCRIPTEN
+		const bool is_assembly_file = should_ask_if_assembly && ask_if_assembly();
+
 		QByteArray buffer;
 		DataStream stream(&buffer, QIODeviceBase::ReadWrite);
-		callback("dummy", stream); // TODO: Is there any way to get the correct path here?
+		callback(stream, is_assembly_file);
 		QFileDialog::saveFileContent(buffer, hint_filename, this);
 #else
 		const QString file_path = QFileDialog::getSaveFileName(this, caption, QString(), filters, nullptr, QFileDialog::DontConfirmOverwrite);
@@ -628,9 +639,11 @@ MainWindow::MainWindow(QWidget* const parent)
 		if (file_path.isNull())
 			return;
 
+		const bool is_assembly_file = is_assembly_file_path(file_path);
+
 		QFile::OpenMode flags = QFile::OpenModeFlag::WriteOnly;
 
-		if (is_assembly_file_path(file_path))
+		if (is_assembly_file)
 			flags.setFlag(QFile::OpenModeFlag::Text);
 
 		QFile file(file_path);
@@ -639,20 +652,20 @@ MainWindow::MainWindow(QWidget* const parent)
 
 		DataStream stream(&file);
 
-		callback(file_path, stream);
+		callback(stream, is_assembly_file);
 #endif
 	};
 
-	const auto save_tile_file = [this, save_file_std_stream, is_assembly_file_path](const QString &compression_name, const QString &file_extension, const Tiles::Format format)
+	const auto save_tile_file = [this, save_file_std_stream](const QString &compression_name, const QString &file_extension, const Tiles::Format format)
 	{
 		save_file_std_stream("tiles." + file_extension, "Save " + compression_name + " Tile Graphics File", compression_name + " Tile Graphics Files (*." + file_extension + " *.bin *.asm);;All Files (*.*)",
-			[&](const QString &file_path, std::ostream &file_stream)
+			[&](std::ostream &file_stream, const bool is_assembly_file)
 			{
 				try
 				{
 					const auto &tiles = tile_manager.getTiles();
 
-					if (is_assembly_file_path(file_path))
+					if (is_assembly_file)
 					{
 						std::stringstream string_stream(std::ios::in | std::ios::out | std::ios::binary);
 						string_stream.exceptions(std::ios::badbit | std::ios::eofbit | std::ios::failbit);
@@ -692,7 +705,7 @@ MainWindow::MainWindow(QWidget* const parent)
 				{
 					QMessageBox::critical(this, "Error", QStringLiteral("Failed to save file. Exception details: ") + e.what());
 				}
-			}, format == Tiles::Format::ASSEMBLY ? std::ios::openmode() : std::ios::binary
+			}, true, format == Tiles::Format::ASSEMBLY ? std::ios::openmode() : std::ios::binary
 		);
 	};
 
@@ -760,7 +773,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	const auto save_palette_file = [this, save_file_data_stream](const int starting_palette_line, const int ending_palette_line)
 	{
 		save_file_data_stream("palette.bin", "Save Palette File", "Palette Files (*.bin);;All Files (*.*)",
-			[&](const QString &file_path, DataStream &file_stream)
+			[&](DataStream &file_stream, [[maybe_unused]] const bool is_assembly_file)
 			{
 				palette->toDataStream(file_stream, starting_palette_line, ending_palette_line);
 			}
@@ -789,22 +802,20 @@ MainWindow::MainWindow(QWidget* const parent)
 	);
 
 	// TODO: This lambda is pointless now: get rid of it.
-	const auto save_asm_or_bin_file = [this, save_file_std_stream, is_assembly_file_path]([[maybe_unused]] const QString &hint_filename, const QString &caption, const QString &filters, const std::function<void(std::ostream &stream, bool saving_assembly_file)> &callback)
+	const auto save_asm_or_bin_file = [this, save_file_std_stream]([[maybe_unused]] const QString &hint_filename, const QString &caption, const QString &filters, const std::function<void(std::ostream &stream, bool saving_assembly_file)> &callback)
 	{
 		save_file_std_stream(hint_filename, caption, filters,
-			[&](const QString &file_path, std::ostream &file_stream)
+			[&](std::ostream &file_stream, const bool is_assembly_file)
 			{
-				const bool saving_assembly_file = is_assembly_file_path(file_path);
-
 				try
 				{
-					callback(file_stream, saving_assembly_file);
+					callback(file_stream, is_assembly_file);
 				}
 				catch (const std::exception &e)
 				{
 					QMessageBox::critical(this, "Error", QStringLiteral("Failed to save file. Exception details: ") + e.what());
 				}
-			}, std::ios::binary
+			}, true, std::ios::binary
 		);
 	};
 
@@ -1072,7 +1083,7 @@ MainWindow::MainWindow(QWidget* const parent)
 			bool success = false;
 
 			save_file_data_stream("image.png", caption, filters,
-				[&]([[maybe_unused]] const QString &file_path, DataStream &file_stream)
+				[&](DataStream &file_stream, [[maybe_unused]] const bool is_assembly_file)
 				{
 					success = image.save(file_stream.device(), "PNG");
 				}
