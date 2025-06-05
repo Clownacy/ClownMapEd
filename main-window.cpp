@@ -587,9 +587,9 @@ MainWindow::MainWindow(QWidget* const parent)
 	// Menubar: File/Save Data File //
 	//////////////////////////////////
 
-	const auto save_file_std_stream = [this](const std::ios::openmode flags, const QString &caption, const QString &filters, const std::function<void(const QString &file_path, std::ostream &file_stream)> &callback)
+	const auto save_file_std_stream = [this](const QString &caption, const QString &filters, const std::function<void(const QString &file_path, std::ostream &file_stream)> &callback, const std::ios::openmode flags = {})
 	{
-#ifndef EMSCRIPTEN
+#ifdef EMSCRIPTEN
 		std::stringstream stream(flags | std::ios::in | std::ios::out);
 		callback("dummy", stream); // TODO: Is there any way to get the correct path here?
 		const auto stream_string = stream.str();
@@ -612,9 +612,32 @@ MainWindow::MainWindow(QWidget* const parent)
 #endif
 	};
 
+	const auto save_file_data_stream = [this](const QString &caption, const QString &filters, const std::function<void(const QString &file_path, DataStream &file_stream)> &callback)
+	{
+#ifdef EMSCRIPTEN
+		QByteArray buffer;
+		DataStream stream(&buffer, QIODeviceBase::ReadWrite);
+		callback("dummy", stream); // TODO: Is there any way to get the correct path here?
+		QFileDialog::saveFileContent(buffer, "", this);
+#else
+		const QString file_path = QFileDialog::getSaveFileName(this, caption, QString(), filters, nullptr, QFileDialog::DontConfirmOverwrite);
+
+		if (file_path.isNull())
+			return;
+
+		QFile file(file_path);
+		if (!file.open(QFile::OpenModeFlag::WriteOnly))
+			QMessageBox::critical(this, "Error", "Failed to save file: file could not be opened for writing.");
+
+		DataStream stream(&file);
+
+		callback(file_path, stream);
+#endif
+	};
+
 	const auto save_tile_file = [this, save_file_std_stream, is_assembly_file_path](const QString &compression_name, const QString &file_extension, const Tiles::Format format)
 	{
-		save_file_std_stream(format == Tiles::Format::ASSEMBLY ? std::ios::openmode() : std::ios::binary, "Save " + compression_name + " Tile Graphics File", compression_name + " Tile Graphics Files (*." + file_extension + " *.bin *.asm);;All Files (*.*)",
+		save_file_std_stream("Save " + compression_name + " Tile Graphics File", compression_name + " Tile Graphics Files (*." + file_extension + " *.bin *.asm);;All Files (*.*)",
 			[&](const QString &file_path, std::ostream &file_stream)
 			{
 				try
@@ -661,7 +684,7 @@ MainWindow::MainWindow(QWidget* const parent)
 				{
 					QMessageBox::critical(this, "Error", QStringLiteral("Failed to save file. Exception details: ") + e.what());
 				}
-			}
+			}, format == Tiles::Format::ASSEMBLY ? std::ios::openmode() : std::ios::binary
 		);
 	};
 
@@ -726,19 +749,14 @@ MainWindow::MainWindow(QWidget* const parent)
 		}
 	);
 
-	const auto save_palette_file = [this](const int starting_palette_line, const int ending_palette_line)
+	const auto save_palette_file = [this, save_file_data_stream](const int starting_palette_line, const int ending_palette_line)
 	{
-		const QString file_path = QFileDialog::getSaveFileName(this, "Save Palette File", QString(), "Palette Files (*.bin);;All Files (*.*)", nullptr, QFileDialog::DontConfirmOverwrite);
-
-		if (file_path.isNull())
-			return;
-
-		QFile file(file_path);
-		if (!file.open(QFile::OpenModeFlag::WriteOnly))
-			QMessageBox::critical(this, "Error", "Failed to save file: file could not be opened for writing.");
-
-		DataStream stream(&file);
-		palette->toDataStream(stream, starting_palette_line, ending_palette_line);
+		save_file_data_stream("Save Palette File", "Palette Files (*.bin);;All Files (*.*)",
+			[&](const QString &file_path, DataStream &file_stream)
+			{
+				palette->toDataStream(file_stream, starting_palette_line, ending_palette_line);
+			}
+		);
 	};
 
 	connect(ui->actionSave_Primary_Palette_Line, &QAction::triggered, this,
