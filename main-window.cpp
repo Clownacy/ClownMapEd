@@ -1955,6 +1955,11 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(&sprite_viewer, &SpriteViewer::selectedSpriteChanged, this, update_menubar);
 	connect(&sprite_mappings, &SignalWrapper<SpriteMappings>::modified, this, update_menubar);
 
+#ifdef EMSCRIPTEN
+	// We don't need the Exit button on the web.
+	ui->actionExit->deleteLater();
+#endif
+
 	// Manually update the menubar upon startup so that the various options are properly enabled.
 	update_menubar();
 }
