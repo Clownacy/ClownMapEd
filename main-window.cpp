@@ -379,7 +379,7 @@ MainWindow::MainWindow(QWidget* const parent)
 		);
 	};
 
-	const auto load_file = [this]([[maybe_unused]] const QString &caption, const QString &filters, const std::function<void(const QString &file_path, std::istream &file_stream)> &callback)
+	const auto load_file_std_stream = [this]([[maybe_unused]] const QString &caption, const QString &filters, const std::function<void(const QString &file_path, std::istream &file_stream)> &callback)
 	{
 #ifdef EMSCRIPTEN
 		QFileDialog::getOpenFileContent(filters,
@@ -433,9 +433,9 @@ MainWindow::MainWindow(QWidget* const parent)
 	};
 
 	connect(ui->actionLoad_Tiles_Uncompressed, &QAction::triggered, this,
-		[this, load_file, load_uncompressed_tile_file]()
+		[this, load_file_std_stream, load_uncompressed_tile_file]()
 		{
-			load_file(
+			load_file_std_stream(
 				"Open Tile Graphics File",
 				"Uncompressed Tile Graphics Files (*.bin *.unc);;All Files (*.*)",
 				[load_uncompressed_tile_file]([[maybe_unused]] const QString &file_path, std::istream &file_stream)
@@ -447,9 +447,9 @@ MainWindow::MainWindow(QWidget* const parent)
 	);
 
 	connect(ui->actionLoad_Tiles_Nemesis, &QAction::triggered, this,
-		[this, load_file, load_nemesis_tile_file]()
+		[this, load_file_std_stream, load_nemesis_tile_file]()
 		{
-			load_file(
+			load_file_std_stream(
 				"Open Nemesis-Compressed Tile Graphics File",
 				"Nemesis-Compressed Tile Graphics Files (*.bin *.nem);;All Files (*.*)",
 				[load_nemesis_tile_file]([[maybe_unused]] const QString &file_path, std::istream &file_stream)
@@ -461,9 +461,9 @@ MainWindow::MainWindow(QWidget* const parent)
 	);
 
 	connect(ui->actionLoad_Tiles_Kosinski, &QAction::triggered, this,
-		[this, load_file, load_kosinski_tile_file]()
+		[this, load_file_std_stream, load_kosinski_tile_file]()
 		{
-			load_file(
+			load_file_std_stream(
 				"Open Kosinski-Compressed Tile Graphics File",
 				"Kosinski-Compressed Tile Graphics Files (*.bin *.kos);;All Files (*.*)",
 				[load_kosinski_tile_file]([[maybe_unused]] const QString &file_path, std::istream &file_stream)
@@ -475,9 +475,9 @@ MainWindow::MainWindow(QWidget* const parent)
 	);
 
 	connect(ui->actionLoad_Tiles_Moduled_Kosinski, &QAction::triggered, this,
-		[this, load_file, load_moduled_kosinski_tile_file]()
+		[this, load_file_std_stream, load_moduled_kosinski_tile_file]()
 		{
-			load_file(
+			load_file_std_stream(
 				"Open Moduled Kosinski-Compressed Tile Graphics File",
 				"Moduled Kosinski-Compressed Tile Graphics Files (*.bin *.kosm);;All Files (*.*)",
 				[load_moduled_kosinski_tile_file]([[maybe_unused]] const QString &file_path, std::istream &file_stream)
@@ -489,9 +489,9 @@ MainWindow::MainWindow(QWidget* const parent)
 	);
 
 	connect(ui->actionLoad_Tiles_Kosinski_Plus, &QAction::triggered, this,
-		[this, load_file, load_kosinski_plus_tile_file]()
+		[this, load_file_std_stream, load_kosinski_plus_tile_file]()
 		{
-			load_file(
+			load_file_std_stream(
 				"Open Kosinski+-Compressed Tile Graphics File",
 				"Kosinski+-Compressed Tile Graphics Files (*.bin *.kosp);;All Files (*.*)",
 				[load_kosinski_plus_tile_file]([[maybe_unused]] const QString &file_path, std::istream &file_stream)
@@ -503,9 +503,9 @@ MainWindow::MainWindow(QWidget* const parent)
 	);
 
 	connect(ui->actionLoad_Tiles_Moduled_Kosinski_Plus, &QAction::triggered, this,
-		[this, load_file, load_moduled_kosinski_plus_tile_file]()
+		[this, load_file_std_stream, load_moduled_kosinski_plus_tile_file]()
 		{
-			load_file(
+			load_file_std_stream(
 				"Open Moduled Kosinski+-Compressed Tile Graphics File",
 				"Moduled Kosinski+-Compressed Tile Graphics Files (*.bin *.kospm);;All Files (*.*)",
 				[load_moduled_kosinski_plus_tile_file]([[maybe_unused]] const QString &file_path, std::istream &file_stream)
@@ -517,9 +517,9 @@ MainWindow::MainWindow(QWidget* const parent)
 	);
 
 	connect(ui->actionLoad_Tiles_Comper, &QAction::triggered, this,
-		[this, load_file, load_comper_tile_file]()
+		[this, load_file_std_stream, load_comper_tile_file]()
 		{
-			load_file(
+			load_file_std_stream(
 				"Open Comper-Compressed Tile Graphics File",
 				"Comper-Compressed Tile Graphics Files (*.bin *.comp);;All Files (*.*)",
 				[load_comper_tile_file]([[maybe_unused]] const QString &file_path, std::istream &file_stream)
@@ -559,9 +559,9 @@ MainWindow::MainWindow(QWidget* const parent)
 	);
 
 	connect(ui->actionLoad_Mappings, &QAction::triggered, this,
-		[this, load_file, load_sprite_mappings_file]()
+		[this, load_file_std_stream, load_sprite_mappings_file]()
 		{
-			load_file(
+			load_file_std_stream(
 				"Open Sprite Mappings File",
 				"Sprite Mapping Files (*.bin *.asm);;All Files (*.*)",
 				load_sprite_mappings_file
@@ -570,10 +570,10 @@ MainWindow::MainWindow(QWidget* const parent)
 	);
 
 	connect(ui->actionLoad_Sprite_Pattern_Cues, &QAction::triggered, this,
-		[this, load_file, load_dynamic_pattern_load_cue_file]()
+		[this, load_file_std_stream, load_dynamic_pattern_load_cue_file]()
 		{
 			// TODO: Filters.
-			load_file(
+			load_file_std_stream(
 				"Open Dynamic Pattern Loading Cue File",
 				"Pattern Cue Files (*.bin *.asm);;All Files (*.*)",
 				load_dynamic_pattern_load_cue_file
