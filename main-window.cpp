@@ -652,9 +652,9 @@ MainWindow::MainWindow(QWidget* const parent)
 						tiles.toStream(string_stream, format);
 
 						file_stream << QStringLiteral("; --------------------------------------------------------------------------------\n"
-												 "; %1 tile graphics - output from ClownMapEd\n"
-												 "; --------------------------------------------------------------------------------\n"
-												 ).arg(compression_name).toStdString();
+						                              "; %1 tile graphics - output from ClownMapEd\n"
+						                              "; --------------------------------------------------------------------------------\n"
+						                              ).arg(compression_name).toStdString();
 
 						const std::string::size_type bytes_per_line = 0x20;
 						const std::string &output_string = string_stream.str();
