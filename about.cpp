@@ -1,13 +1,11 @@
 #include "about.h"
-#include "ui_about.h"
 
 #include <QApplication>
 
 About::About(QWidget *parent) :
-	QDialog(parent),
-	ui(new Ui::About)
+	QDialog(parent)
 {
-	ui->setupUi(this);
+	ui.setupUi(this);
 
 	setModal(true);
 	setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
@@ -15,10 +13,5 @@ About::About(QWidget *parent) :
 	layout()->setSizeConstraint(QLayout::SetFixedSize);
 
 	// Replace the version placeholder with the real version.
-	ui->label->setText(ui->label->text().replace("[VERSION]", QApplication::applicationVersion()));
-}
-
-About::~About()
-{
-	delete ui;
+	ui.label->setText(ui.label->text().replace("[VERSION]", QApplication::applicationVersion()));
 }
