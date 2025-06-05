@@ -1042,13 +1042,8 @@ MainWindow::MainWindow(QWidget* const parent)
 	// Menubar: File/Save to Image //
 	/////////////////////////////////
 
-	const auto export_image = [this](const bool render_as_is)
+	const auto export_image = [this, save_file_data_stream](const bool render_as_is)
 	{
-		const QString file_path = QFileDialog::getSaveFileName(this, render_as_is ? "Render Sprite Frame" : "Export Sprite Frame", QString(), "Image (*.png *.bmp)");
-
-		if (file_path.isNull())
-			return;
-
 		const auto &frame = sprite_mappings->frames[sprite_viewer.selectedSpriteIndex().value()];
 		const auto &frame_rect = calculateRect(frame);
 
@@ -1063,9 +1058,15 @@ MainWindow::MainWindow(QWidget* const parent)
 
 		draw(frame, painter, !render_as_is, tile_manager, render_as_is ? TileManager::PixmapType::NO_BACKGROUND : TileManager::PixmapType::WITH_BACKGROUND, sprite_viewer.startingPaletteLine(), -frame_rect.left(), -frame_rect.top());
 
-		// Save the image to disk.
-		if (!image.save(file_path))
-			QMessageBox::critical(this, "Error", "Failed to export image.");
+		// TODO: This one should ask for permission to overwrite!!!
+		save_file_data_stream(render_as_is ? "Render Sprite Frame" : "Export Sprite Frame", "Image (*.png *.bmp)",
+			[&](const QString &file_path, DataStream &file_stream)
+			{
+				// Save the image to disk.
+				if (!image.save(file_stream.device()))
+					QMessageBox::critical(this, "Error", "Failed to export image.");
+			}
+		);
 	};
 
 	connect(ui->actionExport_Sprite_Frame, &QAction::triggered, this,
