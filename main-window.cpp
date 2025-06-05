@@ -684,7 +684,7 @@ MainWindow::MainWindow(QWidget* const parent)
 				{
 					QMessageBox::critical(this, "Error", QStringLiteral("Failed to save file. Exception details: ") + e.what());
 				}
-			}, format == Tiles::Format::ASSEMBLY ? std::ios::openmode() : std::ios::binary
+			}, format == Tiles::Format::ASSEMBLY ? std::ios::openmode() : std::ios::binary // TODO: Also when using '.asm'!!!
 		);
 	};
 
@@ -781,31 +781,29 @@ MainWindow::MainWindow(QWidget* const parent)
 	);
 
 	// TODO: This lambda is pointless now: get rid of it.
-	const auto save_asm_or_bin_file = [this, is_assembly_file_path](const QString &file_path, const std::function<void(std::ostream &stream, bool saving_assembly_file)> &callback)
+	const auto save_asm_or_bin_file = [this, save_file_std_stream, is_assembly_file_path](const QString &caption, const QString &filters, const std::function<void(std::ostream &stream, bool saving_assembly_file)> &callback)
 	{
-		if (file_path.isNull())
-			return;
+		save_file_std_stream(caption, filters,
+			[&](const QString &file_path, std::ostream &file_stream)
+			{
+				const bool saving_assembly_file = is_assembly_file_path(file_path);
 
-		const bool saving_assembly_file = is_assembly_file_path(file_path);
-
-		std::ofstream stream(file_path.toStdString(), saving_assembly_file ? static_cast<std::ios::openmode>(0) : std::ios::binary);
-		if (!stream.is_open())
-			QMessageBox::critical(this, "Error", "Failed to save file: file could not be opened for writing.");
-
-		try
-		{
-			callback(stream, saving_assembly_file);
-		}
-		catch (const std::exception &e)
-		{
-			QMessageBox::critical(this, "Error", QStringLiteral("Failed to save file. Exception details: ") + e.what());
-		}
+				try
+				{
+					callback(file_stream, saving_assembly_file);
+				}
+				catch (const std::exception &e)
+				{
+					QMessageBox::critical(this, "Error", QStringLiteral("Failed to save file. Exception details: ") + e.what());
+				}
+			}, std::ios::binary // TODO: Not always binary!!!
+		);
 	};
 
 	connect(ui->actionSave_Mappings, &QAction::triggered, this,
 		[this, save_asm_or_bin_file]()
 		{
-			save_asm_or_bin_file(QFileDialog::getSaveFileName(this, "Save Sprite Mappings File", QString(), "Sprite Mapping Files (*.bin *.asm);;All Files (*.*)", nullptr, QFileDialog::DontConfirmOverwrite),
+			save_asm_or_bin_file("Save Sprite Mappings File", "Sprite Mapping Files (*.bin *.asm);;All Files (*.*)",
 				[this](std::ostream &stream, const bool saving_assembly_file)
 				{
 					const bool mapmacros = !ui->actionLegacyFormats->isChecked();
@@ -836,7 +834,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionSave_Pattern_Cues, &QAction::triggered, this,
 		[this, save_asm_or_bin_file]()
 		{
-			save_asm_or_bin_file(QFileDialog::getSaveFileName(this, "Save Dynamic Pattern Loading Cue File", QString(), "Pattern Cue Files (*.bin *.asm);;All Files (*.*)", nullptr, QFileDialog::DontConfirmOverwrite),
+			save_asm_or_bin_file("Save Dynamic Pattern Loading Cue File", "Pattern Cue Files (*.bin *.asm);;All Files (*.*)",
 				[this](std::ostream &stream, const bool saving_assembly_file)
 				{
 					const bool mapmacros = !ui->actionLegacyFormats->isChecked();
