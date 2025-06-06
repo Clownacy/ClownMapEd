@@ -13,7 +13,7 @@ You can try ClownMapEd in your web browser at [clownmaped.clownacy.com](http://c
 - Support for high-DPI displays.
 - Support for alternate operating systems, such as macOS, Linux, and the BSDs.
 - Improved data compression.
-- Support for the 'Comper' and 'Kosinski' compression formats.
+- Support for the 'Comper' and 'Kosinski+' compression formats.
 - Produces optimised Dynamic Pattern Load Cue (DPLC) data.
 - Support for the 'MapMacros' format of mappings and DPLCs.
 - Improved colour matching when importing sprites.
