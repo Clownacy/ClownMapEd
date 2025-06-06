@@ -4,6 +4,10 @@ This is a sprite editor for the Mega Drive _Sonic the Hedgehog_ games. It is a c
 
 https://info.sonicretro.org/ClownMapEd
 
+## Try It Yourself
+
+You can try ClownMapEd in your web browser at [clownmaped.clownacy.com](http://clownmaped.clownacy.com).
+
 ## Enhancements
 
 - Support for high-DPI displays.
