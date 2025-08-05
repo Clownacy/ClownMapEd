@@ -392,7 +392,7 @@ MainWindow::MainWindow(QWidget* const parent)
 		);
 #else
 		const QString file_path = QFileDialog::getOpenFileName(this, caption, QString(), filters);
-		std::ifstream file_stream(file_path.toStdString(), file_stream.binary);
+		std::ifstream file_stream(file_path.toStdString(), std::ios::binary);
 
 		if (!file_stream.is_open())
 		{
@@ -433,7 +433,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	};
 
 	connect(ui->actionLoad_Tiles_Uncompressed, &QAction::triggered, this,
-		[this, load_file_std_stream, load_uncompressed_tile_file]()
+		[load_file_std_stream, load_uncompressed_tile_file]()
 		{
 			load_file_std_stream(
 				"Open Tile Graphics File",
@@ -447,7 +447,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	);
 
 	connect(ui->actionLoad_Tiles_Nemesis, &QAction::triggered, this,
-		[this, load_file_std_stream, load_nemesis_tile_file]()
+		[load_file_std_stream, load_nemesis_tile_file]()
 		{
 			load_file_std_stream(
 				"Open Nemesis-Compressed Tile Graphics File",
@@ -461,7 +461,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	);
 
 	connect(ui->actionLoad_Tiles_Kosinski, &QAction::triggered, this,
-		[this, load_file_std_stream, load_kosinski_tile_file]()
+		[load_file_std_stream, load_kosinski_tile_file]()
 		{
 			load_file_std_stream(
 				"Open Kosinski-Compressed Tile Graphics File",
@@ -475,7 +475,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	);
 
 	connect(ui->actionLoad_Tiles_Moduled_Kosinski, &QAction::triggered, this,
-		[this, load_file_std_stream, load_moduled_kosinski_tile_file]()
+		[load_file_std_stream, load_moduled_kosinski_tile_file]()
 		{
 			load_file_std_stream(
 				"Open Moduled Kosinski-Compressed Tile Graphics File",
@@ -489,7 +489,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	);
 
 	connect(ui->actionLoad_Tiles_Kosinski_Plus, &QAction::triggered, this,
-		[this, load_file_std_stream, load_kosinski_plus_tile_file]()
+		[load_file_std_stream, load_kosinski_plus_tile_file]()
 		{
 			load_file_std_stream(
 				"Open Kosinski+-Compressed Tile Graphics File",
@@ -503,7 +503,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	);
 
 	connect(ui->actionLoad_Tiles_Moduled_Kosinski_Plus, &QAction::triggered, this,
-		[this, load_file_std_stream, load_moduled_kosinski_plus_tile_file]()
+		[load_file_std_stream, load_moduled_kosinski_plus_tile_file]()
 		{
 			load_file_std_stream(
 				"Open Moduled Kosinski+-Compressed Tile Graphics File",
@@ -517,7 +517,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	);
 
 	connect(ui->actionLoad_Tiles_Comper, &QAction::triggered, this,
-		[this, load_file_std_stream, load_comper_tile_file]()
+		[load_file_std_stream, load_comper_tile_file]()
 		{
 			load_file_std_stream(
 				"Open Comper-Compressed Tile Graphics File",
@@ -531,7 +531,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	);
 
 	connect(ui->actionLoad_Primary_Palette, &QAction::triggered, this,
-		[this, load_file_data_stream, load_palette_file]()
+		[load_file_data_stream, load_palette_file]()
 		{
 			load_file_data_stream(
 				"Open Palette File",
@@ -545,7 +545,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	);
 
 	connect(ui->actionLoad_Secondary_Palette_Lines, &QAction::triggered, this,
-		[this, load_file_data_stream, load_palette_file]()
+		[load_file_data_stream, load_palette_file]()
 		{
 			load_file_data_stream(
 				"Open Palette File",
@@ -559,7 +559,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	);
 
 	connect(ui->actionLoad_Mappings, &QAction::triggered, this,
-		[this, load_file_std_stream, load_sprite_mappings_file]()
+		[load_file_std_stream, load_sprite_mappings_file]()
 		{
 			load_file_std_stream(
 				"Open Sprite Mappings File",
@@ -570,7 +570,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	);
 
 	connect(ui->actionLoad_Sprite_Pattern_Cues, &QAction::triggered, this,
-		[this, load_file_std_stream, load_dynamic_pattern_load_cue_file]()
+		[load_file_std_stream, load_dynamic_pattern_load_cue_file]()
 		{
 			// TODO: Filters.
 			load_file_std_stream(
@@ -610,6 +610,8 @@ MainWindow::MainWindow(QWidget* const parent)
 		const auto stream_string = stream.str();
 		QFileDialog::saveFileContent(QByteArray(stream_string.data(), stream_string.size()), hint_filename, this);
 #else
+		static_cast<void>(ask_if_assembly);
+
 		const QString file_path = QFileDialog::getSaveFileName(this, caption, QString(), filters, nullptr, QFileDialog::DontConfirmOverwrite);
 
 		if (file_path.isNull())
@@ -642,6 +644,8 @@ MainWindow::MainWindow(QWidget* const parent)
 		callback(stream, is_assembly_file);
 		QFileDialog::saveFileContent(buffer, hint_filename, this);
 #else
+		static_cast<void>(ask_if_assembly);
+
 		const QString file_path = QFileDialog::getSaveFileName(this, caption, QString(), filters, nullptr, QFileDialog::DontConfirmOverwrite);
 
 		if (file_path.isNull())
@@ -1099,6 +1103,8 @@ MainWindow::MainWindow(QWidget* const parent)
 
 			return success;
 #else
+			static_cast<void>(save_file_data_stream);
+
 			const QString file_path = QFileDialog::getSaveFileName(this, caption, QString(), filters);
 
 			if (file_path.isNull())
