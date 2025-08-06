@@ -392,6 +392,10 @@ MainWindow::MainWindow(QWidget* const parent)
 		);
 #else
 		const QString file_path = QFileDialog::getOpenFileName(this, caption, QString(), filters);
+
+		if (file_path.isNull())
+			return;
+
 		std::ifstream file_stream(file_path.toStdString(), std::ios::binary);
 
 		if (!file_stream.is_open())
@@ -980,13 +984,12 @@ MainWindow::MainWindow(QWidget* const parent)
 					}, this
 				);
 #else
-				QImage image;
-
 				const QString file_path = QFileDialog::getOpenFileName(this, caption, QString(), filters);
 
-				if (!file_path.isNull())
-					image.load(file_path);
+				if (file_path.isNull())
+					return;
 
+				QImage image(file_path);
 				callback(image);
 #endif
 			};
