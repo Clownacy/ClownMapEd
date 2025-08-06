@@ -345,6 +345,8 @@ MainWindow::MainWindow(QWidget* const parent)
 				}
 
 				sprite_viewer.setSelectedSprite(0);
+
+				ui->actionPattern_Load_Cues->setChecked(false);
 			}
 		);
 	};
