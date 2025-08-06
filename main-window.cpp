@@ -865,7 +865,7 @@ MainWindow::MainWindow(QWidget* const parent)
 						stream << QStringLiteral("; --------------------------------------------------------------------------------\n"
 						                         "; Sprite mappings - output from ClownMapEd - %1 format\n"
 						                         "; --------------------------------------------------------------------------------\n\n"
-						                        ).arg(mapmacros ? QStringLiteral("MapMacros") : libsonassmd::game == libsonassmd::Game::SONIC_1 ? QStringLiteral("Sonic 1/CD") : libsonassmd::game == libsonassmd::Game::SONIC_2 ? QStringLiteral("Sonic 2") : QStringLiteral("Sonic 3 & Knuckles")).toStdString();
+						                        ).arg(mapmacros ? QStringLiteral("MapMacros") : libsonassmd::settings.game == libsonassmd::Game::SONIC_1 ? QStringLiteral("Sonic 1/CD") : libsonassmd::settings.game == libsonassmd::Game::SONIC_2 ? QStringLiteral("Sonic 2") : QStringLiteral("Sonic 3 & Knuckles")).toStdString();
 
 						sprite_mappings_copy.toStream(stream, SpriteMappings::Format::ASSEMBLY);
 					}
@@ -894,7 +894,7 @@ MainWindow::MainWindow(QWidget* const parent)
 						stream << QStringLiteral("; --------------------------------------------------------------------------------\n"
 						                         "; Dynamic Pattern Loading Cues - output from ClownMapEd - %1 format\n"
 						                         "; --------------------------------------------------------------------------------\n\n"
-						                        ).arg(mapmacros ? QStringLiteral("MapMacros") : libsonassmd::game == libsonassmd::Game::SONIC_1 ? QStringLiteral("Sonic 1") : QStringLiteral("Sonic 2/3&K/CD")).toStdString();
+						                        ).arg(mapmacros ? QStringLiteral("MapMacros") : libsonassmd::settings.game == libsonassmd::Game::SONIC_1 ? QStringLiteral("Sonic 1") : QStringLiteral("Sonic 2/3&K/CD")).toStdString();
 
 						dplc.toStream(stream, DynamicPatternLoadCues::Format::ASSEMBLY);
 					}
@@ -1902,7 +1902,7 @@ MainWindow::MainWindow(QWidget* const parent)
 
 	const auto set_legacy_assembly_formats_enabled = [](const bool enabled)
 	{
-		libsonassmd::mapmacros = !enabled;
+		libsonassmd::settings.mapmacros = !enabled;
 	};
 
 	connect(ui->actionLegacyFormats, &QAction::toggled, this, set_legacy_assembly_formats_enabled);
@@ -2005,7 +2005,7 @@ void MainWindow::SaveState(const int slot)
 {
 	QSettings settings;
 	const QString prefix = GetSlotPrefix(slot);
-	settings.setValue(prefix + "GameFormat", GameFormatToSetting(libsonassmd::game));
+	settings.setValue(prefix + "GameFormat", GameFormatToSetting(libsonassmd::settings.game));
 	settings.setValue(prefix + "OrientTilesVertically", ui->actionOrient_Tiles_Vertically->isChecked());
 	settings.setValue(prefix + "HideDuplicatedTilesInFrames", ui->actionHide_Duplicated_Tiles_in_Frames->isChecked());
 	settings.setValue(prefix + "StartingPaletteLine", tile_viewer.paletteLine());
@@ -2126,7 +2126,7 @@ void MainWindow::UpdateTitle()
 		return " | " + string + (!index.has_value() ? "s: " : (" " + QString::number(*index, 0x10).toUpper() + "/")) + QString::number(total, 0x10).toUpper();
 	};
 
-	const QString format_string = libsonassmd::game == libsonassmd::Game::SONIC_1 ? "S1" : libsonassmd::game == libsonassmd::Game::SONIC_2 ? "S2" : "S3K";
+	const QString format_string = libsonassmd::settings.game == libsonassmd::Game::SONIC_1 ? "S1" : libsonassmd::settings.game == libsonassmd::Game::SONIC_2 ? "S2" : "S3K";
 	const QString frame_string = do_string_thingy("Frame", sprite_viewer.selectedSpriteIndex(), sprite_mappings->frames.size());
 	const QString piece_string = !sprite_viewer.selectedSpriteIndex().has_value() ? "" : do_string_thingy("Piece", sprite_viewer.selectedPieceIndex(), sprite_mappings->frames[*sprite_viewer.selectedSpriteIndex()].pieces.size());
 	const auto tile = tile_viewer.selection().indexOf(true);
@@ -2138,7 +2138,7 @@ void MainWindow::UpdateTitle()
 
 void MainWindow::SetGameFormat(const libsonassmd::Game game)
 {
-	libsonassmd::game = game;
+	libsonassmd::settings.game = game;
 
 	ui->actionSonic_1->setChecked(game == libsonassmd::Game::SONIC_1);
 	ui->actionSonic_2->setChecked(game == libsonassmd::Game::SONIC_2);
