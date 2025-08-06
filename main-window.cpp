@@ -80,8 +80,6 @@ MainWindow::MainWindow(QWidget* const parent)
 {
 	ui->setupUi(this);
 
-	QSettings settings;
-
 	// Set-up the window's contents.
 	horizontal_layout.addWidget(&sprite_piece_picker);
 	horizontal_layout.addWidget(&palette_editor);
@@ -219,28 +217,11 @@ MainWindow::MainWindow(QWidget* const parent)
 	// Window Title //
 	//////////////////
 
-	const auto update_title = [this]()
-	{
-		const auto do_string_thingy = [](const QString &string, const std::optional<int> index, const int total)
-		{
-			return " | " + string + (!index.has_value() ? "s: " : (" " + QString::number(*index, 0x10).toUpper() + "/")) + QString::number(total, 0x10).toUpper();
-		};
+	connect(&sprite_viewer, &SpriteViewer::selectedSpriteChanged, this, &MainWindow::UpdateTitle);
+	connect(&sprite_mappings, &SignalWrapper<SpriteMappings>::modified, this, &MainWindow::UpdateTitle);
+	connect(&tile_viewer, &TileViewer::tileSelected, this, &MainWindow::UpdateTitle);
 
-		const QString format_string = libsonassmd::game == libsonassmd::Game::SONIC_1 ? "S1" : libsonassmd::game == libsonassmd::Game::SONIC_2 ? "S2" : "S3K";
-		const QString frame_string = do_string_thingy("Frame", sprite_viewer.selectedSpriteIndex(), sprite_mappings->frames.size());
-		const QString piece_string = !sprite_viewer.selectedSpriteIndex().has_value() ? "" : do_string_thingy("Piece", sprite_viewer.selectedPieceIndex(), sprite_mappings->frames[*sprite_viewer.selectedSpriteIndex()].pieces.size());
-		const auto tile = tile_viewer.selection().indexOf(true);
-		const QString tile_string = do_string_thingy("Tile", tile == -1 ? std::optional<int>() : tile, tile_manager.total_tiles());
-		const QString dplc_string = ui->actionPattern_Load_Cues->isChecked() ? " | Cues On" : "";
-
-		setWindowTitle(format_string + "MapEd" + frame_string + piece_string + tile_string + dplc_string);
-	};
-
-	connect(&sprite_viewer, &SpriteViewer::selectedSpriteChanged, this, update_title);
-	connect(&sprite_mappings, &SignalWrapper<SpriteMappings>::modified, this, update_title);
-	connect(&tile_viewer, &TileViewer::tileSelected, this, update_title);
-
-	update_title();
+	UpdateTitle();
 
 	//////////////////////////////////
 	// Menubar: File/Load Data File //
@@ -1860,67 +1841,42 @@ MainWindow::MainWindow(QWidget* const parent)
 	// Menubar: Settings/Game Format //
 	///////////////////////////////////
 
-	const auto set_game_format = [this, update_title](const libsonassmd::Game game)
-	{
-		libsonassmd::game = game;
-
-		ui->actionSonic_1->setChecked(game == libsonassmd::Game::SONIC_1);
-		ui->actionSonic_2->setChecked(game == libsonassmd::Game::SONIC_2);
-		ui->actionSonic_3_Knuckles->setChecked(game == libsonassmd::Game::SONIC_3_AND_KNUCKLES);
-
-		update_title();
-	};
-
-	connect(ui->actionSonic_1, &QAction::triggered, this, [set_game_format](){set_game_format(libsonassmd::Game::SONIC_1);});
-	connect(ui->actionSonic_2, &QAction::triggered, this, [set_game_format](){set_game_format(libsonassmd::Game::SONIC_2);});
-	connect(ui->actionSonic_3_Knuckles, &QAction::triggered, this, [set_game_format](){set_game_format(libsonassmd::Game::SONIC_3_AND_KNUCKLES);});
-
-	set_game_format(GameFormatFromSetting(settings.value("GameFormat", "SONIC_1").toString()));
+	connect(ui->actionSonic_1, &QAction::triggered, this, [this](){SetGameFormat(libsonassmd::Game::SONIC_1);});
+	connect(ui->actionSonic_2, &QAction::triggered, this, [this](){SetGameFormat(libsonassmd::Game::SONIC_2);});
+	connect(ui->actionSonic_3_Knuckles, &QAction::triggered, this, [this](){SetGameFormat(libsonassmd::Game::SONIC_3_AND_KNUCKLES);});
 
 	//////////////////////////////////////
 	// Menubar: Settings/Tile Rendering //
 	//////////////////////////////////////
 
 	connect(ui->actionOrient_Tiles_Vertically, &QAction::toggled, &tile_viewer, &TileViewer::setVerticalOrientation);
-	ui->actionOrient_Tiles_Vertically->setChecked(settings.value("OrientTilesVertically", false).toBool());
 
 	connect(ui->actionHide_Duplicated_Tiles_in_Frames, &QAction::toggled, &sprite_viewer, &SpriteViewer::setHideDuplicateTiles);
-	ui->actionHide_Duplicated_Tiles_in_Frames->setChecked(settings.value("HideDuplicatedTilesInFrames", false).toBool());
 
 	connect(ui->actionRender_Starting_with_Palette_Line_1, &QAction::triggered, this, [this](){SetStartingPaletteLine(0);});
 	connect(ui->actionRender_Starting_with_Palette_Line_2, &QAction::triggered, this, [this](){SetStartingPaletteLine(1);});
 	connect(ui->actionRender_Starting_with_Palette_Line_3, &QAction::triggered, this, [this](){SetStartingPaletteLine(2);});
 	connect(ui->actionRender_Starting_with_Palette_Line_4, &QAction::triggered, this, [this](){SetStartingPaletteLine(3);});
 
-	LoadStartingPaletteLine();
-
 	///////////////////////
 	// Menubar: Settings //
 	///////////////////////
 
-	const auto &SetUpCheckBox = [this, &settings](QAction* const action, const std::function<void(bool)> &callback, const QString &setting_key)
-	{
-		connect(action, &QAction::toggled, this, callback);
-		const bool setting_value = settings.value(setting_key, false).toBool();
-		action->setChecked(setting_value);
-		callback(setting_value);
-	};
-
-	const auto set_pattern_load_cues_enabled = [this, update_title](const bool enabled)
+	const auto set_pattern_load_cues_enabled = [this](const bool enabled)
 	{
 		ui->actionSave_Pattern_Cues->setEnabled(enabled);
 		ui->actionUnload_Pattern_Cues->setEnabled(enabled);
-		update_title();
+		UpdateTitle();
 	};
 
-	SetUpCheckBox(ui->actionPattern_Load_Cues, set_pattern_load_cues_enabled, "PatternLoadCues");
+	connect(ui->actionPattern_Load_Cues, &QAction::toggled, this, set_pattern_load_cues_enabled);
 
 	const auto set_legacy_assembly_formats_enabled = [](const bool enabled)
 	{
 		libsonassmd::mapmacros = !enabled;
 	};
 
-	SetUpCheckBox(ui->actionLegacyFormats, set_legacy_assembly_formats_enabled, "LegacyAssemblyFormats");
+	connect(ui->actionLegacyFormats, &QAction::toggled, this, set_legacy_assembly_formats_enabled);
 
 	///////////////////
 	// Menubar: Help //
@@ -2010,14 +1966,6 @@ MainWindow::MainWindow(QWidget* const parent)
 MainWindow::~MainWindow()
 {
 	// Save settings.
-	QSettings settings;
-	settings.setValue("GameFormat", GameFormatToSetting(libsonassmd::game));
-	settings.setValue("OrientTilesVertically", ui->actionOrient_Tiles_Vertically->isChecked());
-	settings.setValue("HideDuplicatedTilesInFrames", ui->actionHide_Duplicated_Tiles_in_Frames->isChecked());
-	SaveStartingPaletteLine();
-	settings.setValue("PatternLoadCues", ui->actionPattern_Load_Cues->isChecked());
-	settings.setValue("LegacyAssemblyFormats", ui->actionLegacyFormats->isChecked());
-
 	SaveState(0);
 
 	delete ui;
@@ -2027,9 +1975,14 @@ void MainWindow::SaveState(const int slot)
 {
 	QSettings settings;
 	const QString prefix = GetSlotPrefix(slot);
+	settings.setValue(prefix + "GameFormat", GameFormatToSetting(libsonassmd::game));
+	settings.setValue(prefix + "OrientTilesVertically", ui->actionOrient_Tiles_Vertically->isChecked());
+	settings.setValue(prefix + "HideDuplicatedTilesInFrames", ui->actionHide_Duplicated_Tiles_in_Frames->isChecked());
+	settings.setValue(prefix + "StartingPaletteLine", tile_viewer.paletteLine());
+	settings.setValue(prefix + "PatternLoadCues", ui->actionPattern_Load_Cues->isChecked());
+	settings.setValue(prefix + "LegacyAssemblyFormats", ui->actionLegacyFormats->isChecked());
 	settings.setValue(prefix + "SelectedSpriteIndex", sprite_viewer.selectedSpriteIndex().value_or(-1));
 	settings.setValue(prefix + "SelectedPieceIndex", sprite_viewer.selectedPieceIndex().value_or(-1));
-	SaveStartingPaletteLine(prefix);
 
 	// Save cached assets.
 	const QString directory = GetSlotDirectory(slot);
@@ -2070,7 +2023,21 @@ void MainWindow::SaveState(const int slot)
 void MainWindow::LoadState(const int slot)
 {
 	QSettings settings;
+	const QString prefix = GetSlotPrefix(slot);
 	const QString directory = GetSlotDirectory(slot);
+
+	const auto ReadSetting = [&](const auto &key, const QVariant &default_value = QVariant())
+	{
+		return settings.value(prefix + key, default_value);
+	};
+
+	// Load settings.
+	SetGameFormat(GameFormatFromSetting(ReadSetting("GameFormat", "SONIC_1").toString()));
+	ui->actionOrient_Tiles_Vertically->setChecked(ReadSetting("OrientTilesVertically", false).toBool());
+	ui->actionHide_Duplicated_Tiles_in_Frames->setChecked(ReadSetting("HideDuplicatedTilesInFrames", false).toBool());
+	SetStartingPaletteLine(ReadSetting("StartingPaletteLine", 0).toInt());
+	ui->actionPattern_Load_Cues->setChecked(ReadSetting("PatternLoadCues", false).toBool());
+	ui->actionLegacyFormats->setChecked(ReadSetting("LegacyAssemblyFormats", false).toBool());
 
 	// Load palette.
 	palette.modify([&directory](Palette &palette)
@@ -2096,12 +2063,10 @@ void MainWindow::LoadState(const int slot)
 		{
 			sprite_mappings = SpriteMappings(directory + "map.asm", SpriteMappings::Format::ASSEMBLY);
 		});
-		const QString prefix = GetSlotPrefix(slot);
-		const auto sprite = settings.value(prefix + "SelectedSpriteIndex", 0).toInt();
+		const auto sprite = ReadSetting("SelectedSpriteIndex", 0).toInt();
 		sprite_viewer.setSelectedSprite(sprite == -1 ? std::optional<int>() : sprite);
-		const auto piece = settings.value(prefix + "SelectedPieceIndex", 0).toInt();
+		const auto piece = ReadSetting("SelectedPieceIndex", 0).toInt();
 		sprite_viewer.setSelectedPiece(piece == -1 ? std::optional<int>() : piece);
-		LoadStartingPaletteLine(prefix);
 	}
 	catch (...) {}
 	// Load tiles.
@@ -2122,16 +2087,32 @@ void MainWindow::SetStartingPaletteLine(const int line)
 	ui->actionRender_Starting_with_Palette_Line_2->setChecked(line == 1);
 	ui->actionRender_Starting_with_Palette_Line_3->setChecked(line == 2);
 	ui->actionRender_Starting_with_Palette_Line_4->setChecked(line == 3);
-};
-
-void MainWindow::LoadStartingPaletteLine(QString prefix)
-{
-	QSettings settings;
-	SetStartingPaletteLine(settings.value(prefix + "StartingPaletteLine", 0).toInt());
 }
 
-void MainWindow::SaveStartingPaletteLine(QString prefix)
+void MainWindow::UpdateTitle()
 {
-	QSettings settings;
-	settings.setValue(prefix + "StartingPaletteLine", tile_viewer.paletteLine());
+	const auto do_string_thingy = [](const QString &string, const std::optional<int> index, const int total)
+	{
+		return " | " + string + (!index.has_value() ? "s: " : (" " + QString::number(*index, 0x10).toUpper() + "/")) + QString::number(total, 0x10).toUpper();
+	};
+
+	const QString format_string = libsonassmd::game == libsonassmd::Game::SONIC_1 ? "S1" : libsonassmd::game == libsonassmd::Game::SONIC_2 ? "S2" : "S3K";
+	const QString frame_string = do_string_thingy("Frame", sprite_viewer.selectedSpriteIndex(), sprite_mappings->frames.size());
+	const QString piece_string = !sprite_viewer.selectedSpriteIndex().has_value() ? "" : do_string_thingy("Piece", sprite_viewer.selectedPieceIndex(), sprite_mappings->frames[*sprite_viewer.selectedSpriteIndex()].pieces.size());
+	const auto tile = tile_viewer.selection().indexOf(true);
+	const QString tile_string = do_string_thingy("Tile", tile == -1 ? std::optional<int>() : tile, tile_manager.total_tiles());
+	const QString dplc_string = ui->actionPattern_Load_Cues->isChecked() ? " | Cues On" : "";
+
+	setWindowTitle(format_string + "MapEd" + frame_string + piece_string + tile_string + dplc_string);
+}
+
+void MainWindow::SetGameFormat(const libsonassmd::Game game)
+{
+	libsonassmd::game = game;
+
+	ui->actionSonic_1->setChecked(game == libsonassmd::Game::SONIC_1);
+	ui->actionSonic_2->setChecked(game == libsonassmd::Game::SONIC_2);
+	ui->actionSonic_3_Knuckles->setChecked(game == libsonassmd::Game::SONIC_3_AND_KNUCKLES);
+
+	UpdateTitle();
 }

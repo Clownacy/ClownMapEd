@@ -3,7 +3,6 @@
 
 #include <QHBoxLayout>
 #include <QMainWindow>
-#include <QString>
 #include <QVBoxLayout>
 
 #include "about.h"
@@ -47,8 +46,9 @@ private:
 	void LoadState(int slot);
 
 	void SetStartingPaletteLine(int line);
-	void LoadStartingPaletteLine(QString prefix = {});
-	void SaveStartingPaletteLine(QString prefix = {});
+
+	void UpdateTitle();
+	void SetGameFormat(libsonassmd::Game game);
 };
 
 #endif // MAIN_WINDOW_H
