@@ -1903,6 +1903,7 @@ MainWindow::MainWindow(QWidget* const parent)
 		const bool is_last_sprite = no_sprites || selected_sprite_index == static_cast<int>(sprite_mappings->frames.size() - 1);
 		const bool no_sprite_selected = no_sprites;
 
+		ui->actionImport_Sprite_over_Active_Frame->setDisabled(no_sprite_selected);
 		ui->actionExport_Sprite_Frame->setDisabled(no_sprite_selected);
 		ui->actionRender_Sprite_Image->setDisabled(no_sprite_selected);
 
