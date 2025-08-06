@@ -14,6 +14,7 @@
 #include <QMessageBox>
 #include <QSettings>
 #include <QStandardPaths>
+#include <QString>
 #include <QTextStream>
 #include <QtMath>
 
@@ -362,7 +363,35 @@ MainWindow::MainWindow(QWidget* const parent)
 		);
 	};
 
-	const auto load_file_std_stream = [this]([[maybe_unused]] const QString &caption, const QString &filters, const std::function<void(const QString &file_path, std::istream &file_stream)> &callback)
+	const auto GetFileName = [this](const auto &function, const QString &caption = QString(), const QString &filter = QString(), QString *selectedFilter = nullptr, QFileDialog::Options options = QFileDialog::Options())
+	{
+		// Log the previous file path. This way, when the user opens a file dialog right after
+		// starting the program, it will start in the directory of the last file that was opened
+		// before the program was closed previously.
+		QSettings settings;
+		const auto previous_file_path_key = QStringLiteral("PreviousFilePath");
+		const auto previous_file_path = settings.value(previous_file_path_key).toString();
+
+		const QString file_path = function(this, caption, previous_file_path, filter, selectedFilter, options);
+
+		// Avoid logging an empty path when the user closes the dialog without selecting a file.
+		if (!file_path.isNull())
+			settings.setValue(previous_file_path_key, file_path);
+
+		return file_path;
+	};
+
+	const auto GetOpenFileName = [this, GetFileName](const QString &caption = QString(), const QString &filter = QString(), QString *selectedFilter = nullptr, QFileDialog::Options options = QFileDialog::Options())
+	{
+		return GetFileName(QFileDialog::getOpenFileName, caption, filter, selectedFilter, options);
+	};
+
+	const auto GetSaveFileName = [this, GetFileName](const QString &caption = QString(), const QString &filter = QString(), QString *selectedFilter = nullptr, QFileDialog::Options options = QFileDialog::Options())
+	{
+		return GetFileName(QFileDialog::getSaveFileName, caption, filter, selectedFilter, options);
+	};
+
+	const auto load_file_std_stream = [this, GetOpenFileName]([[maybe_unused]] const QString &caption, const QString &filters, const std::function<void(const QString &file_path, std::istream &file_stream)> &callback)
 	{
 #ifdef EMSCRIPTEN
 		QFileDialog::getOpenFileContent(filters,
@@ -374,7 +403,7 @@ MainWindow::MainWindow(QWidget* const parent)
 			}, this
 		);
 #else
-		const QString file_path = QFileDialog::getOpenFileName(this, caption, QString(), filters);
+		const QString file_path = GetOpenFileName(caption, filters);
 
 		if (file_path.isNull())
 			return;
@@ -391,7 +420,7 @@ MainWindow::MainWindow(QWidget* const parent)
 #endif
 	};
 
-	const auto load_file_data_stream = [this]([[maybe_unused]] const QString &caption, const QString &filters, const std::function<void(DataStream &stream)> &callback)
+	const auto load_file_data_stream = [this, GetOpenFileName]([[maybe_unused]] const QString &caption, const QString &filters, const std::function<void(DataStream &stream)> &callback)
 	{
 #ifdef EMSCRIPTEN
 		QFileDialog::getOpenFileContent(filters,
@@ -402,7 +431,7 @@ MainWindow::MainWindow(QWidget* const parent)
 			}, this
 		);
 #else
-		const QString file_path = QFileDialog::getOpenFileName(this, caption, QString(), filters);
+		const QString file_path = GetOpenFileName(caption, filters);
 
 		if (file_path.isNull())
 			return;
@@ -579,7 +608,7 @@ MainWindow::MainWindow(QWidget* const parent)
 		return QMessageBox::question(this, "Format", "Save as assembly instead of binary?") == QMessageBox::Yes;
 	};
 
-	const auto save_file_std_stream = [this, ask_if_assembly, is_assembly_file_path]([[maybe_unused]] QString hint_filename, const QString &caption, const QString &filters, const std::function<void(std::ostream &file_stream, bool is_assembly_file)> &callback, [[maybe_unused]] const bool should_ask_if_assembly = false, std::ios::openmode flags = {})
+	const auto save_file_std_stream = [this, GetSaveFileName, ask_if_assembly, is_assembly_file_path]([[maybe_unused]] QString hint_filename, const QString &caption, const QString &filters, const std::function<void(std::ostream &file_stream, bool is_assembly_file)> &callback, [[maybe_unused]] const bool should_ask_if_assembly = false, std::ios::openmode flags = {})
 	{
 #ifdef EMSCRIPTEN
 		const bool is_assembly_file = should_ask_if_assembly && ask_if_assembly();
@@ -599,7 +628,7 @@ MainWindow::MainWindow(QWidget* const parent)
 #else
 		static_cast<void>(ask_if_assembly);
 
-		const QString file_path = QFileDialog::getSaveFileName(this, caption, QString(), filters, nullptr, QFileDialog::DontConfirmOverwrite);
+		const QString file_path = GetSaveFileName(caption, filters, nullptr, QFileDialog::DontConfirmOverwrite);
 
 		if (file_path.isNull())
 			return;
@@ -621,7 +650,7 @@ MainWindow::MainWindow(QWidget* const parent)
 #endif
 	};
 
-	const auto save_file_data_stream = [this, ask_if_assembly, is_assembly_file_path]([[maybe_unused]] const QString &hint_filename, const QString &caption, const QString &filters, const std::function<void(DataStream &file_stream, bool is_assembly_file)> &callback, [[maybe_unused]] const bool should_ask_if_assembly = false)
+	const auto save_file_data_stream = [this, GetSaveFileName, ask_if_assembly, is_assembly_file_path]([[maybe_unused]] const QString &hint_filename, const QString &caption, const QString &filters, const std::function<void(DataStream &file_stream, bool is_assembly_file)> &callback, [[maybe_unused]] const bool should_ask_if_assembly = false)
 	{
 #ifdef EMSCRIPTEN
 		const bool is_assembly_file = should_ask_if_assembly && ask_if_assembly();
@@ -633,7 +662,7 @@ MainWindow::MainWindow(QWidget* const parent)
 #else
 		static_cast<void>(ask_if_assembly);
 
-		const QString file_path = QFileDialog::getSaveFileName(this, caption, QString(), filters, nullptr, QFileDialog::DontConfirmOverwrite);
+		const QString file_path = GetSaveFileName(caption, filters, nullptr, QFileDialog::DontConfirmOverwrite);
 
 		if (file_path.isNull())
 			return;
@@ -953,9 +982,9 @@ MainWindow::MainWindow(QWidget* const parent)
 	};
 
 	connect(ui->actionImport_Sprite_over_Active_Frame, &QAction::triggered, this,
-		[this, frame_to_qimage]()
+		[this, frame_to_qimage, GetOpenFileName]()
 		{
-			const auto load_image_from_file = [this](const QString &caption, const QString &filters, const std::function<void(QImage &image)> &callback)
+			const auto load_image_from_file = [this, GetOpenFileName](const QString &caption, const QString &filters, const std::function<void(QImage &image)> &callback)
 			{
 #ifdef EMSCRIPTEN
 				QFileDialog::getOpenFileContent(filters,
@@ -967,7 +996,7 @@ MainWindow::MainWindow(QWidget* const parent)
 					}, this
 				);
 #else
-				const QString file_path = QFileDialog::getOpenFileName(this, caption, QString(), filters);
+				const QString file_path = GetOpenFileName(caption, filters);
 
 				if (file_path.isNull())
 					return;
@@ -1059,7 +1088,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	// Menubar: File/Save to Image //
 	/////////////////////////////////
 
-	const auto export_image = [this, save_file_data_stream](const bool render_as_is)
+	const auto export_image = [this, GetSaveFileName, save_file_data_stream](const bool render_as_is)
 	{
 		const auto &frame = sprite_mappings->frames[sprite_viewer.selectedSpriteIndex().value()];
 		const auto &frame_rect = calculateRect(frame);
@@ -1091,7 +1120,7 @@ MainWindow::MainWindow(QWidget* const parent)
 #else
 			static_cast<void>(save_file_data_stream);
 
-			const QString file_path = QFileDialog::getSaveFileName(this, caption, QString(), filters);
+			const QString file_path = GetSaveFileName(caption, filters);
 
 			if (file_path.isNull())
 				return true;
