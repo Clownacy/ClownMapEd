@@ -17,14 +17,14 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>3</number>
+      <number>0</number>
      </property>
      <property name="documentMode">
       <bool>false</bool>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
-       <string>ClownMapEd/clownassembler</string>
+       <string>ClownMapEd/ClownAssembler</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
