@@ -3,6 +3,7 @@
 
 #include <QHBoxLayout>
 #include <QMainWindow>
+#include <QString>
 #include <QVBoxLayout>
 
 #include "about.h"
@@ -44,6 +45,10 @@ private:
 
 	void SaveState(int slot);
 	void LoadState(int slot);
+
+	void SetStartingPaletteLine(int line);
+	void LoadStartingPaletteLine(QString prefix = {});
+	void SaveStartingPaletteLine(QString prefix = {});
 };
 
 #endif // MAIN_WINDOW_H

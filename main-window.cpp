@@ -1887,24 +1887,12 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionHide_Duplicated_Tiles_in_Frames, &QAction::toggled, &sprite_viewer, &SpriteViewer::setHideDuplicateTiles);
 	ui->actionHide_Duplicated_Tiles_in_Frames->setChecked(settings.value("HideDuplicatedTilesInFrames", false).toBool());
 
-	const auto set_starting_palette_line = [this](const int line)
-	{
-		sprite_piece_picker.setPaletteLine(line);
-		sprite_viewer.setStartingPaletteLine(line);
-		tile_viewer.setPaletteLine(line);
+	connect(ui->actionRender_Starting_with_Palette_Line_1, &QAction::triggered, this, [this](){SetStartingPaletteLine(0);});
+	connect(ui->actionRender_Starting_with_Palette_Line_2, &QAction::triggered, this, [this](){SetStartingPaletteLine(1);});
+	connect(ui->actionRender_Starting_with_Palette_Line_3, &QAction::triggered, this, [this](){SetStartingPaletteLine(2);});
+	connect(ui->actionRender_Starting_with_Palette_Line_4, &QAction::triggered, this, [this](){SetStartingPaletteLine(3);});
 
-		ui->actionRender_Starting_with_Palette_Line_1->setChecked(line == 0);
-		ui->actionRender_Starting_with_Palette_Line_2->setChecked(line == 1);
-		ui->actionRender_Starting_with_Palette_Line_3->setChecked(line == 2);
-		ui->actionRender_Starting_with_Palette_Line_4->setChecked(line == 3);
-	};
-
-	connect(ui->actionRender_Starting_with_Palette_Line_1, &QAction::triggered, this, [set_starting_palette_line](){set_starting_palette_line(0);});
-	connect(ui->actionRender_Starting_with_Palette_Line_2, &QAction::triggered, this, [set_starting_palette_line](){set_starting_palette_line(1);});
-	connect(ui->actionRender_Starting_with_Palette_Line_3, &QAction::triggered, this, [set_starting_palette_line](){set_starting_palette_line(2);});
-	connect(ui->actionRender_Starting_with_Palette_Line_4, &QAction::triggered, this, [set_starting_palette_line](){set_starting_palette_line(3);});
-
-	set_starting_palette_line(settings.value("StartingPaletteLine", 0).toInt());
+	LoadStartingPaletteLine();
 
 	///////////////////////
 	// Menubar: Settings //
@@ -2026,7 +2014,7 @@ MainWindow::~MainWindow()
 	settings.setValue("GameFormat", GameFormatToSetting(libsonassmd::game));
 	settings.setValue("OrientTilesVertically", ui->actionOrient_Tiles_Vertically->isChecked());
 	settings.setValue("HideDuplicatedTilesInFrames", ui->actionHide_Duplicated_Tiles_in_Frames->isChecked());
-	settings.setValue("StartingPaletteLine", tile_viewer.paletteLine());
+	SaveStartingPaletteLine();
 	settings.setValue("PatternLoadCues", ui->actionPattern_Load_Cues->isChecked());
 	settings.setValue("LegacyAssemblyFormats", ui->actionLegacyFormats->isChecked());
 
@@ -2041,6 +2029,7 @@ void MainWindow::SaveState(const int slot)
 	const QString prefix = GetSlotPrefix(slot);
 	settings.setValue(prefix + "SelectedSpriteIndex", sprite_viewer.selectedSpriteIndex().value_or(-1));
 	settings.setValue(prefix + "SelectedPieceIndex", sprite_viewer.selectedPieceIndex().value_or(-1));
+	SaveStartingPaletteLine(prefix);
 
 	// Save cached assets.
 	const QString directory = GetSlotDirectory(slot);
@@ -2112,6 +2101,7 @@ void MainWindow::LoadState(const int slot)
 		sprite_viewer.setSelectedSprite(sprite == -1 ? std::optional<int>() : sprite);
 		const auto piece = settings.value(prefix + "SelectedPieceIndex", 0).toInt();
 		sprite_viewer.setSelectedPiece(piece == -1 ? std::optional<int>() : piece);
+		LoadStartingPaletteLine(prefix);
 	}
 	catch (...) {}
 	// Load tiles.
@@ -2120,4 +2110,28 @@ void MainWindow::LoadState(const int slot)
 		tile_manager.loadTilesFromFile(directory + "tiles.bin", Tiles::Format::BINARY);
 	}
 	catch (...) {}
+}
+
+void MainWindow::SetStartingPaletteLine(const int line)
+{
+	sprite_piece_picker.setPaletteLine(line);
+	sprite_viewer.setStartingPaletteLine(line);
+	tile_viewer.setPaletteLine(line);
+
+	ui->actionRender_Starting_with_Palette_Line_1->setChecked(line == 0);
+	ui->actionRender_Starting_with_Palette_Line_2->setChecked(line == 1);
+	ui->actionRender_Starting_with_Palette_Line_3->setChecked(line == 2);
+	ui->actionRender_Starting_with_Palette_Line_4->setChecked(line == 3);
+};
+
+void MainWindow::LoadStartingPaletteLine(QString prefix)
+{
+	QSettings settings;
+	SetStartingPaletteLine(settings.value(prefix + "StartingPaletteLine", 0).toInt());
+}
+
+void MainWindow::SaveStartingPaletteLine(QString prefix)
+{
+	QSettings settings;
+	settings.setValue(prefix + "StartingPaletteLine", tile_viewer.paletteLine());
 }
