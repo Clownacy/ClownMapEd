@@ -84,7 +84,7 @@
      <item>
       <widget class="QLabel" name="labelLink">
        <property name="text">
-        <string>&lt;a href=&quot;https://github.com/Clownacy/clownmaped&quot;&gt;https://github.com/Clownacy/clownmaped&lt;/a&gt;</string>
+        <string>&lt;a href=&quot;https://github.com/Clownacy/ClownMapEd&quot;&gt;https://github.com/Clownacy/ClownMapEd&lt;/a&gt;</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
