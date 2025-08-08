@@ -381,12 +381,12 @@ MainWindow::MainWindow(QWidget* const parent)
 		return file_path;
 	};
 
-	const auto GetOpenFileName = [this, GetFileName](const QString &caption = QString(), const QString &filter = QString(), QString *selectedFilter = nullptr, QFileDialog::Options options = QFileDialog::Options())
+	const auto GetOpenFileName = [GetFileName](const QString &caption = QString(), const QString &filter = QString(), QString *selectedFilter = nullptr, QFileDialog::Options options = QFileDialog::Options())
 	{
 		return GetFileName(QFileDialog::getOpenFileName, caption, filter, selectedFilter, options);
 	};
 
-	const auto GetSaveFileName = [this, GetFileName](const QString &caption = QString(), const QString &filter = QString(), QString *selectedFilter = nullptr, QFileDialog::Options options = QFileDialog::Options())
+	const auto GetSaveFileName = [GetFileName](const QString &caption = QString(), const QString &filter = QString(), QString *selectedFilter = nullptr, QFileDialog::Options options = QFileDialog::Options())
 	{
 		return GetFileName(QFileDialog::getSaveFileName, caption, filter, selectedFilter, options);
 	};
@@ -984,7 +984,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionImport_Sprite_over_Active_Frame, &QAction::triggered, this,
 		[this, frame_to_qimage, GetOpenFileName]()
 		{
-			const auto load_image_from_file = [this, GetOpenFileName](const QString &caption, const QString &filters, const std::function<void(QImage &image)> &callback)
+			const auto load_image_from_file = [GetOpenFileName](const QString &caption, const QString &filters, const std::function<void(QImage &image)> &callback)
 			{
 #ifdef EMSCRIPTEN
 				QFileDialog::getOpenFileContent(filters,
