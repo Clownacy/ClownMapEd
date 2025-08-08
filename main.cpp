@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
 	// Set some properties which will be useful for saving settings with QSettings.
 	// The version is used for displaying the version in the About menu.
 	QApplication::setApplicationName("ClownMapEd");
-	QApplication::setApplicationVersion("1.3");
+	QApplication::setApplicationVersion("1.3.0.1");
 	QApplication::setOrganizationDomain("clownacy.com");
 	QApplication::setOrganizationName("clownacy");
 
