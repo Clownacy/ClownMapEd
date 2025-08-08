@@ -1878,9 +1878,14 @@ MainWindow::MainWindow(QWidget* const parent)
 	// Menubar: Settings/Tile Rendering //
 	//////////////////////////////////////
 
-	connect(ui->actionOrient_Tiles_Vertically, &QAction::toggled, &tile_viewer, &TileViewer::setVerticalOrientation);
+	const auto ConnectToggledSignal = [&](QAction* const action, QObject* const receiver, const std::function<void(bool)> &callback)
+	{
+		connect(action, &QAction::toggled, receiver, callback);
+		callback(action->isChecked());
+	};
 
-	connect(ui->actionHide_Duplicated_Tiles_in_Frames, &QAction::toggled, &sprite_viewer, &SpriteViewer::setHideDuplicateTiles);
+	ConnectToggledSignal(ui->actionOrient_Tiles_Vertically, &tile_viewer, [this](const bool checked){tile_viewer.setVerticalOrientation(checked);});
+	ConnectToggledSignal(ui->actionHide_Duplicated_Tiles_in_Frames, &sprite_viewer, [this](const bool checked){sprite_viewer.setHideDuplicateTiles(checked);});
 
 	connect(ui->actionRender_Starting_with_Palette_Line_1, &QAction::triggered, this, [this](){SetStartingPaletteLine(0);});
 	connect(ui->actionRender_Starting_with_Palette_Line_2, &QAction::triggered, this, [this](){SetStartingPaletteLine(1);});
@@ -1898,14 +1903,14 @@ MainWindow::MainWindow(QWidget* const parent)
 		UpdateTitle();
 	};
 
-	connect(ui->actionPattern_Load_Cues, &QAction::toggled, this, set_pattern_load_cues_enabled);
+	ConnectToggledSignal(ui->actionPattern_Load_Cues, this, set_pattern_load_cues_enabled);
 
 	const auto set_legacy_assembly_formats_enabled = [](const bool enabled)
 	{
 		libsonassmd::settings.mapmacros = !enabled;
 	};
 
-	connect(ui->actionLegacyFormats, &QAction::toggled, this, set_legacy_assembly_formats_enabled);
+	ConnectToggledSignal(ui->actionLegacyFormats, this, set_legacy_assembly_formats_enabled);
 
 	///////////////////
 	// Menubar: Help //
