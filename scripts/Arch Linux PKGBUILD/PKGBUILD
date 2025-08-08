@@ -1,6 +1,6 @@
 # Maintainer: Clownacy <clownacy at yahoo dot com>
 pkgname=clownmaped
-pkgver=v1.3
+pkgver=v1.3.0.1
 pkgrel=1
 pkgdesc='Mega Drive Sonic the Hedgehog sprite editor'
 arch=('x86_64' 'i686' 'armv7h' 'aarch64')
