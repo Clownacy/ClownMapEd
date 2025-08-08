@@ -984,7 +984,7 @@ MainWindow::MainWindow(QWidget* const parent)
 	connect(ui->actionImport_Sprite_over_Active_Frame, &QAction::triggered, this,
 		[this, frame_to_qimage, GetOpenFileName]()
 		{
-			const auto load_image_from_file = [GetOpenFileName](const QString &caption, const QString &filters, const std::function<void(QImage &image)> &callback)
+			const auto load_image_from_file = [this, GetOpenFileName](const QString &caption, const QString &filters, const std::function<void(QImage &image)> &callback)
 			{
 #ifdef EMSCRIPTEN
 				QFileDialog::getOpenFileContent(filters,
@@ -996,6 +996,8 @@ MainWindow::MainWindow(QWidget* const parent)
 					}, this
 				);
 #else
+				static_cast<void>(this);
+
 				const QString file_path = GetOpenFileName(caption, filters);
 
 				if (file_path.isNull())
