@@ -408,7 +408,7 @@ MainWindow::MainWindow(QWidget* const parent)
 		if (file_path.isNull())
 			return;
 
-		std::ifstream file_stream(file_path.toStdString(), std::ios::binary);
+		std::ifstream file_stream(std::filesystem::path(file_path.toStdWString()), std::ios::binary);
 
 		if (!file_stream.is_open())
 		{
@@ -638,7 +638,7 @@ MainWindow::MainWindow(QWidget* const parent)
 		if (is_assembly_file)
 			flags &= ~std::ios::binary;
 
-		std::ofstream stream(file_path.toStdString(), flags);
+		std::ofstream stream(std::filesystem::path(file_path.toStdWString()), flags);
 
 		if (!stream.is_open())
 		{
