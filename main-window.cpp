@@ -391,7 +391,7 @@ MainWindow::MainWindow(QWidget* const parent)
 		return GetFileName(QFileDialog::getSaveFileName, caption, filter, selectedFilter, options);
 	};
 
-	const auto load_file_std_stream = [this, GetOpenFileName]([[maybe_unused]] const QString &caption, const QString &filters, const std::function<void(const QString &file_path, std::istream &file_stream)> &callback)
+	const auto load_file_std_stream = [this, GetOpenFileName, is_assembly_file_path]([[maybe_unused]] const QString &caption, const QString &filters, const std::function<void(const QString &file_path, std::istream &file_stream)> &callback, std::ios::openmode flags = std::ios::binary)
 	{
 #ifdef EMSCRIPTEN
 		QFileDialog::getOpenFileContent(filters,
@@ -408,7 +408,12 @@ MainWindow::MainWindow(QWidget* const parent)
 		if (file_path.isNull())
 			return;
 
-		std::ifstream file_stream(std::filesystem::u8path(file_path.toStdString()), std::ios::binary);
+		const bool is_assembly_file = is_assembly_file_path(file_path);
+
+		if (is_assembly_file)
+			flags &= ~std::ios::binary;
+
+		std::ifstream file_stream(std::filesystem::u8path(file_path.toStdString()), flags);
 
 		if (!file_stream.is_open())
 		{
