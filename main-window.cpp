@@ -1970,10 +1970,10 @@ MainWindow::MainWindow(QWidget* const parent)
 		ui->actionMove_Piece_into_Next_Sprite->setDisabled(no_piece_selected || is_last_sprite);
 		ui->actionMove_Piece_into_Previous_Sprite->setDisabled(no_piece_selected || is_first_sprite);
 		ui->actionMove_Piece_into_New_Sprite->setDisabled(no_piece_selected || is_last_sprite);
-		ui->actionMove_Piece_toward_Back->setDisabled(is_last_piece);
-		ui->actionMove_Piece_toward_Front->setDisabled(is_first_piece);
-		ui->actionMove_Piece_Behind_Others->setDisabled(is_last_piece);
-		ui->actionMove_Piece_in_Front_of_Others->setDisabled(is_first_piece);
+		ui->actionMove_Piece_toward_Back->setDisabled(no_piece_selected || is_last_piece);
+		ui->actionMove_Piece_toward_Front->setDisabled(no_piece_selected || is_first_piece);
+		ui->actionMove_Piece_Behind_Others->setDisabled(no_piece_selected || is_last_piece);
+		ui->actionMove_Piece_in_Front_of_Others->setDisabled(no_piece_selected || is_first_piece);
 
 		const bool nothing_selected = no_sprite_selected;
 
