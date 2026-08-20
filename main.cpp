@@ -2,6 +2,13 @@
 
 #include <QApplication>
 
+#if defined(_WIN32) && defined(QT_STATIC)
+	#include <QtPlugin>
+
+	Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
+	Q_IMPORT_PLUGIN(QWindowsVistaStylePlugin)
+#endif
+
 int main(int argc, char *argv[])
 {
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)

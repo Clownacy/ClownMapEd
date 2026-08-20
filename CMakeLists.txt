@@ -85,6 +85,13 @@ endif()
 
 target_link_libraries(ClownMapEd PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 
+if(WIN32 AND USE_STATIC_QT_BY_DEFAULT)
+    target_link_libraries(ClownMapEd PRIVATE
+        Qt${QT_VERSION_MAJOR}::QWindowsIntegrationPlugin
+        Qt${QT_VERSION_MAJOR}::QWindowsVistaStylePlugin
+    )
+endif()
+
 set_target_properties(ClownMapEd PROPERTIES
 	MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
 	MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
